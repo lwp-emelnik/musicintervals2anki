@@ -11,15 +11,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.MediaCodec;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceManager;
-
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.view.View;
@@ -35,6 +31,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.preference.PreferenceManager;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -183,7 +187,69 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         if (requestCode == ACTION_SELECT_FILE && resultCode == RESULT_OK) {
             final Uri selectedFile = data.getData();
-            inputFilename.setText(getFilePath(this, selectedFile));
+            String filePath = getFilePath(this, selectedFile);
+            inputFilename.setText(filePath);
+
+            MediaExtractor extractor = new MediaExtractor();
+            try {
+                extractor.setDataSource(filePath);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+            MediaFormat format = extractor.getTrackFormat(0);
+            String mime = format.getString(MediaFormat.KEY_MIME);
+            extractor.selectTrack(0);
+            MediaCodec decoder;
+            try {
+                decoder = MediaCodec.createDecoderByType(mime);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+            decoder.configure(format, null, null, 0);
+            decoder.start();
+
+            MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+
+            ArrayList<Byte> signal = new ArrayList<>();
+            boolean isEOS = false;
+
+            while (true) {
+                if (!isEOS) {
+                    int inputBufferId = decoder.dequeueInputBuffer(10000);
+                    if (inputBufferId >= 0) {
+                        ByteBuffer inputBuffer = decoder.getInputBuffer(inputBufferId);
+                        int sampleSize = extractor.readSampleData(inputBuffer, 0);
+                        if (sampleSize < 0) {
+                            decoder.queueInputBuffer(inputBufferId, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                            isEOS = true;
+                        } else {
+                            decoder.queueInputBuffer(inputBufferId, 0, sampleSize, extractor.getSampleTime(), 0);
+                            extractor.advance();
+                        }
+                    }
+                }
+
+                int outputBufferId = decoder.dequeueOutputBuffer(bufferInfo, 10000);
+                if (outputBufferId >= 0) {
+                    ByteBuffer outputBuffer = decoder.getOutputBuffer(outputBufferId);
+                    int t = outputBuffer.position();
+                    byte[] dst = new byte[bufferInfo.size - bufferInfo.offset];
+                    outputBuffer.get(dst);
+                    for (byte b : dst) {
+                        signal.add(b);
+                    }
+                    outputBuffer.position(t);
+                    decoder.releaseOutputBuffer(outputBufferId, false);
+                }
+
+                if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                    break;
+                }
+            }
+            decoder.stop();
+            decoder.release();
         }
     }
 
