@@ -37,6 +37,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -193,9 +194,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             MediaExtractor extractor = new MediaExtractor();
             try {
                 extractor.setDataSource(filePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
+            } catch (Exception e) {
+                try {
+                    extractor.setDataSource(new FileInputStream(filePath).getFD());
+                } catch (Exception e1) {
+                    return;
+                }
             }
             MediaFormat format = extractor.getTrackFormat(0);
             String mime = format.getString(MediaFormat.KEY_MIME);
