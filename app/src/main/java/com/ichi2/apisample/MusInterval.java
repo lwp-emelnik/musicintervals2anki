@@ -34,6 +34,10 @@ public class MusInterval {
             public static final int MAX_VALUE = 200;
         }
 
+        public static class Interval {
+            public static final String[] VALUES = new String[] { "", "min2", "Maj2", "min3", "Maj3" };
+        }
+
         public static final String[] SIGNATURE = new String[] {
                 SOUND,
                 START_NOTE,
