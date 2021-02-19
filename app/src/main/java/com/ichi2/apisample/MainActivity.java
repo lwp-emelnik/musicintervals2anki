@@ -18,7 +18,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -260,8 +259,24 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             signal[i] = (audioData.get(channelCount * i) & 0xFF) | (audioData.get(channelCount * i + 1) << 8);
         }
 
+        String[] notes = detectNotes(signal, sampleRate, channelCount);
+
+        if (notes.length != 2) {
+            throw new Exception();
+        }
+
+        String note1 = notes[0];
+        String note2 = notes[1];
+
+        inputStartNote.setText(note1);
+        radioGroupDirection.check(MusInterval.Fields.Direction.ASC.equals(getDirection(note1, note2)) ?
+                R.id.radioDirectionAsc : R.id.radioDirectionDesc);
+        selectInterval.setSelection(getDistance(note1, note2));
+    }
+
+    private static String[] detectNotes(double[] signal,  int sampleRate, int channelCount) {
         int chunkLength = 2048; // arbitrary
-        int nChunks = signalLength / chunkLength;
+        int nChunks = signal.length / chunkLength;
         if (nChunks == 0) {
             throw new IllegalArgumentException();
         }
@@ -277,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             }
         }
 
-        double peakThreshold = maxAmp * 0.75; // arbitrary
+        double peakThreshold = maxAmp * 0.5; // arbitrary
         boolean isAbove = chunkAmps[0] > peakThreshold;
         LinkedList<int[]> peaksIndices = new LinkedList<>();
         if (isAbove) {
@@ -298,42 +313,49 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             peaksIndices.getLast()[1] = chunkAmps.length - 1;
         }
 
-        if (peaksIndices.size() != 2) {
+        if (peaksIndices.size() < 2) {
             throw new IllegalArgumentException();
         }
 
-        int firstPeakStartChunkIdx = peaksIndices.getFirst()[0];
-        int firstPeakEndChunkIdx = peaksIndices.getFirst()[1];
-        int secondPeakStartChunkIdx = peaksIndices.getLast()[0];
-        int secondPeakEndChunkIdx = peaksIndices.getLast()[1];
-
-        double silenceThreshold = maxAmp * 0.25; //arbitrary
+        double silenceThreshold = maxAmp * 0.2; // arbitrary
         int endChunkInx = peaksIndices.getLast()[1];
         while (endChunkInx < nChunks && chunkAmps[endChunkInx] > silenceThreshold) {
             endChunkInx++;
         }
 
-        int firstNoteStartChunkIdx = firstPeakStartChunkIdx + (firstPeakEndChunkIdx - firstPeakStartChunkIdx) / 2;
-        int secondNoteStartChunkIdx = secondPeakStartChunkIdx + (secondPeakEndChunkIdx - secondPeakStartChunkIdx) / 2;
-        int firstNoteEndChunkIdx = firstNoteStartChunkIdx + (secondNoteStartChunkIdx - firstNoteStartChunkIdx) / 2;
-        int secondNoteEndChunkIdx = endChunkInx;
+        final double soundCoefficient = 0.5; // arbitrary
+        final double pauseCoefficient = 0.5; // arbitrary
+        LinkedList<int[]> notesIndices = new LinkedList<>();
+        for (int i = 0; i < peaksIndices.size(); i++) {
+            int[] peakIndices = peaksIndices.get(i);
+            int peakStartIdx = peakIndices[0];
+            int peakEndIdx = peakIndices[1];
+            int nextPeakStartIdx = i == peaksIndices.size() - 1 ? -1 : peaksIndices.get(i + 1)[0];
 
-        double[] signal1 = new double[(firstNoteEndChunkIdx - firstNoteStartChunkIdx) * chunkLength];
-        for (int i = firstNoteStartChunkIdx; i < firstNoteEndChunkIdx; i++) {
-            System.arraycopy(chunks[i], 0, signal1, (i - firstNoteStartChunkIdx) * chunkLength, chunkLength);
+            int noteStartIdx = peakStartIdx + (int) ((peakEndIdx - peakStartIdx) * soundCoefficient);
+            int noteEndIdx = nextPeakStartIdx == -1 ? endChunkInx :
+                    noteStartIdx + (int) ((nextPeakStartIdx - noteStartIdx) * pauseCoefficient);
+
+            notesIndices.add(new int[]{noteStartIdx, noteEndIdx});
         }
-        String note1 = getNote(getDominantFrequency(signal1, sampleRate, channelCount));
 
-        double[] signal2 = new double[(secondNoteEndChunkIdx - secondNoteStartChunkIdx) * chunkLength];
-        for (int i = secondNoteStartChunkIdx; i < secondNoteEndChunkIdx; i++) {
-            System.arraycopy(chunks[i], 0, signal2, (i - secondNoteStartChunkIdx) * chunkLength, chunkLength);
+        double[][] notesSegments = new double[notesIndices.size()][];
+        for (int i = 0; i < notesSegments.length; i++) {
+            int[] noteIndices = notesIndices.get(i);
+            int noteStartChunkIdx = noteIndices[0];
+            int noteEndChunkIdx = noteIndices[1];
+            notesSegments[i] = new double[(noteEndChunkIdx - noteStartChunkIdx) * chunkLength];
+            for (int j = noteStartChunkIdx; j < noteEndChunkIdx; j++) {
+                System.arraycopy(chunks[j], 0, notesSegments[i], (j - noteStartChunkIdx) * chunkLength, chunkLength);
+            }
         }
-        String note2 = getNote(getDominantFrequency(signal2, sampleRate, channelCount));
 
-        inputStartNote.setText(note1);
-        radioGroupDirection.check(MusInterval.Fields.Direction.ASC.equals(getDirection(note1, note2)) ?
-                R.id.radioDirectionAsc : R.id.radioDirectionDesc);
-        selectInterval.setSelection(getDistance(note1, note2));
+        String[] notes = new String[notesSegments.length];
+        for (int i = 0; i < notes.length; i++) {
+            double dominantFrequency = getDominantFrequency(notesSegments[i], sampleRate, channelCount);
+            notes[i] = getNote(dominantFrequency);
+        }
+        return notes;
     }
 
     private static double rootMeanSquare(double[] arr) {
@@ -354,7 +376,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         double[] abs = new double[len];
         for (int i = 0; i < len; i++) {
-            abs[i] = (Math.sqrt(waveTransformReal[i] * waveTransformReal[i] + waveTransformImg[i] * waveTransformImg[i]));
+            abs[i] = Math.sqrt(waveTransformReal[i] * waveTransformReal[i] + waveTransformImg[i] * waveTransformImg[i]);
         }
 
         int maxIndex = 0;
