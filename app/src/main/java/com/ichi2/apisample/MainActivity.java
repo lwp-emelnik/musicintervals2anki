@@ -196,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 processAudioFile(filePath);
             } catch (Exception e) {
                 e.printStackTrace();
+                showMsg(R.string.note_recognition_error);
             }
         }
     }
