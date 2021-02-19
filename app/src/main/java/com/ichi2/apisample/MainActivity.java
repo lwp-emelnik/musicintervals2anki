@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -38,12 +39,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 
 
@@ -198,6 +199,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 try {
                     extractor.setDataSource(new FileInputStream(filePath).getFD());
                 } catch (Exception e1) {
+                    e.printStackTrace();
                     return;
                 }
             }
@@ -207,18 +209,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             MediaCodec decoder;
             try {
                 decoder = MediaCodec.createDecoderByType(mime);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 return;
             }
             decoder.configure(format, null, null, 0);
             decoder.start();
-
             MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-
-            ArrayList<Byte> signal = new ArrayList<>();
+            ArrayList<Byte> audioData = new ArrayList<>();
             boolean isEOS = false;
-
             while ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) == 0) {
                 if (!isEOS) {
                     int inputBufferId = decoder.dequeueInputBuffer(10000);
@@ -242,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     byte[] dst = new byte[bufferInfo.size - bufferInfo.offset];
                     outputBuffer.get(dst);
                     for (byte b : dst) {
-                        signal.add(b);
+                        audioData.add(b);
                     }
                     outputBuffer.position(t);
                     decoder.releaseOutputBuffer(outputBufferId, false);
@@ -250,6 +249,182 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             }
             decoder.stop();
             decoder.release();
+
+            int sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE);
+            int channelCount = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
+
+            int signalLength = audioData.size() / channelCount;
+            if (signalLength == 0) {
+                return;
+            }
+            double[] signal = new double[signalLength];
+            for (int i = 0; i < signalLength; i++) {
+                signal[i] = (audioData.get(channelCount * i) & 0xFF) | (audioData.get(channelCount * i + 1) << 8);
+            }
+
+            int chunkLength = 2048; // arbitrary
+            int nChunks = signalLength / chunkLength;
+            if (nChunks == 0) {
+                return;
+            }
+            double[][] chunks = new double[nChunks][];
+            double[] chunkAmps = new double[nChunks];
+            double maxAmp = Double.MIN_VALUE;
+            for (int i = 0; i < nChunks; i++) {
+                chunks[i] = new double[chunkLength];
+                System.arraycopy(signal, i*chunkLength, chunks[i], 0, chunkLength);
+                chunkAmps[i] = rootMeanSquare(chunks[i]);
+                if (chunkAmps[i] > maxAmp) {
+                    maxAmp = chunkAmps[i];
+                }
+            }
+
+            double threshold = maxAmp * 0.75; // arbitrary
+            boolean isAbove = chunkAmps[0] > threshold;
+            LinkedList<int[]> peaksIndices = new LinkedList<>();
+            if (isAbove) {
+                peaksIndices.add(new int[2]);
+                peaksIndices.getLast()[0] = 0;
+            }
+            for (int i = 1; i < chunkAmps.length; i++) {
+                if (chunkAmps[i] < threshold && isAbove) {
+                    isAbove = false;
+                    peaksIndices.getLast()[1] = i;
+                } else if (chunkAmps[i] > threshold && !isAbove) {
+                    isAbove = true;
+                    peaksIndices.add(new int[2]);
+                    peaksIndices.getLast()[0] = i;
+                }
+            }
+            if (isAbove) {
+                peaksIndices.getLast()[1] = chunkAmps.length - 1;
+            }
+
+            if (peaksIndices.size() != 2) {
+                return;
+            }
+
+            int firstPeakStartChunkIdx = peaksIndices.getFirst()[0];
+            int firstPeakEndChunkIdx = peaksIndices.getFirst()[1];
+            int secondPeakStartChunkIdx = peaksIndices.getLast()[0];
+            int secondPeakEndChunkIdx = peaksIndices.getLast()[1];
+
+            double silenceThreshold = maxAmp * 0.25; //arbitrary
+            int endChunkInx = peaksIndices.getLast()[1];
+            while (endChunkInx < nChunks && chunkAmps[endChunkInx] > silenceThreshold) {
+                endChunkInx++;
+            }
+
+            int firstNoteStartChunkIdx = firstPeakStartChunkIdx + (firstPeakEndChunkIdx - firstPeakStartChunkIdx) / 2;
+            int secondNoteStartChunkIdx = secondPeakStartChunkIdx + (secondPeakEndChunkIdx - secondPeakStartChunkIdx) / 2;
+            int firstNoteEndChunkIdx = firstNoteStartChunkIdx + (secondNoteStartChunkIdx - firstNoteStartChunkIdx) / 2;
+            int secondNoteEndChunkIdx = endChunkInx;
+
+            double[] signal1 = new double[(firstNoteEndChunkIdx - firstNoteStartChunkIdx) * chunkLength];
+            for (int i = firstNoteStartChunkIdx; i < firstNoteEndChunkIdx; i++) {
+                System.arraycopy(chunks[i], 0, signal1, (i - firstNoteStartChunkIdx) * chunkLength, chunkLength);
+            }
+            String note1 = getNote(getDominantFrequency(signal1, sampleRate, channelCount));
+
+            double[] signal2 = new double[(secondNoteEndChunkIdx - secondNoteStartChunkIdx) * chunkLength];
+            for (int i = secondNoteStartChunkIdx; i < secondNoteEndChunkIdx; i++) {
+                System.arraycopy(chunks[i], 0, signal2, (i - secondNoteStartChunkIdx) * chunkLength , chunkLength);
+            }
+            String note2 = getNote(getDominantFrequency(signal2, sampleRate, channelCount));
+
+            Log.i("start_note", note1);
+            Log.i("direction", getDirection(note1, note2));
+            Log.i("interval", getInterval(note1, note2));
+        }
+    }
+
+    private double rootMeanSquare(double[] arr) {
+        double sum = 0;
+        for (double n : arr) {
+            sum += Math.pow(n, 2);
+        }
+        return Math.sqrt(sum / arr.length);
+    }
+
+    private int getDominantFrequency(double[] signal, int sampleRate, int channelCount) {
+        int len = signal.length;
+        double[] waveTransformReal = new double[len];
+        double[] waveTransformImg = new double[len];
+        System.arraycopy(signal, 0, waveTransformReal, 0, len);
+
+        Fft.transform(waveTransformReal, waveTransformImg);
+
+        double[] abs = new double[len];
+        for (int i = 0; i < len; i++) {
+            abs[i] = (Math.sqrt(waveTransformReal[i] * waveTransformReal[i] + waveTransformImg[i] * waveTransformImg[i]));
+        }
+
+        int maxIndex = 0;
+        for (int i = 0; i < len; i++) {
+            if (abs[i] > abs[maxIndex]) {
+                maxIndex = i;
+            }
+        }
+        return maxIndex * sampleRate * channelCount / len;
+    }
+
+    private final static ArrayList<String> notes = new ArrayList<>(Arrays.asList("C0", "C#0", "D0",
+            "D#0", "E0", "F0", "F#0", "G0", "G#0", "A0", "A#0", "B0", "C1", "C#1", "D1", "D#1", "E1", "F1", "F#1", "G1",
+            "G#1", "A1", "A#1", "B1", "C2", "C#2", "D2", "D#2", "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2", "C3",
+            "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3", "C4", "C#4", "D4", "D#4", "E4", "F4",
+            "F#4", "G4", "G#4", "A4", "A#4", "B4", "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5",
+            "A#5", "B5", "C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6", "C7", "C#7", "D7",
+            "D#7", "E7", "F7", "F#7", "G7", "G#7", "A7", "A#7", "B7", "C8", "C#8", "D8", "D#8", "E8", "F8", "F#8", "G8",
+            "G#8", "A8", "A#8", "B8"));
+
+    private static String getNote(double frequency) {
+        final double a4Frequency = 440;
+        final int a4Index = 57;
+        final double rootThingy = Math.pow(2, (double) 1 / (double) 12);
+        double tempFrequency = a4Frequency;
+        double lastFrequency = tempFrequency;
+        int tempIndex = a4Index;
+        int lastIndex = tempIndex;
+        boolean flag = frequency > a4Frequency;
+        boolean lastFlag = flag;
+        while (flag == lastFlag) {
+            lastIndex = tempIndex;
+            tempIndex = flag ? tempIndex + 1 : tempIndex - 1;
+            if (tempIndex < 0 || tempIndex >= notes.size()) {
+                return "frequency out of range";
+            }
+            lastFrequency = tempFrequency;
+            int diff = tempIndex - a4Index;
+            tempFrequency = a4Frequency * Math.pow(rootThingy, diff);
+            lastFlag = flag;
+            flag = frequency > tempFrequency;
+        }
+        if (Math.abs(Math.abs(frequency) - Math.abs(tempFrequency)) < Math
+                .abs(Math.abs(frequency) - Math.abs(lastFrequency))) {
+            return notes.get(tempIndex);
+        } else {
+            return notes.get(lastIndex);
+        }
+    }
+
+    private static String getInterval(String note1, String note2) {
+        final String[] intervals = new String[] { "zero", "min2", "Maj2", "min3", "Maj3" };
+        int distance = Math.abs(notes.indexOf(note1) - notes.indexOf(note2));
+        if (distance >= intervals.length) {
+            return "too big interval";
+        }
+        return intervals[distance];
+    }
+
+    private static String getDirection(String note1, String note2) {
+        int index1 = notes.indexOf(note1);
+        int index2 = notes.indexOf(note2);
+        if (index2 - index1 > 0) {
+            return "ascending";
+        } else if (index2 - index1 < 0) {
+            return "descending";
+        } else {
+            return "same note";
         }
     }
 
