@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             ArrayList<Byte> signal = new ArrayList<>();
             boolean isEOS = false;
 
-            while (true) {
+            while ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) == 0) {
                 if (!isEOS) {
                     int inputBufferId = decoder.dequeueInputBuffer(10000);
                     if (inputBufferId >= 0) {
@@ -246,10 +246,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     }
                     outputBuffer.position(t);
                     decoder.releaseOutputBuffer(outputBufferId, false);
-                }
-
-                if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                    break;
                 }
             }
             decoder.stop();
