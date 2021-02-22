@@ -36,7 +36,7 @@ public class MusIntervalRecognizerTest {
         }
         Log.i("Passed", passed.size() + "\n" + String.join("\n", passed));
         Log.i("Failed", failed.size() + "\n" + String.join("\n", failed));
-        double successRate = (double)passed.size()/(double)failed.size();
+        double successRate = (double) passed.size() / (double) sampleNames.length;
         Log.i("Success rate", String.format("%.2f", successRate));
         assertEquals(successRate, 1.0, 0);
     }
