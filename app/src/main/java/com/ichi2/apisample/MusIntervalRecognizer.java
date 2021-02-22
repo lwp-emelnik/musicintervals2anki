@@ -228,7 +228,7 @@ public class MusIntervalRecognizer {
             lastIndex = tempIndex;
             tempIndex = flag ? tempIndex + 1 : tempIndex - 1;
             if (tempIndex < 0 || tempIndex >= noteNames.size()) {
-                throw new IllegalArgumentException();
+                return "unknown";
             }
             lastFrequency = tempFrequency;
             int diff = tempIndex - a4Index;
