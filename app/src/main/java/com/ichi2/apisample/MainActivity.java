@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void processAudioFile(String filePath) throws Exception {
-        String[] notes = MusIntervalRecognizer.getNotes(filePath);
+        String[] notes = new MusIntervalRecognizer(filePath).getNotes();
 
         if (notes.length != 2) {
             throw new Exception();

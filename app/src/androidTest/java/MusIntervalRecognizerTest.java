@@ -22,7 +22,7 @@ public class MusIntervalRecognizerTest {
         ArrayList<String> failed = new ArrayList<>();
         for (String sampleName : sampleNames) {
             try {
-                String[] notes = MusIntervalRecognizer.getNotes(samplesDirPath + sampleName);
+                String[] notes = new MusIntervalRecognizer(samplesDirPath + sampleName).getNotes();
 
                 if (notes[0].equals(sampleName.split("_")[0])) {
                     passed.add(sampleName);

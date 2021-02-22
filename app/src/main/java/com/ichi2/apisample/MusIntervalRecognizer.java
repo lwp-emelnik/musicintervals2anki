@@ -11,8 +11,17 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 public class MusIntervalRecognizer {
+    private String filePath;
+    private int sampleRate;
+    private int channelCount;
+    private double[] signal;
+    private String[] notes;
 
-    public static String[] getNotes(String filePath) throws Exception {
+    public MusIntervalRecognizer(String filePath) {
+        this.filePath = filePath;
+    }
+
+    private void extractSignal() throws Exception {
         MediaExtractor extractor = new MediaExtractor();
         try {
             extractor.setDataSource(filePath);
@@ -59,24 +68,30 @@ public class MusIntervalRecognizer {
         decoder.stop();
         decoder.release();
 
-        int sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE);
-        int channelCount = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
+        sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE);
+        channelCount = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
 
         int signalLength = audioData.size() / channelCount;
         if (signalLength == 0) {
             throw new IllegalArgumentException();
         }
-        double[] signal = new double[signalLength];
+        signal = new double[signalLength];
         for (int i = 0; i < signalLength; i++) {
             signal[i] = (audioData.get(channelCount * i) & 0xFF) | (audioData.get(channelCount * i + 1) << 8);
         }
+    }
 
-        return detectNotes(signal, sampleRate, channelCount);
+    public String[] getNotes() throws Exception {
+        if (notes == null) {
+            extractSignal();
+            processSignal();
+        }
+        return notes;
     }
 
 
-    private static String[] detectNotes(double[] signal, int sampleRate, int channelCount) {
-        final int chunkLength = 2048; // arbitrary
+    private void processSignal() {
+        final int chunkLength = 8192; // arbitrary
         int nChunks = signal.length / chunkLength;
         if (nChunks == 0) {
             throw new IllegalArgumentException();
@@ -153,12 +168,11 @@ public class MusIntervalRecognizer {
             }
         }
 
-        String[] notes = new String[notesSegments.length];
+        notes = new String[notesSegments.length];
         for (int i = 0; i < notes.length; i++) {
             double dominantFrequency = getDominantFrequency(notesSegments[i], sampleRate, channelCount);
             notes[i] = getNote(dominantFrequency);
         }
-        return notes;
     }
 
     private static double averageAbsolute(double[] arr) {
@@ -191,7 +205,7 @@ public class MusIntervalRecognizer {
         return maxIndex * sampleRate * channelCount / len;
     }
 
-    private final static ArrayList<String> notes = new ArrayList<>(Arrays.asList("C0", "C#0", "D0",
+    private final static ArrayList<String> noteNames = new ArrayList<>(Arrays.asList("C0", "C#0", "D0",
             "D#0", "E0", "F0", "F#0", "G0", "G#0", "A0", "A#0", "B0", "C1", "C#1", "D1", "D#1", "E1", "F1", "F#1", "G1",
             "G#1", "A1", "A#1", "B1", "C2", "C#2", "D2", "D#2", "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2", "C3",
             "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3", "C4", "C#4", "D4", "D#4", "E4", "F4",
@@ -213,7 +227,7 @@ public class MusIntervalRecognizer {
         while (flag == lastFlag) {
             lastIndex = tempIndex;
             tempIndex = flag ? tempIndex + 1 : tempIndex - 1;
-            if (tempIndex < 0 || tempIndex >= notes.size()) {
+            if (tempIndex < 0 || tempIndex >= noteNames.size()) {
                 throw new IllegalArgumentException();
             }
             lastFrequency = tempFrequency;
@@ -224,15 +238,15 @@ public class MusIntervalRecognizer {
         }
         if (Math.abs(Math.abs(frequency) - Math.abs(tempFrequency)) < Math
                 .abs(Math.abs(frequency) - Math.abs(lastFrequency))) {
-            return notes.get(tempIndex);
+            return noteNames.get(tempIndex);
         } else {
-            return notes.get(lastIndex);
+            return noteNames.get(lastIndex);
         }
     }
 
     public static int getDistance(String note1, String note2) {
         final String[] intervals = MusInterval.Fields.Interval.VALUES;
-        int distance = Math.abs(notes.indexOf(note1) - notes.indexOf(note2));
+        int distance = Math.abs(noteNames.indexOf(note1) - noteNames.indexOf(note2));
         if (distance >= intervals.length) {
             return 0;
         }
@@ -240,8 +254,8 @@ public class MusIntervalRecognizer {
     }
 
     public static String getDirection(String note1, String note2) {
-        int index1 = notes.indexOf(note1);
-        int index2 = notes.indexOf(note2);
+        int index1 = noteNames.indexOf(note1);
+        int index2 = noteNames.indexOf(note2);
         if (index2 - index1 > 0) {
             return MusInterval.Fields.Direction.ASC;
         } else if (index2 - index1 < 0) {
