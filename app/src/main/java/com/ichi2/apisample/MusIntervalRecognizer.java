@@ -141,7 +141,7 @@ public class MusIntervalRecognizer {
             endChunkInx++;
         }
 
-        final double soundCoefficient = 0.5; // arbitrary
+        final double soundCoefficient = 0.75; // arbitrary
         final double pauseCoefficient = 0.5; // arbitrary
         LinkedList<int[]> notesIndices = new LinkedList<>();
         for (int i = 0; i < peaksIndices.size(); i++) {
@@ -152,7 +152,7 @@ public class MusIntervalRecognizer {
 
             int noteStartIdx = peakStartIdx + (int) ((peakEndIdx - peakStartIdx) * soundCoefficient);
             int noteEndIdx = nextPeakStartIdx == -1 ? endChunkInx :
-                    noteStartIdx + (int) ((nextPeakStartIdx - noteStartIdx) * pauseCoefficient);
+                    peakEndIdx + (int) ((nextPeakStartIdx - peakEndIdx) * pauseCoefficient);
 
             notesIndices.add(new int[]{noteStartIdx, noteEndIdx});
         }
