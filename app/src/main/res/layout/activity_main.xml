@@ -234,6 +234,12 @@
 
             </LinearLayout>
 
+            <Button
+                android:id="@+id/actionExport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/action_export" />
+
         </LinearLayout>
     </ScrollView>
 

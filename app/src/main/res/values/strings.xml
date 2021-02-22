@@ -23,6 +23,7 @@
     <string name="action_check_existence">Check existence</string>
     <string name="action_add_to_anki">Add to AnkiDroid</string>
     <string name="open_settings">Settings…</string>
+    <string name="action_export">Export</string>
 
     <!-- MainActivity messages-->
     <string name="anki_permission_denied">Could not get permission to access the AnkiDroid database</string>
@@ -63,6 +64,7 @@
     <string name="add_file_error">Failed to add file to AnkiDroid media</string>
     <string name="unknown_adding_error">Failed to add music interval to AnkiDroid</string>
     <string name="note_recognition_error">Failed to automatically recognize notes in provided audio file</string>
+    <string name="export_error">Failed to export notes</string>
 
     <string name="InvalidAnkiDatabase_fieldAndFieldNameCountMismatch">Invalid Anki Database: field and field name count mismatches</string>
     <string name="InvalidAnkiDatabase_unknownError">Invalid Anki Database: unknown error</string>

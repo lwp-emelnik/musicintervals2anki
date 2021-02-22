@@ -11,13 +11,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.media.MediaCodec;
-import android.media.MediaExtractor;
-import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -37,8 +35,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
 
-import java.io.FileInputStream;
-import java.nio.ByteBuffer;
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         configureCheckExistenceButton();
         configureAddToAnkiButton();
         configureSettingsButton();
+        configureExportButton();
 
         restoreUiState();
 
@@ -201,65 +202,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void processAudioFile(String filePath) throws Exception {
-        MediaExtractor extractor = new MediaExtractor();
-        try {
-            extractor.setDataSource(filePath);
-        } catch (Exception e) {
-            extractor.setDataSource(new FileInputStream(filePath).getFD());
-        }
-        MediaFormat format = extractor.getTrackFormat(0);
-        String mime = format.getString(MediaFormat.KEY_MIME);
-        extractor.selectTrack(0);
-        MediaCodec decoder = MediaCodec.createDecoderByType(mime);
-        decoder.configure(format, null, null, 0);
-        decoder.start();
-        MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-        ArrayList<Byte> audioData = new ArrayList<>();
-        boolean isEOS = false;
-        while ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) == 0) {
-            if (!isEOS) {
-                int inputBufferId = decoder.dequeueInputBuffer(10000);
-                if (inputBufferId >= 0) {
-                    ByteBuffer inputBuffer = decoder.getInputBuffer(inputBufferId);
-                    int sampleSize = extractor.readSampleData(inputBuffer, 0);
-                    if (sampleSize < 0) {
-                        decoder.queueInputBuffer(inputBufferId, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
-                        isEOS = true;
-                    } else {
-                        decoder.queueInputBuffer(inputBufferId, 0, sampleSize, extractor.getSampleTime(), 0);
-                        extractor.advance();
-                    }
-                }
-            }
-            int outputBufferId = decoder.dequeueOutputBuffer(bufferInfo, 10000);
-            if (outputBufferId >= 0) {
-                ByteBuffer outputBuffer = decoder.getOutputBuffer(outputBufferId);
-                int t = outputBuffer.position();
-                byte[] dst = new byte[bufferInfo.size - bufferInfo.offset];
-                outputBuffer.get(dst);
-                for (byte b : dst) {
-                    audioData.add(b);
-                }
-                outputBuffer.position(t);
-                decoder.releaseOutputBuffer(outputBufferId, false);
-            }
-        }
-        decoder.stop();
-        decoder.release();
-
-        int sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE);
-        int channelCount = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
-
-        int signalLength = audioData.size() / channelCount;
-        if (signalLength == 0) {
-            throw new IllegalArgumentException();
-        }
-        double[] signal = new double[signalLength];
-        for (int i = 0; i < signalLength; i++) {
-            signal[i] = (audioData.get(channelCount * i) & 0xFF) | (audioData.get(channelCount * i + 1) << 8);
-        }
-
-        String[] notes = detectNotes(signal, sampleRate, channelCount);
+        String[] notes = MusIntervalRecognizer.getNotes(filePath);
 
         if (notes.length != 2) {
             throw new Exception();
@@ -269,183 +212,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         String note2 = notes[1];
 
         inputStartNote.setText(note1);
-        radioGroupDirection.check(MusInterval.Fields.Direction.ASC.equals(getDirection(note1, note2)) ?
+        radioGroupDirection.check(MusInterval.Fields.Direction.ASC.equals(MusIntervalRecognizer.getDirection(note1, note2)) ?
                 R.id.radioDirectionAsc : R.id.radioDirectionDesc);
-        selectInterval.setSelection(getDistance(note1, note2));
-    }
-
-    private static String[] detectNotes(double[] signal,  int sampleRate, int channelCount) {
-        int chunkLength = 2048; // arbitrary
-        int nChunks = signal.length / chunkLength;
-        if (nChunks == 0) {
-            throw new IllegalArgumentException();
-        }
-        double[][] chunks = new double[nChunks][];
-        double[] chunkAmps = new double[nChunks];
-        double maxAmp = Double.MIN_VALUE;
-        for (int i = 0; i < nChunks; i++) {
-            chunks[i] = new double[chunkLength];
-            System.arraycopy(signal, i * chunkLength, chunks[i], 0, chunkLength);
-            chunkAmps[i] = rootMeanSquare(chunks[i]);
-            if (chunkAmps[i] > maxAmp) {
-                maxAmp = chunkAmps[i];
-            }
-        }
-
-        double peakThreshold = maxAmp * 0.5; // arbitrary
-        boolean isAbove = chunkAmps[0] > peakThreshold;
-        LinkedList<int[]> peaksIndices = new LinkedList<>();
-        if (isAbove) {
-            peaksIndices.add(new int[2]);
-            peaksIndices.getLast()[0] = 0;
-        }
-        for (int i = 1; i < chunkAmps.length; i++) {
-            if (chunkAmps[i] < peakThreshold && isAbove) {
-                isAbove = false;
-                peaksIndices.getLast()[1] = i;
-            } else if (chunkAmps[i] > peakThreshold && !isAbove) {
-                isAbove = true;
-                peaksIndices.add(new int[2]);
-                peaksIndices.getLast()[0] = i;
-            }
-        }
-        if (isAbove) {
-            peaksIndices.getLast()[1] = chunkAmps.length - 1;
-        }
-
-        if (peaksIndices.size() < 2) {
-            throw new IllegalArgumentException();
-        }
-
-        double silenceThreshold = maxAmp * 0.2; // arbitrary
-        int endChunkInx = peaksIndices.getLast()[1];
-        while (endChunkInx < nChunks && chunkAmps[endChunkInx] > silenceThreshold) {
-            endChunkInx++;
-        }
-
-        final double soundCoefficient = 0.5; // arbitrary
-        final double pauseCoefficient = 0.5; // arbitrary
-        LinkedList<int[]> notesIndices = new LinkedList<>();
-        for (int i = 0; i < peaksIndices.size(); i++) {
-            int[] peakIndices = peaksIndices.get(i);
-            int peakStartIdx = peakIndices[0];
-            int peakEndIdx = peakIndices[1];
-            int nextPeakStartIdx = i == peaksIndices.size() - 1 ? -1 : peaksIndices.get(i + 1)[0];
-
-            int noteStartIdx = peakStartIdx + (int) ((peakEndIdx - peakStartIdx) * soundCoefficient);
-            int noteEndIdx = nextPeakStartIdx == -1 ? endChunkInx :
-                    noteStartIdx + (int) ((nextPeakStartIdx - noteStartIdx) * pauseCoefficient);
-
-            notesIndices.add(new int[]{noteStartIdx, noteEndIdx});
-        }
-
-        double[][] notesSegments = new double[notesIndices.size()][];
-        for (int i = 0; i < notesSegments.length; i++) {
-            int[] noteIndices = notesIndices.get(i);
-            int noteStartChunkIdx = noteIndices[0];
-            int noteEndChunkIdx = noteIndices[1];
-            notesSegments[i] = new double[(noteEndChunkIdx - noteStartChunkIdx) * chunkLength];
-            for (int j = noteStartChunkIdx; j < noteEndChunkIdx; j++) {
-                System.arraycopy(chunks[j], 0, notesSegments[i], (j - noteStartChunkIdx) * chunkLength, chunkLength);
-            }
-        }
-
-        String[] notes = new String[notesSegments.length];
-        for (int i = 0; i < notes.length; i++) {
-            double dominantFrequency = getDominantFrequency(notesSegments[i], sampleRate, channelCount);
-            notes[i] = getNote(dominantFrequency);
-        }
-        return notes;
-    }
-
-    private static double rootMeanSquare(double[] arr) {
-        double sum = 0;
-        for (double n : arr) {
-            sum += Math.pow(n, 2);
-        }
-        return Math.sqrt(sum / arr.length);
-    }
-
-    private static int getDominantFrequency(double[] signal, int sampleRate, int channelCount) {
-        int len = signal.length;
-        double[] waveTransformReal = new double[len];
-        double[] waveTransformImg = new double[len];
-        System.arraycopy(signal, 0, waveTransformReal, 0, len);
-
-        Fft.transform(waveTransformReal, waveTransformImg);
-
-        double[] abs = new double[len];
-        for (int i = 0; i < len; i++) {
-            abs[i] = Math.sqrt(waveTransformReal[i] * waveTransformReal[i] + waveTransformImg[i] * waveTransformImg[i]);
-        }
-
-        int maxIndex = 0;
-        for (int i = 0; i < len; i++) {
-            if (abs[i] > abs[maxIndex]) {
-                maxIndex = i;
-            }
-        }
-        return maxIndex * sampleRate * channelCount / len;
-    }
-
-    private final static ArrayList<String> notes = new ArrayList<>(Arrays.asList("C0", "C#0", "D0",
-            "D#0", "E0", "F0", "F#0", "G0", "G#0", "A0", "A#0", "B0", "C1", "C#1", "D1", "D#1", "E1", "F1", "F#1", "G1",
-            "G#1", "A1", "A#1", "B1", "C2", "C#2", "D2", "D#2", "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2", "C3",
-            "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3", "C4", "C#4", "D4", "D#4", "E4", "F4",
-            "F#4", "G4", "G#4", "A4", "A#4", "B4", "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5",
-            "A#5", "B5", "C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6", "C7", "C#7", "D7",
-            "D#7", "E7", "F7", "F#7", "G7", "G#7", "A7", "A#7", "B7", "C8", "C#8", "D8", "D#8", "E8", "F8", "F#8", "G8",
-            "G#8", "A8", "A#8", "B8"));
-
-    private static String getNote(double frequency) {
-        final double a4Frequency = 440;
-        final int a4Index = 57;
-        final double rootThingy = Math.pow(2, (double) 1 / (double) 12);
-        double tempFrequency = a4Frequency;
-        double lastFrequency = tempFrequency;
-        int tempIndex = a4Index;
-        int lastIndex = tempIndex;
-        boolean flag = frequency > a4Frequency;
-        boolean lastFlag = flag;
-        while (flag == lastFlag) {
-            lastIndex = tempIndex;
-            tempIndex = flag ? tempIndex + 1 : tempIndex - 1;
-            if (tempIndex < 0 || tempIndex >= notes.size()) {
-                throw new IllegalArgumentException();
-            }
-            lastFrequency = tempFrequency;
-            int diff = tempIndex - a4Index;
-            tempFrequency = a4Frequency * Math.pow(rootThingy, diff);
-            lastFlag = flag;
-            flag = frequency > tempFrequency;
-        }
-        if (Math.abs(Math.abs(frequency) - Math.abs(tempFrequency)) < Math
-                .abs(Math.abs(frequency) - Math.abs(lastFrequency))) {
-            return notes.get(tempIndex);
-        } else {
-            return notes.get(lastIndex);
-        }
-    }
-
-    private static int getDistance(String note1, String note2) {
-        final String[] intervals = MusInterval.Fields.Interval.VALUES;
-        int distance = Math.abs(notes.indexOf(note1) - notes.indexOf(note2));
-        if (distance >= intervals.length) {
-            return 0;
-        }
-        return distance;
-    }
-
-    private static String getDirection(String note1, String note2) {
-        int index1 = notes.indexOf(note1);
-        int index2 = notes.indexOf(note2);
-        if (index2 - index1 > 0) {
-            return MusInterval.Fields.Direction.ASC;
-        } else if (index2 - index1 < 0) {
-            return MusInterval.Fields.Direction.DESC;
-        } else {
-            throw new IllegalArgumentException();
-        }
+        selectInterval.setSelection(MusIntervalRecognizer.getDistance(note1, note2));
     }
 
     private void configureCheckExistenceButton() {
@@ -554,6 +323,61 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     return;
                 }
                 openSettings();
+            }
+        });
+    }
+
+    private void configureExportButton() {
+        final Button actionExport = findViewById(R.id.actionExport);
+        actionExport.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mAnkiDroid.shouldRequestPermission()) {
+                    mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
+                    return;
+                }
+                if (!doesModelExist() || !doesModelHaveEnoughFields() || !doesModelHaveStoredFields()) {
+                    validateModel();
+                    return;
+                }
+                try {
+                    final MusInterval mi = getMusInterval();
+                    LinkedList<Map<String, String>> notes = mi.getExistingNotes();
+                    final String mediaDir = "/storage/emulated/0/AnkiDroid/collection.media/"; // @todo: refactor
+                    final String dstDir = "/storage/emulated/0/MusicIntervals2Anki/";
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                    Map<String, String> fields = new HashMap<>();
+                    for (String field : MusInterval.Fields.SIGNATURE) {
+                        fields.put(field, sharedPreferences.getString(field, field));
+                    }
+                    for (Map<String, String> note : notes) {
+                        String sourceName = note.get(fields.get(MusInterval.Fields.SOUND));
+                        sourceName = sourceName.substring(sourceName.indexOf(":") + 1, sourceName.lastIndexOf("]"));
+                        String sourcePath = mediaDir + sourceName;
+                        String dstName = TextUtils.join("_", new String[]{
+                                note.get(fields.get(MusInterval.Fields.START_NOTE)),
+                                note.get(fields.get(MusInterval.Fields.DIRECTION)),
+                                note.get(fields.get(MusInterval.Fields.TIMING)),
+                                note.get(fields.get(MusInterval.Fields.INTERVAL)),
+                                note.get(fields.get(MusInterval.Fields.TEMPO)),
+                                note.get(fields.get(MusInterval.Fields.INSTRUMENT))
+                        }) + sourceName.substring(sourceName.lastIndexOf("."));
+                        String dstPath = dstDir + dstName;
+                        File source = new File(sourcePath);
+                        File dst = new File(dstPath);
+                        try {
+                            FileUtils.copyFile(source, dst);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } catch (MusInterval.Exception e) {
+                    processMusIntervalException(e);
+                } catch (AnkiDroidHelper.InvalidAnkiDatabaseException e) {
+                    processInvalidAnkiDatabase(e);
+                } catch (Exception e) {
+                    showMsg(R.string.export_error);
+                }
             }
         });
     }
