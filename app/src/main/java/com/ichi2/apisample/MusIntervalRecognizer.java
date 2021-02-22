@@ -87,7 +87,7 @@ public class MusIntervalRecognizer {
         for (int i = 0; i < nChunks; i++) {
             chunks[i] = new double[chunkLength];
             System.arraycopy(signal, i * chunkLength, chunks[i], 0, chunkLength);
-            chunkAmps[i] = rootMeanSquare(chunks[i]);
+            chunkAmps[i] = averageAbsolute(chunks[i]);
             if (chunkAmps[i] > maxAmp) {
                 maxAmp = chunkAmps[i];
             }
@@ -161,10 +161,10 @@ public class MusIntervalRecognizer {
         return notes;
     }
 
-    private static double rootMeanSquare(double[] arr) {
+    private static double averageAbsolute(double[] arr) {
         double sum = 0;
         for (double n : arr) {
-            sum += Math.pow(n, 2);
+            sum += Math.abs(n);
         }
         return Math.sqrt(sum / arr.length);
     }
