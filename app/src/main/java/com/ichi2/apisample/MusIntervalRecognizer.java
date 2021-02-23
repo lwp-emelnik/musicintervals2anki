@@ -180,7 +180,7 @@ public class MusIntervalRecognizer {
         for (double n : arr) {
             sum += Math.abs(n);
         }
-        return Math.sqrt(sum / arr.length);
+        return sum / arr.length;
     }
 
     private static int getDominantFrequency(double[] signal, int sampleRate, int channelCount) {
