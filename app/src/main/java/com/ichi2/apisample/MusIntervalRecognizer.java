@@ -91,43 +91,43 @@ public class MusIntervalRecognizer {
 
 
     private void processSignal() {
-        final int chunkLength = 8192; // arbitrary
-        int nChunks = signal.length / chunkLength;
-        if (nChunks == 0) {
+        final int windowLength = 8192; // arbitrary
+        int nWindows = signal.length / windowLength;
+        if (nWindows == 0) {
             throw new IllegalArgumentException();
         }
-        double[][] chunks = new double[nChunks][];
-        double[] chunkAmps = new double[nChunks];
+        double[][] windows = new double[nWindows][];
+        double[] windowAmps = new double[nWindows];
         double maxAmp = Double.MIN_VALUE;
-        for (int i = 0; i < nChunks; i++) {
-            chunks[i] = new double[chunkLength];
-            System.arraycopy(signal, i * chunkLength, chunks[i], 0, chunkLength);
-            chunkAmps[i] = averageAbsolute(chunks[i]);
-            if (chunkAmps[i] > maxAmp) {
-                maxAmp = chunkAmps[i];
+        for (int i = 0; i < nWindows; i++) {
+            windows[i] = new double[windowLength];
+            System.arraycopy(signal, i * windowLength, windows[i], 0, windowLength);
+            windowAmps[i] = averageAbsolute(windows[i]);
+            if (windowAmps[i] > maxAmp) {
+                maxAmp = windowAmps[i];
             }
         }
 
         final double peakCoefficient = 0.75; // arbitrary
         double peakThreshold = maxAmp * peakCoefficient;
-        boolean isAbove = chunkAmps[0] > peakThreshold;
+        boolean isAbove = windowAmps[0] > peakThreshold;
         LinkedList<int[]> peaksIndices = new LinkedList<>();
         if (isAbove) {
             peaksIndices.add(new int[2]);
             peaksIndices.getLast()[0] = 0;
         }
-        for (int i = 1; i < chunkAmps.length; i++) {
-            if (chunkAmps[i] < peakThreshold && isAbove) {
+        for (int i = 1; i < windowAmps.length; i++) {
+            if (windowAmps[i] < peakThreshold && isAbove) {
                 isAbove = false;
                 peaksIndices.getLast()[1] = i;
-            } else if (chunkAmps[i] > peakThreshold && !isAbove) {
+            } else if (windowAmps[i] > peakThreshold && !isAbove) {
                 isAbove = true;
                 peaksIndices.add(new int[2]);
                 peaksIndices.getLast()[0] = i;
             }
         }
         if (isAbove) {
-            peaksIndices.getLast()[1] = chunkAmps.length - 1;
+            peaksIndices.getLast()[1] = windowAmps.length - 1;
         }
 
         if (peaksIndices.size() < 2) {
@@ -136,9 +136,9 @@ public class MusIntervalRecognizer {
 
         final double silenceCoefficient = 0.25; //arbitrary
         final double silenceThreshold = maxAmp * silenceCoefficient;
-        int endChunkInx = peaksIndices.getLast()[1];
-        while (endChunkInx < nChunks && chunkAmps[endChunkInx] > silenceThreshold) {
-            endChunkInx++;
+        int endWindowIdx = peaksIndices.getLast()[1];
+        while (endWindowIdx < nWindows && windowAmps[endWindowIdx] > silenceThreshold) {
+            endWindowIdx++;
         }
 
         final double soundCoefficient = 0.75; // arbitrary
@@ -151,7 +151,7 @@ public class MusIntervalRecognizer {
             int nextPeakStartIdx = i == peaksIndices.size() - 1 ? -1 : peaksIndices.get(i + 1)[0];
 
             int noteStartIdx = peakStartIdx + (int) ((peakEndIdx - peakStartIdx) * soundCoefficient);
-            int noteEndIdx = nextPeakStartIdx == -1 ? endChunkInx :
+            int noteEndIdx = nextPeakStartIdx == -1 ? endWindowIdx :
                     peakEndIdx + (int) ((nextPeakStartIdx - peakEndIdx) * pauseCoefficient);
 
             notesIndices.add(new int[]{noteStartIdx, noteEndIdx});
@@ -160,11 +160,11 @@ public class MusIntervalRecognizer {
         double[][] notesSegments = new double[notesIndices.size()][];
         for (int i = 0; i < notesSegments.length; i++) {
             int[] noteIndices = notesIndices.get(i);
-            int noteStartChunkIdx = noteIndices[0];
-            int noteEndChunkIdx = noteIndices[1];
-            notesSegments[i] = new double[(noteEndChunkIdx - noteStartChunkIdx) * chunkLength];
-            for (int j = noteStartChunkIdx; j < noteEndChunkIdx; j++) {
-                System.arraycopy(chunks[j], 0, notesSegments[i], (j - noteStartChunkIdx) * chunkLength, chunkLength);
+            int noteStartWindowIdx = noteIndices[0];
+            int noteEndWindowIdx = noteIndices[1];
+            notesSegments[i] = new double[(noteEndWindowIdx - noteStartWindowIdx) * windowLength];
+            for (int j = noteStartWindowIdx; j < noteEndWindowIdx; j++) {
+                System.arraycopy(windows[j], 0, notesSegments[i], (j - noteStartWindowIdx) * windowLength, windowLength);
             }
         }
 
