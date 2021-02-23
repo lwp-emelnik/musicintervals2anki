@@ -141,7 +141,7 @@ public class MusIntervalRecognizer {
             endWindowIdx++;
         }
 
-        final double soundCoefficient = 0.75; // arbitrary
+        final double soundCoefficient = 0; // arbitrary
         final double pauseCoefficient = 0.5; // arbitrary
         LinkedList<int[]> notesIndices = new LinkedList<>();
         for (int i = 0; i < peaksIndices.size(); i++) {
