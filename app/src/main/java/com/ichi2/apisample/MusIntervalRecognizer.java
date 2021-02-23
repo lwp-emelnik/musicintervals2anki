@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 
 public class MusIntervalRecognizer {
@@ -183,7 +184,7 @@ public class MusIntervalRecognizer {
         return sum / arr.length;
     }
 
-    private static int getDominantFrequency(double[] signal, int sampleRate, int channelCount) {
+    private long getDominantFrequency(double[] signal, int sampleRate, int channelCount) {
         int len = signal.length;
         double[] waveTransformReal = new double[len];
         double[] waveTransformImg = new double[len];
@@ -196,13 +197,26 @@ public class MusIntervalRecognizer {
             abs[i] = Math.sqrt(waveTransformReal[i] * waveTransformReal[i] + waveTransformImg[i] * waveTransformImg[i]);
         }
 
-        int maxIndex = 0;
+        double[][] maxIndices = new double[abs.length][];
+
         for (int i = 0; i < len; i++) {
-            if (abs[i] > abs[maxIndex]) {
-                maxIndex = i;
+            maxIndices[i] = new double[2];
+            maxIndices[i][0] = i;
+            maxIndices[i][1] = abs[i];
+        }
+        Arrays.sort(maxIndices, new Comparator<double[]>() {
+            @Override
+            public int compare(double[] doubles, double[] t1) {
+                return (int)(doubles[1] - t1[1]);
+            }
+        });
+        for (int i = len-1; i >= 0; i--) {
+            long f = (long)maxIndices[i][0] * sampleRate * channelCount / len;
+            if (f < sampleRate / 2) {
+                return f;
             }
         }
-        return maxIndex * sampleRate * channelCount / len;
+        return -1;
     }
 
     private final static ArrayList<String> noteNames = new ArrayList<>(Arrays.asList("C0", "C#0", "D0",
@@ -228,7 +242,7 @@ public class MusIntervalRecognizer {
             lastIndex = tempIndex;
             tempIndex = flag ? tempIndex + 1 : tempIndex - 1;
             if (tempIndex < 0 || tempIndex >= noteNames.size()) {
-                return "unknown";
+                return String.valueOf(frequency);
             }
             lastFrequency = tempFrequency;
             int diff = tempIndex - a4Index;
