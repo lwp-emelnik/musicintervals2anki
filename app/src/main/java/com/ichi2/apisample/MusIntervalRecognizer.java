@@ -92,36 +92,32 @@ public class MusIntervalRecognizer {
 
 
     private void processSignal() {
+        final double silenceThreshold = 1; // @todo find real static amplitude value
+        final double noteThreshold = averageAbsolute(signal, silenceThreshold);
         final int windowLength = 8192; // arbitrary
-        int nWindows = signal.length / windowLength;
+        int nWindows = signal.length / windowLength; // cuts end of the signal, might be bad
         if (nWindows == 0) {
             throw new IllegalArgumentException();
         }
         double[][] windows = new double[nWindows][];
         double[] windowAmps = new double[nWindows];
-        double maxAmp = Double.MIN_VALUE;
         for (int i = 0; i < nWindows; i++) {
             windows[i] = new double[windowLength];
             System.arraycopy(signal, i * windowLength, windows[i], 0, windowLength);
-            windowAmps[i] = averageAbsolute(windows[i]);
-            if (windowAmps[i] > maxAmp) {
-                maxAmp = windowAmps[i];
-            }
+            windowAmps[i] = averageAbsolute(windows[i], 0);
         }
 
-        final double peakCoefficient = 0.75; // arbitrary
-        double peakThreshold = maxAmp * peakCoefficient;
-        boolean isAbove = windowAmps[0] > peakThreshold;
+        boolean isAbove = windowAmps[0] > noteThreshold;
         LinkedList<int[]> peaksIndices = new LinkedList<>();
         if (isAbove) {
             peaksIndices.add(new int[2]);
             peaksIndices.getLast()[0] = 0;
         }
         for (int i = 1; i < windowAmps.length; i++) {
-            if (windowAmps[i] < peakThreshold && isAbove) {
+            if (windowAmps[i] < noteThreshold && isAbove) {
                 isAbove = false;
                 peaksIndices.getLast()[1] = i;
-            } else if (windowAmps[i] > peakThreshold && !isAbove) {
+            } else if (windowAmps[i] > noteThreshold && !isAbove) {
                 isAbove = true;
                 peaksIndices.add(new int[2]);
                 peaksIndices.getLast()[0] = i;
@@ -135,8 +131,6 @@ public class MusIntervalRecognizer {
             throw new IllegalArgumentException();
         }
 
-        final double silenceCoefficient = 0.25; //arbitrary
-        final double silenceThreshold = maxAmp * silenceCoefficient;
         int endWindowIdx = peaksIndices.getLast()[1];
         while (endWindowIdx < nWindows && windowAmps[endWindowIdx] > silenceThreshold) {
             endWindowIdx++;
@@ -176,12 +170,25 @@ public class MusIntervalRecognizer {
         }
     }
 
-    private static double averageAbsolute(double[] arr) {
-        double sum = 0;
-        for (double n : arr) {
-            sum += Math.abs(n);
+    private static double averageAbsolute(double[] arr, double threshold) {
+        if (arr.length == 0) {
+            throw new IllegalArgumentException();
         }
-        return sum / arr.length;
+        // gather elements that are above threshold to avoid sum value overflow
+        ArrayList<Double> above = new ArrayList<>();
+        for (double d : arr) {
+            if (d > threshold) {
+                above.add(d);
+            }
+        }
+        if (above.size() == 0) {
+            return 0;
+        }
+        double avg = 0;
+        for (double d : above) {
+            avg += d / above.size();
+        }
+        return avg;
     }
 
     private long getDominantFrequency(double[] signal, int sampleRate, int channelCount) {
@@ -207,11 +214,11 @@ public class MusIntervalRecognizer {
         Arrays.sort(maxIndices, new Comparator<double[]>() {
             @Override
             public int compare(double[] doubles, double[] t1) {
-                return (int)(doubles[1] - t1[1]);
+                return (int) (doubles[1] - t1[1]);
             }
         });
-        for (int i = len-1; i >= 0; i--) {
-            long f = (long)maxIndices[i][0] * sampleRate * channelCount / len;
+        for (int i = len - 1; i >= 0; i--) {
+            long f = (long) maxIndices[i][0] * sampleRate * channelCount / len;
             if (f < sampleRate / 2) {
                 return f;
             }
