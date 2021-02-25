@@ -175,18 +175,19 @@ public class MusIntervalRecognizer {
             throw new IllegalArgumentException();
         }
         // gather elements that are above threshold to avoid sum value overflow
-        ArrayList<Double> above = new ArrayList<>();
+        ArrayList<Double> absAbove = new ArrayList<>();
         for (double d : arr) {
-            if (d > threshold) {
-                above.add(d);
+            double abs = Math.abs(d);
+            if (abs > threshold) {
+                absAbove.add(abs);
             }
         }
-        if (above.size() == 0) {
+        if (absAbove.size() == 0) {
             return 0;
         }
         double avg = 0;
-        for (double d : above) {
-            avg += d / above.size();
+        for (double abs : absAbove) {
+            avg += abs / absAbove.size();
         }
         return avg;
     }
