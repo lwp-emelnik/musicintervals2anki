@@ -93,16 +93,22 @@ public class MusIntervalRecognizer {
 
     private void processSignal() {
         final double silenceThreshold = 1; // @todo find real static amplitude value
-        final double noteCoefficient = 1;
-        final double noteThreshold = averageAbsolute(signal, silenceThreshold) * noteCoefficient;
-
-        final int windowLength = 16384;
-        final double overlapCoefficient = 0.75;
-        if (windowLength * overlapCoefficient % 1 != 0) {
-            throw new AssertionError();
+        int startIdx = 0;
+        for (; startIdx < signal.length && signal[startIdx] < silenceThreshold; startIdx++) ;
+        int endIdx = signal.length - 1;
+        for (; endIdx >= 0 && signal[endIdx] < silenceThreshold; endIdx--) ;
+        if (startIdx >= endIdx) {
+            throw new IllegalArgumentException();
         }
+        final int croppedSignalLength = endIdx - startIdx + 1;
+        double[] croppedSignal = new double[croppedSignalLength];
+        System.arraycopy(signal, startIdx, croppedSignal, 0, croppedSignalLength);
+
+        final double winLenCoefficient = 1d / 16d;
+        final int windowLength = (int) (croppedSignalLength * winLenCoefficient);
+        final double overlapCoefficient = 0.75;
         final int overlapLength = (int) (windowLength * overlapCoefficient);
-        int nWindows = (int) ((signal.length / windowLength - 1) / (1 - overlapCoefficient) + 1);
+        final int nWindows = croppedSignal.length / (windowLength - overlapLength) - windowLength / (windowLength - overlapLength);
         if (nWindows == 0) {
             throw new IllegalArgumentException();
         }
@@ -110,21 +116,23 @@ public class MusIntervalRecognizer {
         double[] windowAmps = new double[nWindows];
         for (int i = 0; i < nWindows; i++) {
             windows[i] = new double[windowLength];
-            System.arraycopy(signal, i * (windowLength - overlapLength), windows[i], 0, windowLength);
+            System.arraycopy(croppedSignal, i * (windowLength - overlapLength), windows[i], 0, windowLength);
             windowAmps[i] = averageAbsolute(windows[i], 0);
         }
 
-        boolean isAbove = windowAmps[0] > noteThreshold;
+        final double peakCoefficient = 1;
+        final double peakThreshold = averageAbsolute(windowAmps, 0) * peakCoefficient;
+        boolean isAbove = windowAmps[0] > peakThreshold;
         LinkedList<int[]> peaksIndices = new LinkedList<>();
         if (isAbove) {
             peaksIndices.add(new int[2]);
             peaksIndices.getLast()[0] = 0;
         }
         for (int i = 1; i < windowAmps.length; i++) {
-            if (windowAmps[i] < noteThreshold && isAbove) {
+            if (windowAmps[i] < peakThreshold && isAbove) {
                 isAbove = false;
                 peaksIndices.getLast()[1] = i;
-            } else if (windowAmps[i] > noteThreshold && !isAbove) {
+            } else if (windowAmps[i] > peakThreshold && !isAbove) {
                 isAbove = true;
                 peaksIndices.add(new int[2]);
                 peaksIndices.getLast()[0] = i;
@@ -138,29 +146,28 @@ public class MusIntervalRecognizer {
             throw new IllegalArgumentException();
         }
 
-        int endWindowIdx = peaksIndices.getLast()[1];
-        while (endWindowIdx < nWindows && windowAmps[endWindowIdx] > silenceThreshold) {
-            endWindowIdx++;
+        int[] pauseIndices = new int[peaksIndices.size() + 1];
+        pauseIndices[0] = 0;
+        pauseIndices[pauseIndices.length - 1] = croppedSignalLength - 1;
+        for (int i = 0; i < peaksIndices.size() - 1; i++) {
+            int nextPeakStart = peaksIndices.get(i + 1)[0] * (windowLength - overlapLength);
+            int curPeakEnd = peaksIndices.get(i)[1] * (windowLength - overlapLength);
+            int minIdx = curPeakEnd;
+            for (int j = curPeakEnd + 1; j < nextPeakStart; j++) {
+                if (croppedSignal[j] <= croppedSignal[minIdx]) {
+                    minIdx = j;
+                }
+            }
+            pauseIndices[i+1] = minIdx;
         }
 
-        final double noteStartCoefficient = 0; // arbitrary
-        final double noteEndCoefficient = 0.5; // arbitrary
         notes = new String[peaksIndices.size()];
-        for (int i = 0; i < peaksIndices.size(); i++) {
-            int[] peakIndices = peaksIndices.get(i);
-            int peakStartIdx = peakIndices[0];
-            int peakEndIdx = peakIndices[1];
-            int nextPeakStartIdx = i == peaksIndices.size() - 1 ? -1 : peaksIndices.get(i + 1)[0];
-
-            int noteStartIdx = peakStartIdx + (int) ((peakEndIdx - peakStartIdx) * noteStartCoefficient);
-            int noteEndIdx = nextPeakStartIdx == -1 ? endWindowIdx :
-                    peakEndIdx + (int) ((nextPeakStartIdx - peakEndIdx) * noteEndCoefficient);
-
-            int noteLength = (noteEndIdx - noteStartIdx) * (windowLength - overlapLength);
-            double[] noteSignal = new double[noteLength];
-            System.arraycopy(signal, noteStartIdx * (windowLength - overlapLength), noteSignal, 0, noteLength);
-            double dominantFrequency = getDominantFrequency(noteSignal, sampleRate, channelCount);
-            notes[i] = getNote(dominantFrequency);
+        for (int i = 0; i < pauseIndices.length - 1; i++) {
+            double[] noteSignal = new double[pauseIndices[i+1] - pauseIndices[i] + 1];
+            System.arraycopy(croppedSignal, pauseIndices[i], noteSignal, 0, noteSignal.length);
+            double freq = getDominantFrequency(noteSignal, sampleRate, channelCount);
+            String note = getNote(freq);
+            notes[i] = note;
         }
     }
 
@@ -186,7 +193,7 @@ public class MusIntervalRecognizer {
         return avg;
     }
 
-    private long getDominantFrequency(double[] signal, int sampleRate, int channelCount) {
+    private double getDominantFrequency(double[] signal, int sampleRate, int channelCount) {
         int len = signal.length;
         double[] waveTransformReal = new double[len];
         double[] waveTransformImg = new double[len];
@@ -213,7 +220,7 @@ public class MusIntervalRecognizer {
             }
         }); // @todo refactor
         for (int i = len - 1; i >= 0; i--) {
-            long f = (long) maxIndices[i][0] * sampleRate * channelCount / len;
+            double f = maxIndices[i][0] * sampleRate * channelCount / len;
             if (f < sampleRate / 2) {
                 return f;
             }
