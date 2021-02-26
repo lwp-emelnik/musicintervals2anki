@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.util.ArrayList;
 
-public class MusIntervalRecognizerTest {
+public class MusIntervalRecognizerInstrumentedTest {
 
     final static String samplesDirPath = "/storage/emulated/0/MusicIntervals2Anki/";
 
