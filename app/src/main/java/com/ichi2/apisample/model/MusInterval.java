@@ -2,13 +2,6 @@ package com.ichi2.apisample.model;
 
 import com.ichi2.apisample.R;
 import com.ichi2.apisample.helper.AnkiDroidHelper;
-import com.ichi2.apisample.helper.equality.DoubleEqualityChecker;
-import com.ichi2.apisample.helper.equality.EqualityChecker;
-import com.ichi2.apisample.helper.equality.IntegerEqualityChecker;
-import com.ichi2.apisample.helper.search.DoubleSearchExpressionMaker;
-import com.ichi2.apisample.helper.search.IntegerSearchExpressionMaker;
-import com.ichi2.apisample.helper.search.SearchExpressionMaker;
-import com.ichi2.apisample.validation.PositiveDecimalValidator;
 import com.ichi2.apisample.validation.EmptyValidator;
 import com.ichi2.apisample.validation.IntegerRangeValidator;
 import com.ichi2.apisample.validation.PatternValidator;
@@ -20,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,7 +32,6 @@ public class MusInterval {
         public static final String INTERVAL = "interval";
         public static final String TEMPO = "tempo";
         public static final String INSTRUMENT = "instrument";
-        public static final String FIRST_NOTE_DURATION_COEFFICIENT = "first_note_duration_coefficient";
         public static final String VERSION = "mi2a_version";
 
         public static class StartNote {
@@ -118,12 +109,6 @@ public class MusInterval {
             private static final Validator RANGE_VALIDATOR = new IntegerRangeValidator(Tempo.MIN_VALUE, Tempo.MAX_VALUE);
         }
 
-        public static class FirstNoteDurationCoefficient {
-            public static final double DEFAULT_VALUE = 1.0;
-
-            public static final Validator FORMAT_VALIDATOR = new PositiveDecimalValidator();
-        }
-
         public static String[] getSignature(boolean versionField) {
             ArrayList<String> signature = new ArrayList<String>() {{
                 add(SOUND);
@@ -135,7 +120,6 @@ public class MusInterval {
                 add(INTERVAL);
                 add(TEMPO);
                 add(INSTRUMENT);
-                add(FIRST_NOTE_DURATION_COEFFICIENT);
             }};
             if (versionField) {
                 signature.add(VERSION);
@@ -143,24 +127,10 @@ public class MusInterval {
             return signature.toArray(new String[0]);
         }
 
-        public static final Map<String, String> DEFAULT_VALUES = new HashMap<String, String>() {{
-            put(FIRST_NOTE_DURATION_COEFFICIENT, String.valueOf(FirstNoteDurationCoefficient.DEFAULT_VALUE));
-        }};
-
-        public static final Map<String, SearchExpressionMaker> SEARCH_EXPRESSION_MAKERS = new HashMap<String, SearchExpressionMaker>() {{
-            put(TEMPO, new IntegerSearchExpressionMaker());
-            put(FIRST_NOTE_DURATION_COEFFICIENT, new DoubleSearchExpressionMaker());
-        }};
-
-        public static final Map<String, EqualityChecker> EQUALITY_CHECKERS = new HashMap<String, EqualityChecker>() {{
-            put(TEMPO, new IntegerEqualityChecker());
-            put(FIRST_NOTE_DURATION_COEFFICIENT, new DoubleEqualityChecker());
-        }};
-
         private static final Validator VALIDATOR_EMPTY = new EmptyValidator();
         private static final Validator VALIDATOR_SOUND = new PatternValidator("^$|^\\[sound:.*\\]$");
 
-        public static final Map<String, Validator[]> VALIDATORS = new HashMap<String, Validator[]>() {{
+        static final Map<String, Validator[]> VALIDATORS = new HashMap<String, Validator[]>() {{
             put(SOUND, new Validator[]{
                     VALIDATOR_EMPTY,
                     VALIDATOR_SOUND
@@ -195,9 +165,6 @@ public class MusInterval {
             put(INSTRUMENT, new Validator[]{
                     VALIDATOR_EMPTY
             });
-            put(FIRST_NOTE_DURATION_COEFFICIENT, new Validator[]{
-                    FirstNoteDurationCoefficient.FORMAT_VALIDATOR
-            });
         }};
     }
 
@@ -231,7 +198,6 @@ public class MusInterval {
             put(Fields.INTERVAL, Fields.INTERVAL);
             put(Fields.TEMPO, Fields.TEMPO);
             put(Fields.INSTRUMENT, Fields.INSTRUMENT);
-            put(Fields.FIRST_NOTE_DURATION_COEFFICIENT, Fields.FIRST_NOTE_DURATION_COEFFICIENT);
             put(Fields.VERSION, Fields.VERSION);
         }};
         private String mDeckName = DEFAULT_DECK_NAME;
@@ -245,7 +211,6 @@ public class MusInterval {
         private String[] mIntervals = new String[]{};
         private String mTempo = "";
         private String mInstrument = "";
-        private String mFirstNoteDurationCoefficient = "";
         private String mVersion = "";
 
         private boolean mDefaultModel = false;
@@ -259,7 +224,7 @@ public class MusInterval {
             mHelper = helper;
         }
 
-        public MusInterval build() throws ValidationException {
+        public MusInterval build() throws ModelException, TempoNotInRangeException {
             return new MusInterval(this);
         }
 
@@ -355,11 +320,6 @@ public class MusInterval {
 
         public Builder instrument(String is) {
             mInstrument = is;
-            return this;
-        }
-
-        public Builder first_note_duration_coefficient(String fndc) {
-            mFirstNoteDurationCoefficient = fndc;
             return this;
         }
 
@@ -469,7 +429,6 @@ public class MusInterval {
     }
 
     public static class TempoNotInRangeException extends ValidationException { }
-    public static class InvalidFirstNoteDurationCoefficientException extends ValidationException { }
 
     private final AnkiDroidHelper helper;
 
@@ -477,9 +436,6 @@ public class MusInterval {
 
     public final String modelName;
     public final Map<String, String> modelFields;
-    final Map<String, String> modelFieldsDefaultValues;
-    final Map<String, SearchExpressionMaker> modelFieldsSearchExpressionMakers;
-    final Map<String, EqualityChecker> modelFieldsEqualityCheckers;
     public final Long modelId;
     public final String deckName;
     private Long deckId;
@@ -495,7 +451,6 @@ public class MusInterval {
     public final String[] intervals;
     public final String tempo;
     public final String instrument;
-    public final String firstNoteDurationCoefficient;
     public final String version;
 
     private interface FieldAccessor {
@@ -542,13 +497,12 @@ public class MusInterval {
     }};
 
     private Map<String, ArrayList<String>> addedNotesOwnFields;
-    private ArrayList<String> originalSounds;
 
 
     /**
      * Construct an object using builder class.
      */
-    public MusInterval(Builder builder) throws ValidationException {
+    public MusInterval(Builder builder) throws ModelException, TempoNotInRangeException {
         helper = builder.mHelper;
 
         relatedSoundFields = new RelatedIntervalSoundField[]{
@@ -558,21 +512,6 @@ public class MusInterval {
 
         modelName = builder.mModelName;
         modelFields = builder.mModelFields;
-        modelFieldsDefaultValues = new HashMap<>();
-        modelFieldsSearchExpressionMakers = new HashMap<>();
-        modelFieldsEqualityCheckers = new HashMap<>();
-        for (String fieldKey : Fields.getSignature(true)) {
-            String modelField = modelFields.getOrDefault(fieldKey, fieldKey);
-            if (Fields.DEFAULT_VALUES.containsKey(fieldKey)) {
-                modelFieldsDefaultValues.put(modelField, Fields.DEFAULT_VALUES.get(fieldKey));
-            }
-            if (Fields.SEARCH_EXPRESSION_MAKERS.containsKey(fieldKey)) {
-                modelFieldsSearchExpressionMakers.put(modelField, Fields.SEARCH_EXPRESSION_MAKERS.get(fieldKey));
-            }
-            if (Fields.EQUALITY_CHECKERS.containsKey(fieldKey)) {
-                modelFieldsEqualityCheckers.put(modelField, Fields.EQUALITY_CHECKERS.get(fieldKey));
-            }
-        }
         modelId = helper.findModelIdByName(builder.mModelName);
         deckName = builder.mDeckName;
         deckId = helper.findDeckIdByName(builder.mDeckName);
@@ -587,14 +526,12 @@ public class MusInterval {
         intervals = builder.mIntervals;
         tempo = builder.mTempo.trim();
         instrument = builder.mInstrument.trim();
-        firstNoteDurationCoefficient = builder.mFirstNoteDurationCoefficient;
         version = builder.mVersion;
 
         validateFields(builder.mDefaultModel, builder.mFields, builder.mCards, builder.mQfmt, builder.mAfmt, builder.mCss);
     }
 
-    protected void validateFields(boolean isDefaultModel, String[] fields, String[] cards, String[] qfmt, String[] afmt, String css)
-            throws ModelException, TempoNotInRangeException, InvalidFirstNoteDurationCoefficientException {
+    protected void validateFields(boolean isDefaultModel, String[] fields, String[] cards, String[] qfmt, String[] afmt, String css) throws ModelException, TempoNotInRangeException {
         String[] signature = Fields.getSignature(!version.isEmpty());
 
         if (modelId == null) {
@@ -624,10 +561,6 @@ public class MusInterval {
 
         if (!tempo.isEmpty() && !Fields.Tempo.RANGE_VALIDATOR.isValid(tempo)) {
             throw new TempoNotInRangeException();
-        }
-
-        if (!Fields.FirstNoteDurationCoefficient.FORMAT_VALIDATOR.isValid(firstNoteDurationCoefficient)) {
-            throw new InvalidFirstNoteDurationCoefficientException();
         }
     }
 
@@ -672,13 +605,7 @@ public class MusInterval {
                 data.remove(modelFields.get(Fields.SOUND_LARGER));
                 data.remove(modelFields.get(Fields.VERSION));
             }
-            return helper.findNotes(
-                    modelId,
-                    dataSet,
-                    modelFieldsDefaultValues,
-                    modelFieldsSearchExpressionMakers,
-                    modelFieldsEqualityCheckers
-            );
+            return helper.findNotes(modelId, dataSet);
         } else {
             return new LinkedList<>();
         }
@@ -790,7 +717,6 @@ public class MusInterval {
         for (Map.Entry<String, FieldAccessor> ownFieldAccessor : OWN_FIELDS_ACCESSORS.entrySet()) {
             addedNotesOwnFields.put(ownFieldAccessor.getKey(), new ArrayList<String>());
         }
-        originalSounds = new ArrayList<>();
 
         addToAnki(0, miDataSet, prompter, progressIndicator);
     }
@@ -800,7 +726,7 @@ public class MusInterval {
 
         final int dataCount = dataSet.size();
         if (idx >= dataCount) {
-            prompter.addingFinished(getAddingResult());
+            prompter.addingFinished(getAddedMusInterval());
             return;
         }
 
@@ -860,7 +786,7 @@ public class MusInterval {
 
                         helper.updateNote(modelId, Long.parseLong(existingData.get(AnkiDroidHelper.KEY_ID)), newData);
                         MusInterval updatedMi = getMusIntervalFromData(newData);
-                        updateAddedNotes(updatedMi, sound);
+                        updateAddedNotes(updatedMi);
                         return updatedMi;
                     }
 
@@ -891,7 +817,7 @@ public class MusInterval {
             progressIndicator.setMessage(R.string.batch_adding, i + 1, dataCount);
         }
 
-        prompter.addingFinished(getAddingResult());
+        prompter.addingFinished(getAddedMusInterval());
     }
 
     private MusInterval handleAddToAnki(Map<String, String> data) throws AddSoundFileException,
@@ -914,11 +840,11 @@ public class MusInterval {
         }
 
         MusInterval newMi = getMusIntervalFromData(data);
-        updateAddedNotes(newMi, sound);
+        updateAddedNotes(newMi);
         return newMi;
     }
 
-    private void updateAddedNotes(MusInterval mi, String originalSound) {
+    private void updateAddedNotes(MusInterval mi) {
         for (Map.Entry<String, FieldAccessor> ownFieldAccessor : OWN_FIELDS_ACCESSORS.entrySet()) {
             String ownField = ownFieldAccessor.getKey();
             ArrayList<String> current = addedNotesOwnFields.get(ownField);
@@ -926,7 +852,6 @@ public class MusInterval {
             current.add(accessor.getFieldValue(mi));
             addedNotesOwnFields.put(ownField, current);
         }
-        originalSounds.add(originalSound);
     }
 
     private MusInterval getMusIntervalFromData(Map<String, String> data) throws ValidationException {
@@ -950,15 +875,14 @@ public class MusInterval {
                 .timing(data.get(modelFields.get(Fields.TIMING)))
                 .intervals(new String[]{data.get(modelFields.get(Fields.INTERVAL))})
                 .tempo(data.get(modelFields.get(Fields.TEMPO)))
-                .instrument(data.get(modelFields.get(Fields.INSTRUMENT)))
-                .first_note_duration_coefficient(data.get(modelFields.get(Fields.FIRST_NOTE_DURATION_COEFFICIENT)));
+                .instrument(data.get(modelFields.get(Fields.INSTRUMENT)));
         if (!version.isEmpty()) {
             builder.version(version);
         }
         return builder.build();
     }
 
-    private AddingResult getAddingResult() throws ValidationException {
+    private MusInterval getAddedMusInterval() throws ValidationException {
         Builder builder = new Builder(helper)
                 .deck(deckName)
                 .model(modelName)
@@ -972,12 +896,11 @@ public class MusInterval {
                 .timing(timing)
                 .intervals(addedNotesOwnFields.get(Builder.KEY_INTERVALS).toArray(new String[0]))
                 .tempo(tempo)
-                .instrument(instrument)
-                .first_note_duration_coefficient(firstNoteDurationCoefficient);
+                .instrument(instrument);
         if (!version.isEmpty()) {
             builder.version(version);
         }
-        return builder.build().new AddingResult(originalSounds.toArray(new String[0]));
+        return builder.build();
     }
 
     public int getPermutationsNumber() {
@@ -1011,7 +934,6 @@ public class MusInterval {
                     miData.put(modelFields.get(Fields.INTERVAL), interval);
                     miData.put(modelFields.get(Fields.TEMPO), tempo);
                     miData.put(modelFields.get(Fields.INSTRUMENT), instrument);
-                    miData.put(modelFields.get(Fields.FIRST_NOTE_DURATION_COEFFICIENT), firstNoteDurationCoefficient);
                     miDataSet.add(miData);
                     i++;
                 }
@@ -1023,21 +945,5 @@ public class MusInterval {
             }
         }
         return miDataSet;
-    }
-
-    public class AddingResult {
-        private final String[] originalSounds;
-
-        public AddingResult(String[] originalSounds) {
-            this.originalSounds = originalSounds;
-        }
-
-        public String[] getOriginalSounds() {
-            return originalSounds;
-        }
-
-        public MusInterval getMusInterval() {
-            return MusInterval.this;
-        }
     }
 }

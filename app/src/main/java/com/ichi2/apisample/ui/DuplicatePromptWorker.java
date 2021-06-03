@@ -3,6 +3,7 @@ package com.ichi2.apisample.ui;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.os.Handler;
 
 import com.ichi2.apisample.R;
 import com.ichi2.apisample.helper.AnkiDroidHelper;
@@ -11,6 +12,7 @@ import com.ichi2.apisample.model.MusInterval;
 
 public class DuplicatePromptWorker implements Runnable {
     private final MainActivity mainActivity;
+    private final Handler handler;
 
     private final boolean tagDuplicates;
     private final String duplicateTag;
@@ -18,8 +20,9 @@ public class DuplicatePromptWorker implements Runnable {
     private final MusInterval[] existingMis;
     private final AddingHandler duplicateAddingHandler;
 
-    public DuplicatePromptWorker(MainActivity mainActivity, boolean tagDuplicates, String duplicateTag, MusInterval[] existingMis, AddingHandler duplicateAddingHandler) {
+    public DuplicatePromptWorker(MainActivity mainActivity, Handler handler, boolean tagDuplicates, String duplicateTag, MusInterval[] existingMis, AddingHandler duplicateAddingHandler) {
         this.mainActivity = mainActivity;
+        this.handler = handler;
 
         this.tagDuplicates = tagDuplicates;
         this.duplicateTag = duplicateTag;
@@ -43,6 +46,8 @@ public class DuplicatePromptWorker implements Runnable {
                             if (tagDuplicates) {
                                 duplicateAddingHandler.tag(duplicateTag);
                             }
+                            mainActivity.handleInsertion(newMi);
+                            mainActivity.showQuantityMsg(R.plurals.mi_added, 1);
                             duplicateAddingHandler.proceed();
                         } catch (Throwable e) {
                             mainActivity.handleError(e);
@@ -91,6 +96,7 @@ public class DuplicatePromptWorker implements Runnable {
                             duplicateAddingHandler.proceed();
                             return;
                         }
+                        mainActivity.handleInsertion(newMi);
                         mainActivity.showMsg(R.string.item_replaced);
                         duplicateAddingHandler.proceed();
                     } catch (Throwable e) {

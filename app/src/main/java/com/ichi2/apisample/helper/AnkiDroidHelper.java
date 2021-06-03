@@ -17,8 +17,6 @@ import androidx.core.content.ContextCompat;
 
 import com.ichi2.anki.FlashCardsContract;
 import com.ichi2.anki.api.AddContentApi;
-import com.ichi2.apisample.helper.equality.EqualityChecker;
-import com.ichi2.apisample.helper.search.SearchExpressionMaker;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -229,12 +227,8 @@ public class AnkiDroidHelper {
             }
             values = new ContentValues();
             values.put(FlashCardsContract.Model.FIELD_NAME, field);
-            try {
-                Uri fieldUri = mResolver.insert(fieldsUri, values);
-                if (fieldUri == null) {
-                    return null;
-                }
-            } catch (Exception e) {
+            Uri fieldUri = mResolver.insert(fieldsUri, values);
+            if (fieldUri == null) {
                 return null;
             }
         }
@@ -333,9 +327,8 @@ public class AnkiDroidHelper {
     // @todo: refactor once new version release of "com.ichi2.anki.api" is available
     public String addFileToAnkiMedia(String uriString) {
         Uri uri = Uri.parse(uriString);
-        uri = UriUtil.getContentUri(mContext, uri);
-        uriString = uri.toString();
         mContext.grantUriPermission(PACKAGE_ANKI, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
         String type = mResolver.getType(uri);
         final String tempAudioFilePath = Environment.getExternalStorageDirectory().getPath() + "/tempOutput.mp3";
         if (type.startsWith("video")) {
@@ -391,40 +384,15 @@ public class AnkiDroidHelper {
         return getApi().addNote(modelId, deckId, result, tags);
     }
 
-    public static final SearchExpressionMaker DEFAULT_SEARCH_EXPRESSION_MAKER = new SearchExpressionMaker() {
-        @Override
-        public String getExpression(String value) {
-            return !value.isEmpty() ? value : "%";
-        }
-
-        @Override
-        public boolean isDefinitive() {
-            return true;
-        }
-    };
-
-    public static final EqualityChecker DEFAULT_EQUALITY_CHECKER = new EqualityChecker() {
-        @Override
-        public boolean areEqual(String v1, String v2) {
-            return v1.equalsIgnoreCase(v2);
-        }
-    };
-
-    public LinkedList<Map<String, String>> findNotes(long modelId, final Map<String, String> data,
-                                                     Map<String, String> fieldDefaultValues,
-                                                     Map<String, SearchExpressionMaker> fieldSearchExpressionMakers,
-                                                     Map<String, EqualityChecker> fieldEqualityCheckers)
+    public LinkedList<Map<String, String>> findNotes(long modelId, final Map<String, String> data)
             throws InvalidAnkiDatabase_fieldAndFieldNameCountMismatchException {
         ArrayList<Map<String, String>> dataSet = new ArrayList<Map<String, String>>() {{
             add(data);
         }};
-        return findNotes(modelId, dataSet, fieldDefaultValues, fieldSearchExpressionMakers, fieldEqualityCheckers);
+        return findNotes(modelId, dataSet);
     }
 
-    public LinkedList<Map<String, String>> findNotes(long modelId, ArrayList<Map<String, String>> dataSet,
-                                                     Map<String, String> fieldDefaultValues,
-                                                     Map<String, SearchExpressionMaker> fieldSearchExpressionMakers,
-                                                     Map<String, EqualityChecker> fieldEqualityCheckers)
+    public LinkedList<Map<String, String>> findNotes(long modelId, ArrayList<Map<String, String>> dataSet)
             throws InvalidAnkiDatabase_fieldAndFieldNameCountMismatchException {
         if (dataSet.size() == 0) {
             return new LinkedList<>();
@@ -437,52 +405,17 @@ public class AnkiDroidHelper {
             if (dataCondition.length() > 0) {
                 dataCondition.append(" or ");
             }
-            ArrayList<String> defaultFields = new ArrayList<>();
+            StringBuilder fieldsAggregated = new StringBuilder();
             for (String fieldName : fieldNames) {
-                if (data.containsKey(fieldName)) {
-                    String value = data.get(fieldName);
-                    if (!value.isEmpty() && fieldDefaultValues.containsKey(fieldName)) {
-                        EqualityChecker equalityChecker = fieldEqualityCheckers.getOrDefault(fieldName, DEFAULT_EQUALITY_CHECKER);
-                        String defaultValue = fieldDefaultValues.get(fieldName);
-                        if (equalityChecker.areEqual(value, defaultValue)) {
-                            defaultFields.add(fieldName);
-                        }
-                    }
+                if (fieldsAggregated.length() > 0) {
+                    fieldsAggregated.append(FLDS_SEPARATOR);
                 }
+                final String value = data.containsKey(fieldName) && !data.get(fieldName).isEmpty()
+                        ? data.get(fieldName)
+                        : "%";
+                fieldsAggregated.append(value);
             }
-
-            // here we create two conditions for each field containing default value
-            // to account for the case of the default value and empty value equality
-            int n = (int) Math.pow(2, defaultFields.size());
-            for (int i = 0; i < n; i++) {
-                StringBuilder fieldsAggregated = new StringBuilder();
-                if (i > 0) {
-                    dataCondition.append(" or ");
-                }
-                for (String fieldName : fieldNames) {
-                    if (fieldsAggregated.length() > 0) {
-                        fieldsAggregated.append(FLDS_SEPARATOR);
-                    }
-
-                    String expression;
-                    if (data.containsKey(fieldName)) {
-                        String value = data.get(fieldName);
-                        expression = fieldSearchExpressionMakers.getOrDefault(fieldName, DEFAULT_SEARCH_EXPRESSION_MAKER).getExpression(value);
-                    } else {
-                        expression = "%";
-                    }
-
-                    // decide whether or not this is the "second" condition, for which we substitute
-                    // the value that is being searched for with an empty string
-                    int idx = defaultFields.indexOf(fieldName);
-                    if (idx != -1 && i % (n / (int) Math.pow(2, idx)) >= (n / Math.pow(2, idx + 1))) {
-                        expression = "";
-                    }
-                    fieldsAggregated.append(expression);
-                }
-                dataCondition.append(String.format(Locale.US, "%s like \"%s\"", FlashCardsContract.Note.FLDS, fieldsAggregated.toString()));
-            }
-
+            dataCondition.append(String.format(Locale.US, "%s like \"%s\"", FlashCardsContract.Note.FLDS, fieldsAggregated.toString()));
         }
 
         String selection = String.format(Locale.US, "%s=%d and (%s)",
@@ -503,7 +436,6 @@ public class AnkiDroidHelper {
         }
 
         try {
-            rows:
             while (notesTableCursor.moveToNext()) {
                 int idIndex = notesTableCursor.getColumnIndexOrThrow(FlashCardsContract.Note._ID);
                 int fldsIndex = notesTableCursor.getColumnIndexOrThrow(FlashCardsContract.Note.FLDS);
@@ -522,28 +454,7 @@ public class AnkiDroidHelper {
                     item.put(KEY_TAGS, notesTableCursor.getString(tagsIndex));
 
                     for (int i = 0; i < fieldNames.length; ++i) {
-                        String fieldName = fieldNames[i];
-                        String field = fields[i];
-                        // additional filtering for non-definitive expressions
-                        // can be computationally expensive
-                        SearchExpressionMaker expressionMaker = fieldSearchExpressionMakers.getOrDefault(fieldName, DEFAULT_SEARCH_EXPRESSION_MAKER);
-                        if (!expressionMaker.isDefinitive()) {
-                            EqualityChecker equalityChecker = fieldEqualityCheckers.getOrDefault(fieldName, DEFAULT_EQUALITY_CHECKER);
-                            boolean matching = false;
-                            for (Map<String, String> data : dataSet) {
-                                String value = data.getOrDefault(fieldName, "");
-                                boolean defaultEquality = field.isEmpty() && fieldDefaultValues.containsKey(fieldName)
-                                        && equalityChecker.areEqual(value, fieldDefaultValues.get(fieldName));
-                                if (value.isEmpty() || equalityChecker.areEqual(value, field) || defaultEquality) {
-                                    matching = true;
-                                    break;
-                                }
-                            }
-                            if (!matching) {
-                                continue rows;
-                            }
-                        }
-                        item.put(fieldName, field);
+                        item.put(fieldNames[i], fields[i]);
                     }
 
                     result.add(item);

@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.FileProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.ichi2.apisample.R;
@@ -46,8 +47,6 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class AudioCaptureService extends Service {
-    public final static String CAPTURES_DIRECTORY = Environment.getExternalStorageDirectory().getPath() + "/MusicIntervals2Anki/AudioCaptures";
-
     public final static String EXTRA_RESULT_DATA = "AudioCaptureService:Extra:ResultData";
 
     public final static String ACTION_FILE_CREATED = "AudioCaptureService:FileCreated";
@@ -271,12 +270,12 @@ public class AudioCaptureService extends Service {
     }
 
     private File createAudioFile() {
-        File capturesDir = new File(CAPTURES_DIRECTORY);
+        File capturesDir = new File(Environment.getExternalStorageDirectory().getPath() + "/AudioCaptures");
         if (!capturesDir.exists()) {
             capturesDir.mkdirs();
         }
 
-        String timestamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss-SSS", Locale.US).format(new Date());
+        String timestamp = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss-SSS", Locale.US).format(new Date());
         String filename = String.format("Capture-%s.pcm", timestamp);
         return new File(capturesDir.getAbsolutePath() + "/" + filename);
     }
@@ -336,31 +335,26 @@ public class AudioCaptureService extends Service {
             converter.convert(pathname, convertedPathname);
             tempPcmFile.delete();
 
-            Uri uri = Uri.fromFile(wavFile);
+            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", wavFile);
 
             Intent intent = new Intent(ACTION_FILE_CREATED);
             intent.putExtra(EXTRA_URI_STRING, uri.toString());
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
             SharedPreferences uiDb = getSharedPreferences(MainActivity.REF_DB_STATE, Context.MODE_PRIVATE);
-            boolean afterSelecting = uiDb.getBoolean(MainActivity.REF_DB_AFTER_SELECTING, false);
             boolean afterAdding = uiDb.getBoolean(MainActivity.REF_DB_AFTER_ADDING, false);
+            SharedPreferences.Editor uiDbEditor = uiDb.edit();
             ArrayList<String> newFilenames;
-            if (afterSelecting || afterAdding) {
+            if (afterAdding) {
                 newFilenames = new ArrayList<>();
-                SharedPreferences.Editor uiDbEditor = uiDb.edit();
-                uiDbEditor.putBoolean(MainActivity.REF_DB_MISMATCHING_SORTING, false);
-                uiDbEditor.putBoolean(MainActivity.REF_DB_SORT_BY_NAME, false);
-                uiDbEditor.putBoolean(MainActivity.REF_DB_SORT_BY_DATE, false);
-                uiDbEditor.putBoolean(MainActivity.REF_DB_AFTER_SELECTING, false);
                 uiDbEditor.putBoolean(MainActivity.REF_DB_AFTER_ADDING, false);
-                uiDbEditor.apply();
             } else {
                 String[] filenames = MainActivity.getStoredFilenames(this);
                 newFilenames = new ArrayList<>(Arrays.asList(filenames));
             }
             newFilenames.add(uri.toString());
-            MainActivity.storeFilenames(this, newFilenames.toArray(new String[0]));
+            uiDbEditor.putStringSet(MainActivity.REF_DB_SELECTED_FILENAMES, new HashSet<>(newFilenames));
+            uiDbEditor.apply();
 
             recordedFilesCount++;
             textBottom.setText(getString(R.string.recorded_files, recordedFilesCount));

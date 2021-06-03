@@ -52,7 +52,7 @@ public class FilenameAdapter extends RecyclerView.Adapter<FilenameAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final UriPathName uriPathName = uriPathNames[position];
-        holder.getTextView().setText(uriPathName.label);
+        holder.getTextView().setText(uriPathName.name);
         holder.getActionPlay().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -70,13 +70,11 @@ public class FilenameAdapter extends RecyclerView.Adapter<FilenameAdapter.ViewHo
         private final Uri uri;
         private final String path;
         private final String name;
-        private String label;
 
-        public UriPathName(Uri uri, String path, String name, String label) {
+        public UriPathName(Uri uri, String path, String name) {
             this.uri = uri;
             this.path = path;
             this.name = name;
-            this.label = label;
         }
 
         public Uri getUri() {
@@ -89,10 +87,6 @@ public class FilenameAdapter extends RecyclerView.Adapter<FilenameAdapter.ViewHo
 
         public String getName() {
             return name;
-        }
-
-        public void setLabel(String label) {
-            this.label = label;
         }
     }
 }
