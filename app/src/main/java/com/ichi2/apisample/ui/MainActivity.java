@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,12 +25,12 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
+import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -49,6 +50,7 @@ import android.widget.Toast;
 
 import com.ichi2.apisample.BuildConfig;
 import com.ichi2.apisample.helper.StringUtil;
+import com.ichi2.apisample.helper.UriUtil;
 import com.ichi2.apisample.model.AddingHandler;
 import com.ichi2.apisample.model.AddingPrompter;
 import com.ichi2.apisample.model.NotesIntegrity;
@@ -59,11 +61,10 @@ import com.ichi2.apisample.model.ProgressIndicator;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 
 public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, AddingPrompter, ProgressIndicator {
@@ -83,7 +84,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private static final String TAG_SUSPICIOUS = "suspicious";
 
     static final String REF_DB_STATE = "com.ichi2.apisample.uistate";
-    static final String REF_DB_SELECTED_FILENAMES = "selectedFilenames";
+    static final String REF_DB_SELECTED_FILENAMES = "selectedFilenamesArr";
+    static final String REF_DB_MISMATCHING_SORTING = "mismatchingSorting";
+    static final String REF_DB_SORT_BY_NAME = "sortByName";
+    static final String REF_DB_SORT_BY_DATE = "sortByDate";
+    static final String REF_DB_AFTER_SELECTING = "afterSelecting";
     static final String REF_DB_AFTER_ADDING = "afterAdding";
     private static final String REF_DB_SWITCH_BATCH = "switchBatch";
     private static final String REF_DB_CHECK_NOTE_ANY = "checkNoteAny";
@@ -94,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private static final String REF_DB_INPUT_TEMPO = "inputTempo";
     private static final String REF_DB_INPUT_INSTRUMENT = "inputInstrument";
     private static final String REF_DB_SAVED_INSTRUMENTS = "savedInstruments";
+    private static final String REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT = "firstNoteDurationCoefficient";
     private static final String REF_DB_BATCH_ADDING_NOTICE_SEEN = "batchAddingNoticeSeen";
     private static final String REF_DB_NOTE_KEYS = "noteKeys";
     private static final String REF_DB_OCTAVE_KEYS = "octaveKeys";
@@ -125,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private SwitchCompat switchBatch;
     private TextView textFilename;
-    private Button actionPlay;
+    Button actionPlay;
     private Button actionCaptureAudio;
     private Button actionSelectFile;
     private CheckBox checkNoteAny;
@@ -138,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private CheckBox[] checkIntervals;
     private EditText inputTempo;
     private AutoCompleteTextView inputInstrument;
+    private EditText inputFirstNoteDurationCoefficient;
     private TextView labelExisting;
     private Button actionMarkExisting;
 
@@ -189,22 +196,48 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
-    private String[] filenames = new String[]{};
-    private String[] selectedFilenames;
+    private final ArrayList<AlertDialog> activeOnStartDialogs = new ArrayList<>();
+    private final DialogInterface.OnDismissListener onStartDialogDismissListener = new DialogInterface.OnDismissListener() {
+        @Override
+        public void onDismiss(DialogInterface dialogInterface) {
+            activeOnStartDialogs.remove(dialogInterface);
+        }
+    };
 
-    private SoundPlayer soundPlayer;
+    String[] filenames = new String[]{};
+    private String[] selectedFilenames;
+    boolean mismatchingSorting;
+    boolean sortByName;
+    static final Comparator<String> COMPARATOR_FILE_NAME = new Comparator<String>() {
+        @Override
+        public int compare(String s, String t1) {
+            return s.compareTo(t1);
+        }
+    };
+    boolean sortByDate;
+    static final Comparator<Long> COMPARATOR_FILE_LAST_MODIFIED = new Comparator<Long>() {
+        @Override
+        public int compare(Long s, Long t1) {
+            return Long.compare(s, t1);
+        }
+    };
+
+    private boolean afterSelecting;
+
+    SoundPlayer soundPlayer;
 
     private Integer permutationsNumber;
 
     private HashSet<String> savedInstruments = new HashSet<>();
+    private ArrayAdapter<String> savedInstrumentsAdapter;
 
     private AnkiDroidHelper mAnkiDroid;
 
     private boolean afterAdding;
 
-    private String[] noteKeys = new String[]{};
-    private String[] octaveKeys = new String[]{};
-    private String[] intervalKeys = new String[]{};
+    String[] noteKeys = new String[]{};
+    String[] octaveKeys = new String[]{};
+    String[] intervalKeys = new String[]{};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -238,6 +271,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
         inputTempo = findViewById(R.id.inputTempo);
         inputInstrument = findViewById(R.id.inputInstrument);
+        inputFirstNoteDurationCoefficient = findViewById(R.id.inputFirstNoteDurationCoefficient);
         labelExisting = findViewById(R.id.labelExisting);
         actionMarkExisting = findViewById(R.id.actionMarkExisting);
 
@@ -263,6 +297,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
         inputTempo.addTextChangedListener(new FieldInputTextWatcher(this));
         inputInstrument.addTextChangedListener(new FieldInputTextWatcher(this));
+        inputFirstNoteDurationCoefficient.addTextChangedListener(new FieldInputTextWatcher(this));
         switchBatch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -312,6 +347,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            clearSelectedFilenames();
             clearAddedFilenames();
             String uriString = intent.getStringExtra(AudioCaptureService.EXTRA_URI_STRING);
             String[] newFilenames = new String[filenames.length + 1];
@@ -331,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         refreshExisting();
         refreshPermutations();
-        boolean selected = selectedFilenames != null && selectedFilenames.length > 0;
+        boolean selected = selectedFilenames != null;
         if (selected) {
             afterAdding = false;
             filenames = selectedFilenames;
@@ -411,6 +447,17 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
+    private void clearSelectedFilenames() {
+        if (afterSelecting) {
+            filenames = new String[]{};
+            refreshFilenames();
+            afterSelecting = false;
+            mismatchingSorting = false;
+            sortByName = false;
+            sortByDate = false;
+        }
+    }
+
     void clearAddedFilenames() {
         if (afterAdding) {
             refreshKeys();
@@ -439,11 +486,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void refreshFilenames() {
-        StringBuilder text = new StringBuilder();
         if (filenames.length > 0) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             String ankiDir = preferences.getString(SettingsFragment.KEY_ANKI_DIR_PREFERENCE, SettingsFragment.DEFAULT_ANKI_DIR);
 
+            final ContentResolver resolver = getContentResolver();
             final FilenameAdapter.UriPathName[] uriPathNames = new FilenameAdapter.UriPathName[filenames.length];
             for (int i = 0; i < uriPathNames.length; i++) {
                 String filename = filenames[i];
@@ -455,51 +502,26 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     path = ankiDir + AnkiDroidHelper.DIR_MEDIA
                             + filename.substring(7, filename.length() - 1);
                     File file = new File(path);
-                    if (!file.exists()) {
-                        uri = null;
-                    } else {
-                        uri = Uri.fromFile(file);
-                    }
+                    uri = file.exists() ? Uri.fromFile(file) : null;
                 } else {
                     uri = Uri.parse(filename);
-                    // getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    // @todo: investigate this
-                    Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                    Uri contentUri = UriUtil.getContentUri(this, uri);
+                    Cursor cursor = resolver.query(contentUri, null, null, null, null);
                     int nameIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
                     cursor.moveToFirst();
                     name = cursor.getString(nameIdx);
                     cursor.close();
                 }
-                uriPathNames[i] = new FilenameAdapter.UriPathName(uri, path, name);
+                String label = getFilenameLabel(name, i);
+                uriPathNames[i] = new FilenameAdapter.UriPathName(uri, path, name, label);
             }
-            final FilenameAdapter.UriPathName uriFirst = uriPathNames[0];
 
-            text.append(uriFirst.getName());
+            final FilenameAdapter.UriPathName uriFirst = uriPathNames[0];
 
             actionPlay.setEnabled(true);
             if (filenames.length > 1) {
-                text.append(getString(R.string.additional_filenames, filenames.length - 1));
-
                 actionPlay.setText(R.string.view_all);
-                actionPlay.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FilenameAdapter.UriPathName[] filenames = new FilenameAdapter.UriPathName[uriPathNames.length];
-                        for (int i = 0; i < uriPathNames.length; i++) {
-                            FilenameAdapter.UriPathName uriPathName = uriPathNames[i];
-                            String startNote = i < noteKeys.length || i < octaveKeys.length ? noteKeys[i] + octaveKeys[i] : getString(R.string.unassigned);
-                            String interval = i < intervalKeys.length ? intervalKeys[i] : getString(R.string.unassigned);
-                            String label = getString(
-                                    R.string.filename_with_key,
-                                    i + 1,
-                                    uriPathName.getName(),
-                                    startNote,
-                                    interval);
-                            filenames[i] = new FilenameAdapter.UriPathName(uriPathName.getUri(), uriPathName.getPath(), label);
-                        }
-                        openFilenamesDialog(filenames);
-                    }
-                });
+                actionPlay.setOnClickListener(new OnViewAllClickListener(this, uriPathNames));
             } else {
                 actionPlay.setText(R.string.play);
                 actionPlay.setOnClickListener(new View.OnClickListener() {
@@ -509,27 +531,32 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     }
                 });
             }
+
+            refreshFilenameText(uriFirst.getName());
         } else {
             resetPlayButton();
+            refreshFilenameText("");
+        }
+    }
+
+    void refreshFilenameText(String firstName) {
+        String text = firstName;
+        if (filenames != null && filenames.length > 1) {
+            text += getString(R.string.additional_filenames, filenames.length - 1);
         }
         textFilename.setText(text);
     }
 
-    public void openFilenamesDialog(FilenameAdapter.UriPathName[] uriPathNames) {
-        ViewGroup viewGroup = findViewById(R.id.content);
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_filenames, viewGroup, false);
-        RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerView);
-        recyclerView.setAdapter(new FilenameAdapter(uriPathNames, soundPlayer));
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        new AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                })
-                .show();
+    String getFilenameLabel(String name, int pos) {
+        String startNote = pos < noteKeys.length || pos < octaveKeys.length ? noteKeys[pos] + octaveKeys[pos] : getString(R.string.unassigned);
+        String interval = pos < intervalKeys.length ? intervalKeys[pos] : getString(R.string.unassigned);
+        return getString(
+                R.string.filename_with_key,
+                pos + 1,
+                name,
+                startNote,
+                interval
+        );
     }
 
     private void configureClearAllButton() {
@@ -538,6 +565,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             @Override
             public void onClick(View v) {
                 filenames = new String[]{};
+                afterAdding = false;
+                mismatchingSorting = false;
+                sortByName = false;
+                sortByDate = false;
+                afterSelecting = false;
                 resetPlayButton();
                 textFilename.setText("");
                 checkNoteAny.setChecked(true);
@@ -547,6 +579,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 checkIntervalAny.setChecked(true);
                 inputTempo.setText("");
                 inputInstrument.setText("");
+                inputFirstNoteDurationCoefficient.setText("");
             }
         });
     }
@@ -676,22 +709,59 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 if (resultCode != RESULT_OK) {
                     return;
                 }
-                ArrayList<String> filenamesList = new ArrayList<>();
+
+                final ArrayList<Uri> uriList = new ArrayList<>();
                 if (data != null) {
                     ClipData clipData = data.getClipData();
                     if (clipData != null) {
                         for (int i = 0; i < clipData.getItemCount(); i++) {
                             Uri uri = clipData.getItemAt(i).getUri();
                             getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            filenamesList.add(uri.toString());
+                            uriList.add(uri);
                         }
                     } else {
                         Uri uri = data.getData();
                         getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        filenamesList.add(uri.toString());
+                        uriList.add(uri);
                     }
                 }
-                selectedFilenames = filenamesList.toArray(new String[0]);
+
+                ContentResolver resolver = getContentResolver();
+                final ArrayList<String> names = new ArrayList<>(uriList.size());
+                final ArrayList<Long> lastModifiedValues = new ArrayList<>(uriList.size());
+                for (Uri uri : uriList) {
+                    Cursor cursor = resolver.query(uri, null, null, null, null);
+                    int nameIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    int lastModifiedIdx = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_LAST_MODIFIED);
+                    cursor.moveToFirst();
+                    names.add(cursor.getString(nameIdx));
+                    lastModifiedValues.add(cursor.getLong(lastModifiedIdx));
+                    cursor.close();
+                }
+
+                final ArrayList<String> namesSorted = new ArrayList<>(names);
+                namesSorted.sort(COMPARATOR_FILE_NAME);
+                final ArrayList<Long> lastModifiedSorted = new ArrayList<>(lastModifiedValues);
+                lastModifiedSorted.sort(COMPARATOR_FILE_LAST_MODIFIED);
+
+                String[] uriStrings = new String[uriList.size()];
+                for (int i = 0; i < uriList.size(); i++) {
+                    int sortedNameIdx = names.indexOf(namesSorted.get(i));
+                    int sortedLastModifiedIdx = lastModifiedValues.indexOf(lastModifiedSorted.get(i));
+                    if (sortedNameIdx != sortedLastModifiedIdx) {
+                        mismatchingSorting = true;
+                        selectedFilenames = new String[]{};
+                        showMismatchingSortingDialog(uriList, names, namesSorted, lastModifiedValues, lastModifiedSorted);
+                        return;
+                    }
+                    uriStrings[i] = uriList.get(sortedNameIdx).toString();
+                }
+
+                mismatchingSorting = false;
+                sortByName = false;
+                sortByDate = false;
+                selectedFilenames = uriStrings;
+                afterSelecting = true;
                 break;
             case ACTION_SCREEN_CAPTURE:
                 if (resultCode != RESULT_OK) {
@@ -708,6 +778,44 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     handleCaptureAudio();
                 }
         }
+    }
+
+    private void showMismatchingSortingDialog(final ArrayList<Uri> uriList, final ArrayList<String> names, final ArrayList<String> namesSorted, final ArrayList<Long> lastModifiedValues, final ArrayList<Long> lastModifiedSorted) {
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.mismatching_sorting)
+                .setPositiveButton(R.string.sort_by_date, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String[] uriStrings = new String[uriList.size()];
+                        for (int j = 0; j < uriList.size(); j++) {
+                            int sortedLastModifiedIdx = lastModifiedValues.indexOf(lastModifiedSorted.get(j));
+                            uriStrings[j] = uriList.get(sortedLastModifiedIdx).toString();
+                        }
+                        sortByDate = true;
+                        sortByName = false;
+                        filenames = uriStrings;
+                        afterSelecting = true;
+                        refreshFilenames();
+                        actionPlay.callOnClick();
+                    }
+                })
+                .setNegativeButton(R.string.sort_by_name, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String[] uriStrings = new String[uriList.size()];
+                        for (int j = 0; j < uriList.size(); j++) {
+                            int sortedNameIdx = names.indexOf(namesSorted.get(j));
+                            uriStrings[j] = uriList.get(sortedNameIdx).toString();
+                        }
+                        sortByName = true;
+                        sortByDate = false;
+                        filenames = uriStrings;
+                        afterSelecting = true;
+                        refreshFilenames();
+                        actionPlay.callOnClick();
+                    }
+                })
+                .show();
     }
 
     private void configureMarkExistingButton() {
@@ -772,31 +880,108 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         final boolean tagDuplicates = sharedPreferences.getBoolean(SettingsFragment.KEY_TAG_DUPLICATES_SWITCH, SettingsFragment.DEFAULT_TAG_DUPLICATES_SWITCH);
         final String duplicateTag = TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_DUPLICATE;
 
-        mHandler.post(new DuplicatePromptWorker(this, mHandler, tagDuplicates, duplicateTag, existingMis, handler));
+        mHandler.post(new DuplicatePromptWorker(this, tagDuplicates, duplicateTag, existingMis, handler));
     }
 
     @Override
-    public void addingFinished(final MusInterval newMi) {
+    public void addingFinished(final MusInterval.AddingResult addingResult) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 progressDialog.dismiss();
+
+                final String[] originalFilenames = addingResult.getOriginalSounds();
+                MusInterval newMi = addingResult.getMusInterval();
                 filenames = newMi.sounds;
+                afterSelecting = false;
                 noteKeys = newMi.notes;
                 octaveKeys = newMi.octaves;
                 intervalKeys = newMi.intervals;
                 afterAdding = true;
+                mismatchingSorting = false;
+                sortByName = false;
+                sortByDate = false;
                 refreshFilenames();
-                savedInstruments.add(newMi.instrument);
+                String addedInstrument = newMi.instrument;
+                savedInstruments.add(addedInstrument);
+                if (!savedInstruments.contains(addedInstrument)) {
+                    savedInstrumentsAdapter.add(addedInstrument);
+                }
                 refreshExisting();
                 final int nAdded = newMi.sounds.length;
                 if (nAdded == 1) {
                     showQuantityMsg(R.plurals.mi_added, nAdded);
                 } else if (nAdded > 1) {
                     showQuantityMsg(R.plurals.mi_added, nAdded, nAdded);
+                } else {
+                    return;
+                }
+
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                String filesDeletion = preferences.getString(SettingsFragment.KEY_FILES_DELETION_PREFERENCE, SettingsFragment.DEFAULT_FILES_DELETION);
+                switch (filesDeletion) {
+                    case SettingsFragment.VALUE_FILES_DELETION_DISABLED:
+                        break;
+                    case SettingsFragment.VALUE_FILES_DELETION_CREATED_ONLY:
+                        deleteCapturedFiles(originalFilenames);
+                        break;
+                    case SettingsFragment.VALUE_FILES_DELETION_ALL:
+                        deleteAddedFiles(originalFilenames);
+                        break;
+                    default:
+                    case SettingsFragment.VALUE_FILES_DELETION_ALWAYS_ASK:
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setMessage(R.string.files_deletion_prompt)
+                                .setPositiveButton(R.string.files_deletion_all, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        deleteAddedFiles(originalFilenames);
+                                    }
+                                })
+                                .setNegativeButton(R.string.files_deletion_recorded, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        deleteCapturedFiles(originalFilenames);
+                                    }
+                                })
+                                .setNeutralButton(R.string.files_deletion_none, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.dismiss();
+                                    }
+                                })
+                                .show();
+                        break;
                 }
             }
         });
+    }
+
+    private void deleteCapturedFiles(String[] filenames) {
+        for (String filename : filenames) {
+            Uri uri = Uri.parse(filename);
+            if ("file".equals(uri.getScheme())) {
+                String pathname = uri.getPath();
+                String parentDir = pathname.substring(0, pathname.lastIndexOf("/"));
+                if (AudioCaptureService.CAPTURES_DIRECTORY.equals(parentDir)) {
+                    File file = new File(pathname);
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    private void deleteAddedFiles(String[] filenames) {
+        for (String filename : filenames) {
+            Uri uri = Uri.parse(filename);
+            if ("file".equals(uri.getScheme())) {
+                File file = new File(uri.getPath());
+                file.delete();
+            } else {
+                DocumentFile documentFile = DocumentFile.fromSingleUri(MainActivity.this, uri);
+                documentFile.delete();
+            }
+        }
     }
 
     @Override
@@ -807,16 +992,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 handleError(t);
             }
         });
-    }
-
-    void handleInsertion(MusInterval newMi) {
-        String[] tempFilenames = new String[filenames.length + 1];
-        System.arraycopy(filenames, 0, tempFilenames, 0, filenames.length);
-        tempFilenames[tempFilenames.length - 1] = newMi.sounds[0];
-        filenames = tempFilenames;
-        refreshFilenames();
-        savedInstruments.add(newMi.instrument);
-        refreshExisting();
     }
 
     private void configureSettingsButton() {
@@ -895,7 +1070,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         final SharedPreferences.Editor uiDbEditor = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE).edit();
 
         uiDbEditor.putBoolean(REF_DB_SWITCH_BATCH, switchBatch.isChecked());
-        uiDbEditor.putStringSet(REF_DB_SELECTED_FILENAMES, new HashSet<>(Arrays.asList(filenames)));
+        storeFilenames(this, filenames);
+        uiDbEditor.putBoolean(REF_DB_AFTER_SELECTING, afterSelecting);
         uiDbEditor.putBoolean(REF_DB_CHECK_NOTE_ANY, checkNoteAny.isChecked());
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
             uiDbEditor.putBoolean(String.valueOf(CHECK_NOTE_IDS[i]), checkNotes[i].isChecked());
@@ -913,8 +1089,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         uiDbEditor.putString(REF_DB_INPUT_TEMPO, inputTempo.getText().toString());
         uiDbEditor.putString(REF_DB_INPUT_INSTRUMENT, inputInstrument.getText().toString());
         uiDbEditor.putStringSet(REF_DB_SAVED_INSTRUMENTS, savedInstruments);
+        uiDbEditor.putString(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, inputFirstNoteDurationCoefficient.getText().toString());
 
         uiDbEditor.putBoolean(REF_DB_AFTER_ADDING, afterAdding);
+        uiDbEditor.putBoolean(REF_DB_MISMATCHING_SORTING, mismatchingSorting);
+        uiDbEditor.putBoolean(REF_DB_SORT_BY_NAME, sortByName);
+        uiDbEditor.putBoolean(REF_DB_SORT_BY_DATE, sortByDate);
         uiDbEditor.putString(REF_DB_NOTE_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, noteKeys));
         uiDbEditor.putString(REF_DB_OCTAVE_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, octaveKeys));
         uiDbEditor.putString(REF_DB_INTERVAL_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, intervalKeys));
@@ -931,6 +1111,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         switchBatch.setChecked(uiDb.getBoolean(REF_DB_SWITCH_BATCH, false));
         filenames = getStoredFilenames(this);
         refreshFilenames();
+        afterSelecting = uiDb.getBoolean(REF_DB_AFTER_SELECTING, false);
         checkNoteAny.setChecked(uiDb.getBoolean(REF_DB_CHECK_NOTE_ANY, true));
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
             checkNotes[i].setChecked(uiDb.getBoolean(String.valueOf(CHECK_NOTE_IDS[i]), false));
@@ -948,10 +1129,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputTempo.setText(uiDb.getString(REF_DB_INPUT_TEMPO, ""));
         inputInstrument.setText(uiDb.getString(REF_DB_INPUT_INSTRUMENT, ""));
         savedInstruments = (HashSet<String>) uiDb.getStringSet(REF_DB_SAVED_INSTRUMENTS, new HashSet<String>());
-        inputInstrument.setAdapter(new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, savedInstruments.toArray(new String[0])));
+        savedInstrumentsAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, new ArrayList<>(savedInstruments));
+        inputInstrument.setAdapter(savedInstrumentsAdapter);
+        inputFirstNoteDurationCoefficient.setText(uiDb.getString(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, ""));
 
         afterAdding = uiDb.getBoolean(REF_DB_AFTER_ADDING, false);
+        mismatchingSorting = uiDb.getBoolean(REF_DB_MISMATCHING_SORTING, false);
+        sortByName = uiDb.getBoolean(REF_DB_SORT_BY_NAME, false);
+        sortByDate = uiDb.getBoolean(REF_DB_SORT_BY_DATE, false);
         noteKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_NOTE_KEYS, ""));
         octaveKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_OCTAVE_KEYS, ""));
         intervalKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_INTERVAL_KEYS, ""));
@@ -961,8 +1147,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     static String[] getStoredFilenames(Context context) {
         final SharedPreferences uiDb = context.getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE);
-        Set<String> storedFilenames = uiDb.getStringSet(REF_DB_SELECTED_FILENAMES, new HashSet<String>());
-        return storedFilenames.toArray(new String[0]);
+        return StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_SELECTED_FILENAMES, ""));
+    }
+
+    static void storeFilenames(Context context, String[] filenames) {
+        final SharedPreferences.Editor uiDbEditor = context.getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE).edit();
+        uiDbEditor.putString(REF_DB_SELECTED_FILENAMES, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, filenames));
+        uiDbEditor.apply();
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -1008,7 +1199,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
-    private MusInterval getMusInterval() throws MusInterval.ModelException, MusInterval.TempoNotInRangeException {
+    private MusInterval getMusInterval() throws MusInterval.ValidationException {
         final String anyStr = getResources().getString(R.string.any);
 
         final int radioDirectionId = radioGroupDirection.getCheckedRadioButtonId();
@@ -1043,7 +1234,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 .timing(!timingStr.equals(anyStr) ? timingStr : "")
                 .intervals(intervals)
                 .tempo(inputTempo.getText().toString())
-                .instrument(inputInstrument.getText().toString());
+                .instrument(inputInstrument.getText().toString())
+                .first_note_duration_coefficient(inputFirstNoteDurationCoefficient.getText().toString());
 
         if (versionField) {
             builder.version(BuildConfig.VERSION_NAME);
@@ -1134,7 +1326,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             }
         } catch (MusInterval.ModelDoesNotExistException e) {
             final String modelName = e.getModelName();
-            new AlertDialog.Builder(this)
+            AlertDialog dialog = new AlertDialog.Builder(this)
                     .setMessage(String.format(
                             getResources().getString(R.string.create_model),
                             modelName))
@@ -1148,10 +1340,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                             dialog.cancel();
                         }
                     })
-                    .show();
+                    .create();
+            activeOnStartDialogs.add(dialog);
+            dialog.setOnDismissListener(onStartDialogDismissListener);
+            dialog.show();
         } catch (final MusInterval.DefaultModelOutdatedException e) {
             final String modelName = e.getModelName();
-            new AlertDialog.Builder(this)
+            AlertDialog dialog = new AlertDialog.Builder(this)
                     .setMessage(String.format(
                             getResources().getString(R.string.update_model),
                             modelName))
@@ -1178,8 +1373,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                             dialog.cancel();
                         }
                     })
-                    .show();
-
+                    .create();
+            activeOnStartDialogs.add(dialog);
+            dialog.setOnDismissListener(onStartDialogDismissListener);
+            dialog.show();
         } catch (MusInterval.NotEnoughFieldsException e) {
             showMsg(R.string.invalid_model, e.getModelName());
         } catch (MusInterval.ModelNotConfiguredException e) {
@@ -1192,7 +1389,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 }
                 fieldsStr.append(String.format("\"%s\"", SettingsFragment.getFieldPreferenceLabelString(field, this)));
             }
-            new AlertDialog.Builder(this)
+            AlertDialog dialog = new AlertDialog.Builder(this)
                     .setMessage(
                             getResources().getQuantityString(R.plurals.invalid_model_fields, invalidModelFields.size(), modelName, fieldsStr.toString()))
                     .setPositiveButton(R.string.configure, new DialogInterface.OnClickListener() {
@@ -1205,7 +1402,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                             dialog.cancel();
                         }
                     })
-                    .show();
+                    .create();
+            activeOnStartDialogs.add(dialog);
+            dialog.setOnDismissListener(onStartDialogDismissListener);
+            dialog.show();
         } catch (MusInterval.NoteNotExistsException e) {
             showMsg(R.string.mi_not_exists);
         } catch (MusInterval.CreateDeckException e) {
@@ -1220,6 +1420,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             showMsg(R.string.add_file_error);
         } catch (MusInterval.TempoNotInRangeException e) {
             showMsg(R.string.tempo_not_in_range, MusInterval.Fields.Tempo.MIN_VALUE, MusInterval.Fields.Tempo.MAX_VALUE);
+        } catch (MusInterval.InvalidFirstNoteDurationCoefficientException e) {
+            showMsg(R.string.invalid_first_note_duration_coefficient);
         } catch (MusInterval.Exception e) {
             showMsg(R.string.unknown_adding_error);
         }
@@ -1264,6 +1466,14 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         preferenceEditor.apply();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        for (AlertDialog dialog : activeOnStartDialogs) {
+            dialog.dismiss();
+        }
+    }
+
     private void processInvalidAnkiDatabase(AnkiDroidHelper.InvalidAnkiDatabaseException invalidAnkiDatabaseException) {
         try {
             throw invalidAnkiDatabaseException;
@@ -1275,6 +1485,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void processUnknownException(Throwable e) {
+        e.printStackTrace();
         showMsg(R.string.unknown_error);
     }
 
