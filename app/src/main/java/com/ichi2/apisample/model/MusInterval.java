@@ -67,6 +67,56 @@ public class MusInterval {
                 }
             }
 
+            private static String getEndNote(String startNote, String direction, String interval) {
+                ArrayList<String> notes = new ArrayList<>(Arrays.asList(VALUES));
+                int startIdx = notes.indexOf(startNote);
+                int distance = Interval.getIndex(interval);
+                if (startIdx == -1 || distance == -1) {
+                    throw new IllegalArgumentException();
+                }
+
+                int endIdx;
+                if (direction.equalsIgnoreCase(Direction.ASC)) {
+                    endIdx = startIdx + distance;
+                } else if (direction.equalsIgnoreCase(Direction.DESC)) {
+                    endIdx = startIdx - distance;
+                } else {
+                    throw new IllegalArgumentException();
+                }
+
+                return endIdx >= 0 && endIdx < VALUES.length ? VALUES[endIdx] : null;
+            }
+
+            private static final NoteEqualityChecker EQUALITY_CHECKER =
+                    new NoteEqualityChecker(new String[]{START_NOTE, DIRECTION, TIMING, INTERVAL}) {
+                        private static final int IDX_START_NOTE = 0;
+                        private static final int IDX_DIRECTION = 1;
+                        private static final int IDX_TIMING = 2;
+                        private static final int IDX_INTERVAL = 3;
+
+                        @Override
+                        public boolean areEqual(Map<String, String> data1, Map<String, String> data2) {
+                            String startNoteField = modelFields[IDX_START_NOTE];
+                            String directionField = modelFields[IDX_DIRECTION];
+                            String timingField = modelFields[IDX_TIMING];
+                            String intervalField = modelFields[IDX_INTERVAL];
+                            String startNote1 = data1.getOrDefault(startNoteField, "");
+                            String startNote2 = data2.getOrDefault(startNoteField, "");
+                            String direction1 = data1.getOrDefault(directionField, "");
+                            String direction2 = data2.getOrDefault(directionField, "");
+                            String timing1 = data1.getOrDefault(timingField, "");
+                            String timing2 = data2.getOrDefault(timingField, "");
+                            String interval1 = data1.getOrDefault(intervalField, "");
+                            String interval2 = data2.getOrDefault(intervalField, "");
+                            boolean defaultEquality = startNote1.equalsIgnoreCase(startNote2);
+                            boolean harmonicEquality = interval1.equalsIgnoreCase(interval2) &&
+                                    !direction1.equalsIgnoreCase(direction2) &&
+                                    timing1.equalsIgnoreCase(Timing.HARMONIC) && timing2.equalsIgnoreCase(Timing.HARMONIC) &&
+                                    startNote1.equalsIgnoreCase(StartNote.getEndNote(startNote2, direction2, interval2));
+                            return defaultEquality || harmonicEquality;
+                        }
+                    };
+
             private static String getValidationPattern() {
                 return "[A-Ga-g]#?[1-6]";
             }
@@ -77,21 +127,34 @@ public class MusInterval {
             public static final String DESC = "descending";
 
             private static final NoteEqualityChecker EQUALITY_CHECKER =
-                    new NoteEqualityChecker(new String[]{DIRECTION, INTERVAL}) {
-                        private static final int IDX_DIRECTION = 0;
-                        private static final int IDX_INTERVAL = 1;
+                    new NoteEqualityChecker(new String[]{START_NOTE, DIRECTION, TIMING, INTERVAL}) {
+                        private static final int IDX_START_NOTE = 0;
+                        private static final int IDX_DIRECTION = 1;
+                        private static final int IDX_TIMING = 2;
+                        private static final int IDX_INTERVAL = 3;
 
                         @Override
                         public boolean areEqual(Map<String, String> data1, Map<String, String> data2) {
+                            String startNoteField = modelFields[IDX_START_NOTE];
                             String directionField = modelFields[IDX_DIRECTION];
+                            String timingField = modelFields[IDX_TIMING];
                             String intervalField = modelFields[IDX_INTERVAL];
+                            String startNote1 = data1.getOrDefault(startNoteField, "");
+                            String startNote2 = data2.getOrDefault(startNoteField, "");
                             String direction1 = data1.getOrDefault(directionField, "");
                             String direction2 = data2.getOrDefault(directionField, "");
+                            String timing1 = data1.getOrDefault(timingField, "");
+                            String timing2 = data2.getOrDefault(timingField, "");
                             String interval1 = data1.getOrDefault(intervalField, "");
                             String interval2 = data2.getOrDefault(intervalField, "");
-                            return direction1.equalsIgnoreCase(direction2) ||
-                                    interval1.equalsIgnoreCase(Interval.VALUE_UNISON) ||
+                            boolean defaultEquality = direction1.equalsIgnoreCase(direction2);
+                            boolean unisonEquality = interval1.equalsIgnoreCase(Interval.VALUE_UNISON) ||
                                     interval2.equalsIgnoreCase(Interval.VALUE_UNISON);
+                            boolean harmonicEquality = interval1.equalsIgnoreCase(interval2) &&
+                                    !direction1.equalsIgnoreCase(direction2) &&
+                                    timing1.equalsIgnoreCase(Timing.HARMONIC) && timing2.equalsIgnoreCase(Timing.HARMONIC) &&
+                                    startNote1.equalsIgnoreCase(StartNote.getEndNote(startNote2, direction2, interval2));
+                            return defaultEquality || unisonEquality || harmonicEquality;
                         }
                     };
 
@@ -213,14 +276,22 @@ public class MusInterval {
         }};
 
         private static final Map<String, SearchExpressionMaker> SEARCH_EXPRESSION_MAKERS = new HashMap<String, SearchExpressionMaker>() {{
+            put(START_NOTE, new AnySearchExpressionMaker());
+            put(DIRECTION, new AnySearchExpressionMaker());
             put(TEMPO, new IntegerSearchExpressionMaker());
             put(FIRST_NOTE_DURATION_COEFFICIENT, new DoubleSearchExpressionMaker());
         }};
         static final Map<String, SearchExpressionMaker> RELATIVES_SEARCH_EXPRESSION_MAKERS = new HashMap<String, SearchExpressionMaker>() {{
-            put(TEMPO, new AnySearchExpressionMaker());
+            put(TEMPO, new AnySearchExpressionMaker() {
+                @Override
+                public boolean isDefinitive() {
+                    return true;
+                }
+            });
         }};
 
         private static final Map<String, EqualityChecker> EQUALITY_CHECKERS = new HashMap<String, EqualityChecker>() {{
+            put(START_NOTE, StartNote.EQUALITY_CHECKER);
             put(DIRECTION, Direction.EQUALITY_CHECKER);
             put(TEMPO, new FieldEqualityChecker(TEMPO, new IntegerValueEqualityChecker()));
             put(FIRST_NOTE_DURATION_COEFFICIENT, new FieldEqualityChecker(FIRST_NOTE_DURATION_COEFFICIENT, new DoubleValueEqualityChecker()));
