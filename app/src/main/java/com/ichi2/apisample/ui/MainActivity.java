@@ -148,6 +148,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private TextView labelExisting;
     private Button actionMarkExisting;
 
+    private Toast toast;
+
     private ProgressDialog progressDialog;
 
     private Handler mHandler;
@@ -196,8 +198,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
-    private final ArrayList<AlertDialog> activeOnStartDialogs = new ArrayList<>();
-    private final DialogInterface.OnDismissListener onStartDialogDismissListener = new DialogInterface.OnDismissListener() {
+    final ArrayList<AlertDialog> activeOnStartDialogs = new ArrayList<>();
+    final DialogInterface.OnDismissListener onStartDialogDismissListener = new DialogInterface.OnDismissListener() {
         @Override
         public void onDismiss(DialogInterface dialogInterface) {
             activeOnStartDialogs.remove(dialogInterface);
@@ -732,12 +734,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     if (clipData != null) {
                         for (int i = 0; i < clipData.getItemCount(); i++) {
                             Uri uri = clipData.getItemAt(i).getUri();
-                            getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                             uriList.add(uri);
                         }
                     } else {
                         Uri uri = data.getData();
-                        getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         uriList.add(uri);
                     }
                 }
@@ -919,8 +919,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 sortByDate = false;
                 refreshFilenames();
                 String addedInstrument = newMi.instrument;
-                savedInstruments.add(addedInstrument);
                 if (!savedInstruments.contains(addedInstrument)) {
+                    savedInstruments.add(addedInstrument);
                     savedInstrumentsAdapter.add(addedInstrument);
                 }
                 refreshExisting();
@@ -1488,6 +1488,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (AlertDialog dialog : activeOnStartDialogs) {
             dialog.dismiss();
         }
+        soundPlayer.stop();
+        if (toast != null) {
+            toast.cancel();
+        }
     }
 
     private void processInvalidAnkiDatabase(AnkiDroidHelper.InvalidAnkiDatabaseException invalidAnkiDatabaseException) {
@@ -1506,10 +1510,18 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     void showMsg(int msgResId, Object ...formatArgs) {
-        Toast.makeText(MainActivity.this, getResources().getString(msgResId, formatArgs), Toast.LENGTH_LONG).show();
+        displayToast(getResources().getString(msgResId, formatArgs));
     }
 
     void showQuantityMsg(int msgResId, int quantity, Object ...formatArgs) {
-        Toast.makeText(MainActivity.this, getResources().getQuantityString(msgResId, quantity, formatArgs), Toast.LENGTH_LONG).show();
+        displayToast(getResources().getQuantityString(msgResId, quantity, formatArgs));
+    }
+
+    private void displayToast(String text) {
+        if (toast != null) {
+            toast.cancel();
+        }
+        toast = Toast.makeText(this, text, Toast.LENGTH_LONG);
+        toast.show();
     }
 }
