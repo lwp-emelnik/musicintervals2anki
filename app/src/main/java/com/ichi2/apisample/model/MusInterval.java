@@ -38,9 +38,9 @@ public class MusInterval {
      */
     public static class Fields {
         public static final String SOUND = "sound";
-        public static final String SOUND_SMALLER = "sound_smaller"; // @todo: rename, reorder
+        public static final String SOUND_SMALLER = "sound.smaller";
         public static final String SOUND_SMALLER_ALT = "sound.smaller.alt";
-        public static final String SOUND_LARGER = "sound_larger";
+        public static final String SOUND_LARGER = "sound.larger";
         public static final String SOUND_LARGER_ALT = "sound.larger.alt";
         public static final String START_NOTE = "note1";
         public static final String DIRECTION = "ascending_descending";
@@ -49,7 +49,7 @@ public class MusInterval {
         public static final String TEMPO = "tempo";
         public static final String INSTRUMENT = "instrument";
         public static final String FIRST_NOTE_DURATION_COEFFICIENT = "note1.duration";
-        public static final String VERSION = "mi2a_version";
+        public static final String VERSION = "mi2a.version";
 
         public static class StartNote {
             private static final String[] NOTES = new String[]{
@@ -279,17 +279,17 @@ public class MusInterval {
         public static String[] getSignature(boolean versionField) {
             ArrayList<String> signature = new ArrayList<String>() {{
                 add(SOUND);
-                add(SOUND_SMALLER);
-                add(SOUND_SMALLER_ALT);
-                add(SOUND_LARGER);
-                add(SOUND_LARGER_ALT);
                 add(START_NOTE);
+                add(FIRST_NOTE_DURATION_COEFFICIENT);
                 add(DIRECTION);
                 add(TIMING);
                 add(INTERVAL);
                 add(TEMPO);
                 add(INSTRUMENT);
-                add(FIRST_NOTE_DURATION_COEFFICIENT);
+                add(SOUND_SMALLER);
+                add(SOUND_SMALLER_ALT);
+                add(SOUND_LARGER);
+                add(SOUND_LARGER_ALT);
             }};
             if (versionField) {
                 signature.add(VERSION);
