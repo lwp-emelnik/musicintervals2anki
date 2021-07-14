@@ -5644,4 +5644,71 @@ public class MusIntervalTest {
         assertArrayEquals(miAdded.sounds, miSmallerAdded.soundsLarger);
         assertArrayEquals(miAdded.sounds, miLargerAdded.soundsSmaller);
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void checkIntegrity_DifferentHarmonicNotations_ShouldCountAsDuplicates() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
+        final long modelId = new Random().nextLong();
+        final long ascendingNoteId = new Random().nextLong();
+        final long descendingNoteId = new Random().nextLong();
+
+        final AnkiDroidHelper helper = mock(AnkiDroidHelper.class);
+        doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
+        doReturn(SIGNATURE).when(helper).getFieldList(eq(modelId));
+
+        final Map<String, String> ascendingNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, "[sound:dir/ascending.mp3]");
+            put(MusInterval.Fields.START_NOTE, "C2");
+            put(MusInterval.Fields.INTERVAL, "Maj2");
+            put(MusInterval.Fields.TIMING, "harmonic");
+            put(MusInterval.Fields.DIRECTION, "ascending");
+            put(MusInterval.Fields.TEMPO, "80");
+            put(MusInterval.Fields.INSTRUMENT, "guitar");
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(ascendingNoteId));
+            put(AnkiDroidHelper.KEY_TAGS, "");
+        }};
+
+        final Map<String, String> descendingNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, "[sound:dir/descending.mp3]");
+            put(MusInterval.Fields.START_NOTE, "D2");
+            put(MusInterval.Fields.INTERVAL, "Maj2");
+            put(MusInterval.Fields.TIMING, "harmonic");
+            put(MusInterval.Fields.DIRECTION, "descending");
+            put(MusInterval.Fields.TEMPO, "80");
+            put(MusInterval.Fields.INSTRUMENT, "guitar");
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(descendingNoteId));
+            put(AnkiDroidHelper.KEY_TAGS, "");
+        }};
+
+        final Map<String, String> searchData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.START_NOTE, "%%");
+            put(MusInterval.Fields.INTERVAL, "%");
+            put(MusInterval.Fields.TIMING, "");
+            put(MusInterval.Fields.DIRECTION, "");
+            put(MusInterval.Fields.TEMPO, "");
+            put(MusInterval.Fields.INSTRUMENT, "");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
+        }};
+
+        LinkedList<Map<String, String>> searchResult = new LinkedList<Map<String, String>>() {{
+            add(ascendingNoteData);
+            add(descendingNoteData);
+        }};
+        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(new HashMap<String, String>()), any(Map.class), any(Map.class), any(Map.class));
+        ArrayList<Map<String, String>> searchDataSet = new ArrayList<Map<String, String>>() {{
+            add(searchData);
+        }};
+        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(searchDataSet), any(Map.class), any(Map.class), any(Map.class));
+
+        MusInterval mi = new MusInterval.Builder(helper)
+                .model(defaultModelName)
+                .notes(null)
+                .octaves(null)
+                .intervals(null)
+                .build();
+        ProgressIndicator progressIndicator = mock(ProgressIndicator.class);
+        NotesIntegrity.Summary is = new NotesIntegrity(helper, mi, corruptedTag, suspiciousTag, duplicateTag, progressIndicator).check();
+
+        assertEquals(2, is.getDuplicateNotesCount());
+    }
 }
