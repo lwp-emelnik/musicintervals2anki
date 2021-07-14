@@ -5894,7 +5894,7 @@ public class MusIntervalTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void add_SimilarIntervalDifferentHarmonicNotation_shouldNotUpdateReverse() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
+    public void add_SimilarIntervalDifferentHarmonicNotation_shoulOnlyUpdateReverseAlt() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
         final long deckId = new Random().nextLong();
         final long modelId = new Random().nextLong();
         final long noteId = new Random().nextLong();
@@ -6062,10 +6062,12 @@ public class MusIntervalTest {
         MusInterval miSmallerDescAdded = addedMusIntervals.getLast();
         assertArrayEquals(musIntervalsAdded.getLast().sounds, miSmallerDescAdded.soundsLarger);
         assertArrayEquals(musIntervalsAdded.getLast().soundsSmaller, new String[]{""});
+        assertArrayEquals(musIntervalsAdded.getLast().soundsSmallerAlt, miSmallerDescAdded.sounds);
 
         musIntervalLargerDesc.addToAnki(prompter, indicator);
         MusInterval miLargerDescAdded = addedMusIntervals.getLast();
         assertArrayEquals(musIntervalsAdded.getLast().sounds, miLargerDescAdded.soundsSmaller);
         assertArrayEquals(musIntervalsAdded.getLast().soundsLarger, new String[]{""});
+        assertArrayEquals(musIntervalsAdded.getLast().soundsLarger, miLargerDescAdded.sounds);
     }
 }
