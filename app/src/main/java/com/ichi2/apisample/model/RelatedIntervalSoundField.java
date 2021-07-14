@@ -50,7 +50,7 @@ public abstract class RelatedIntervalSoundField {
             if (relatedNoteData != null) {
                 String relatedInterval = relatedNoteData.getOrDefault(intervalField, "");
                 Map<String, String> relatedNoteKeyData = getIntervalIdentityData(relatedNoteData);
-                if (!isEqualData(keyData, relatedNoteKeyData, musInterval.defaultValues, musInterval.relativesEqualityCheckers, intervalField)
+                if (!isEqualData(keyData, relatedNoteKeyData, musInterval.defaultValues, musInterval.relativesEqualityCheckers, intervalField, false)
                         || !isCorrectRelation(intervalIdx, relatedInterval)) {
                     Set<Map<String, String>> pointed = suspiciousRelatedNotesData.getOrDefault(relatedSoundField, new HashSet<Map<String, String>>());
                     pointed.add(relatedNoteData);
@@ -236,7 +236,8 @@ public abstract class RelatedIntervalSoundField {
                                 getIntervalIdentityData(currentReverseData),
                                 musInterval.defaultValues,
                                 musInterval.relativesEqualityCheckers,
-                                intervalField)) {
+                                intervalField,
+                                true)) {
                     continue;
                 }
 
@@ -262,7 +263,11 @@ public abstract class RelatedIntervalSoundField {
 
     protected abstract boolean isRelationPossible(int intervalIdx);
 
-    protected abstract String getRelatedInterval(int intervalIdx);
+    protected String getRelatedInterval(int intervalIdx) {
+        return isRelationPossible(intervalIdx) ? MusInterval.Fields.Interval.VALUES[intervalIdx + getDistance()] : null;
+    }
+
+    protected abstract int getDistance();
 
     private Map<String, String> getIntervalIdentityData(Map<String, String> data) {
         return new HashMap<String, String>(data) {{
@@ -275,9 +280,17 @@ public abstract class RelatedIntervalSoundField {
         }};
     }
 
-    private static boolean isEqualData(Map<String, String> data1, Map<String, String> data2,
-                                       Map<String, String> modelFieldsDefaultValues,
-                                       Map<String, EqualityChecker> modelFieldsEqualityCheckers, String intervalField) {
+    private boolean isEqualData(Map<String, String> data1, Map<String, String> data2,
+                                Map<String, String> modelFieldsDefaultValues,
+                                Map<String, EqualityChecker> modelFieldsEqualityCheckers,
+                                String intervalField, boolean reverse) {
+        String interval1 = data1.getOrDefault(intervalField, "");
+        int interval1Idx = MusInterval.Fields.Interval.getIndex(interval1);
+        String interval2 = data2.getOrDefault(intervalField, "");
+        int interval2Idx = MusInterval.Fields.Interval.getIndex(interval2);
+        if (interval2Idx - interval1Idx != (reverse ? this.reverse.getDistance() : getDistance())) {
+            return false;
+        }
         Set<String> keySet1 = new HashSet<>(data1.keySet());
         keySet1.remove(intervalField);
         Set<String> keySet2 = new HashSet<>(data2.keySet());
@@ -323,8 +336,8 @@ class SmallerIntervalSoundField extends RelatedIntervalSoundField {
     }
 
     @Override
-    protected String getRelatedInterval(int intervalIdx) {
-        return isRelationPossible(intervalIdx) ? MusInterval.Fields.Interval.VALUES[intervalIdx - 1] : null;
+    protected int getDistance() {
+        return -1;
     }
 }
 
@@ -349,7 +362,7 @@ class LargerIntervalSoundField extends RelatedIntervalSoundField {
     }
 
     @Override
-    protected String getRelatedInterval(int intervalIdx) {
-        return isRelationPossible(intervalIdx) ? MusInterval.Fields.Interval.VALUES[intervalIdx + 1] : null;
+    protected int getDistance() {
+        return 1;
     }
 }
