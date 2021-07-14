@@ -296,7 +296,6 @@ public class MusInterval {
             put(TEMPO, new FieldEqualityChecker(TEMPO, new IntegerValueEqualityChecker()));
             put(FIRST_NOTE_DURATION_COEFFICIENT, new FieldEqualityChecker(FIRST_NOTE_DURATION_COEFFICIENT, new DoubleValueEqualityChecker()));
         }};
-
         private static final Map<String, EqualityChecker> RELATIVES_EQUALITY_CHECKERS = new HashMap<String, EqualityChecker>() {{
             put(TEMPO, new FieldEqualityChecker(TEMPO, new AnyEqualityChecker()));
         }};
@@ -735,7 +734,7 @@ public class MusInterval {
             if (Fields.RELATIVES_EQUALITY_CHECKERS.containsKey(fieldKey)) {
                 EqualityChecker equalityChecker = Fields.RELATIVES_EQUALITY_CHECKERS.get(fieldKey);
                 passModelFields(equalityChecker, modelField);
-                relativesEqualityCheckers.replace(fieldKey, equalityChecker);
+                relativesEqualityCheckers.replace(modelField, equalityChecker);
             }
         }
         relativesPriorityComparators = Fields.RELATIVES_PRIORITY_COMPARATORS;
