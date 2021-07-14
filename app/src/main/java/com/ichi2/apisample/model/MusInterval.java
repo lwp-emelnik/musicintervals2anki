@@ -108,14 +108,34 @@ public class MusInterval {
                             String timing2 = data2.getOrDefault(timingField, "");
                             String interval1 = data1.getOrDefault(intervalField, "");
                             String interval2 = data2.getOrDefault(intervalField, "");
-                            boolean defaultEquality = startNote1.equalsIgnoreCase(startNote2);
+                            boolean regularEquality = match(startNote1, startNote2);
                             boolean harmonicEquality = interval1.equalsIgnoreCase(interval2) &&
                                     !direction1.equalsIgnoreCase(direction2) &&
                                     timing1.equalsIgnoreCase(Timing.HARMONIC) && timing2.equalsIgnoreCase(Timing.HARMONIC) &&
-                                    startNote1.equalsIgnoreCase(StartNote.getEndNote(startNote2, direction2, interval2));
-                            return defaultEquality || harmonicEquality;
+                                    match(startNote1, StartNote.getEndNote(startNote2, direction2, interval2));
+                            return regularEquality || harmonicEquality;
                         }
                     };
+
+            private static boolean match(String pattern, String value) {
+                boolean noteProvided = !pattern.startsWith("%");
+                boolean octaveProvided = !pattern.endsWith("%");
+                if (noteProvided || octaveProvided) {
+                    if (noteProvided && octaveProvided) {
+                        return pattern.equalsIgnoreCase(value);
+                    }
+                    String providedPart = pattern.replaceAll("%", "");
+                    boolean hasSharp = value.contains("#");
+                    int octaveIdx = hasSharp ? 2 : 1;
+                    if (noteProvided) {
+                        return providedPart.equalsIgnoreCase(value.substring(0, octaveIdx));
+                    } else {
+                        return providedPart.equals(value.substring(octaveIdx));
+                    }
+                } else {
+                    return true;
+                }
+            }
 
             private static String getValidationPattern() {
                 return "[A-Ga-g]#?[1-6]";
@@ -147,14 +167,14 @@ public class MusInterval {
                             String timing2 = data2.getOrDefault(timingField, "");
                             String interval1 = data1.getOrDefault(intervalField, "");
                             String interval2 = data2.getOrDefault(intervalField, "");
-                            boolean defaultEquality = direction1.equalsIgnoreCase(direction2);
+                            boolean regularEquality = direction1.equalsIgnoreCase(direction2);
                             boolean unisonEquality = interval1.equalsIgnoreCase(Interval.VALUE_UNISON) ||
                                     interval2.equalsIgnoreCase(Interval.VALUE_UNISON);
                             boolean harmonicEquality = interval1.equalsIgnoreCase(interval2) &&
                                     !direction1.equalsIgnoreCase(direction2) &&
                                     timing1.equalsIgnoreCase(Timing.HARMONIC) && timing2.equalsIgnoreCase(Timing.HARMONIC) &&
-                                    startNote1.equalsIgnoreCase(StartNote.getEndNote(startNote2, direction2, interval2));
-                            return defaultEquality || unisonEquality || harmonicEquality;
+                                    StartNote.match(startNote1, StartNote.getEndNote(startNote2, direction2, interval2));
+                            return regularEquality || unisonEquality || harmonicEquality;
                         }
                     };
 
