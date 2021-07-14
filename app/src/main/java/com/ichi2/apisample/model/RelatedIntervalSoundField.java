@@ -73,7 +73,7 @@ public abstract class RelatedIntervalSoundField {
         final String interval = noteData.getOrDefault(intervalField, "");
         final int intervalIdx = MusInterval.Fields.Interval.getIndex(interval);
 
-        final String unisonInterval = MusInterval.Fields.Interval.VALUE_UNISON;
+        final String unisonInterval = MusInterval.Fields.Interval.VALUE_UNISON; // @todo: fill these in constructor (also get rid of this)
         final String directionField = musInterval.modelFields.getOrDefault(MusInterval.Fields.DIRECTION, MusInterval.Fields.DIRECTION);
         final String direction = noteData.getOrDefault(directionField, "");
 
@@ -141,7 +141,8 @@ public abstract class RelatedIntervalSoundField {
                         updatedLinks += updateReverse(
                                 relatedNotesData, noteData,
                                 sound, relatedInterval,
-                                soundField, reverseRelatedSoundField, intervalField
+                                soundField, reverseRelatedSoundField,
+                                intervalField, directionField
                         );
                     }
 
@@ -182,14 +183,28 @@ public abstract class RelatedIntervalSoundField {
         return updatedLinks;
     }
 
-    private int updateReverse(LinkedList<Map<String, String>> relatedNotesData, Map<String, String> noteData,
+    private int updateReverse(LinkedList<Map<String, String>> relatedNotesData, Map<String, String> data,
                               String sound, String relatedInterval,
-                              final String soundField, String reverseRelatedSoundField, String intervalField)
+                              final String soundField, String reverseRelatedSoundField,
+                              String intervalField, String directionField)
             throws AnkiDroidHelper.InvalidAnkiDatabaseException {
-
+        String startNoteField = musInterval.modelFields.getOrDefault(MusInterval.Fields.START_NOTE, MusInterval.Fields.START_NOTE);
+        String timingField = musInterval.modelFields.getOrDefault(MusInterval.Fields.TIMING, MusInterval.Fields.TIMING);
+        String startNote = data.getOrDefault(startNoteField, "");
+        String direction = data.getOrDefault(directionField, "");
+        String timing = data.getOrDefault(timingField, "");
         int updatedLinks = 0;
         outer:
         for (Map<String, String> relatedData : relatedNotesData) {
+            String relatedStartNote = relatedData.getOrDefault(startNoteField, "");
+            String relatedDirection = relatedData.getOrDefault(directionField, "");
+            String relatedTiming = relatedData.getOrDefault(timingField, "");
+            if (!direction.equalsIgnoreCase(relatedDirection) &&
+                    MusInterval.Fields.Timing.HARMONIC.equalsIgnoreCase(timing) &&
+                    MusInterval.Fields.Timing.HARMONIC.equalsIgnoreCase(relatedTiming) &&
+                    !startNote.equalsIgnoreCase(relatedStartNote)) {
+                continue;
+            }
             final String relatedReverseSound = relatedData.getOrDefault(reverseRelatedSoundField, "");
             if (!relatedReverseSound.isEmpty()) {
                 Map<String, String> searchData = new HashMap<String, String>() {{
@@ -244,7 +259,7 @@ public abstract class RelatedIntervalSoundField {
                 for (int i = 0; i < musInterval.relativesPriorityComparators.length - 1; i++) {
                     RelativesPriorityComparator comparator = musInterval.relativesPriorityComparators[i];
                     comparator.setTargetValueFromData(relatedData);
-                    if (comparator.compare(noteData, currentReverseData) < 0) {
+                    if (comparator.compare(data, currentReverseData) < 0) {
                         continue outer;
                     }
                 }
