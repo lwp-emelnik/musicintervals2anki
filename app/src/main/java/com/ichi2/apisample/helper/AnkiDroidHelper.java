@@ -536,7 +536,8 @@ public class AnkiDroidHelper {
 
                     // additional filtering for non-definitive expressions
                     // can be computationally expensive
-                    for (String field : fieldSearchExpressionMakers.keySet()) {
+                    for (Map.Entry<String, String> rowFieldValue : rowData.entrySet()) {
+                        String field = rowFieldValue.getKey();
                         String rowValue = rowData.getOrDefault(field, "");
                         SearchExpressionMaker expressionMaker = fieldSearchExpressionMakers.getOrDefault(field, DEFAULT_SEARCH_EXPRESSION_MAKER);
                         if (!expressionMaker.isDefinitive()) {
@@ -554,8 +555,7 @@ public class AnkiDroidHelper {
                                         defaultEquality = true;
                                     }
                                 }
-                                // @todo: revisit first condition
-                                if (value.matches("^%*$") || equalityChecker.areEqual(data, rowData) || defaultEquality) {
+                                if (value.isEmpty() || equalityChecker.areEqual(data, rowData) || defaultEquality) {
                                     matching = true;
                                     break;
                                 }
