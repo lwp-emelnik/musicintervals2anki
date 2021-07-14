@@ -721,14 +721,12 @@ public class MusInterval {
     public MusInterval(Builder builder) throws ValidationException {
         helper = builder.mHelper;
 
-        RelatedIntervalSoundField soundSmallerField = new SmallerIntervalSoundField(helper, this);
-        RelatedIntervalSoundField soundLargerField = new LargerIntervalSoundField(helper, this);
-        soundSmallerField.setReverse(soundLargerField);
-        soundLargerField.setReverse(soundSmallerField);
-        relatedSoundFields = new RelatedIntervalSoundField[]{soundSmallerField, soundLargerField};
-
+        deckName = builder.mDeckName;
+        deckId = helper.findDeckIdByName(builder.mDeckName);
         modelName = builder.mModelName;
+        modelId = helper.findModelIdByName(builder.mModelName);
         modelFields = builder.mModelFields;
+
         defaultValues = new HashMap<>();
         searchExpressionMakers = new HashMap<>();
         relativesSearchExpressionMakers = new HashMap<>();
@@ -763,9 +761,12 @@ public class MusInterval {
         for (RelativesPriorityComparator comparator : relativesPriorityComparators) {
             comparator.setModelFields(modelFields);
         }
-        modelId = helper.findModelIdByName(builder.mModelName);
-        deckName = builder.mDeckName;
-        deckId = helper.findDeckIdByName(builder.mDeckName);
+
+        RelatedIntervalSoundField soundSmallerField = new SmallerIntervalSoundField(helper, this);
+        RelatedIntervalSoundField soundLargerField = new LargerIntervalSoundField(helper, this);
+        soundSmallerField.setReverse(soundLargerField);
+        soundLargerField.setReverse(soundSmallerField);
+        relatedSoundFields = new RelatedIntervalSoundField[]{soundSmallerField, soundLargerField};
 
         sounds = builder.mSounds;
         soundsSmaller = builder.mSoundsSmaller;
