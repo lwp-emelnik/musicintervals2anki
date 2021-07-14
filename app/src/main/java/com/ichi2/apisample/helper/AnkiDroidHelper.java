@@ -418,7 +418,7 @@ public class AnkiDroidHelper {
                                                      Map<String, String> fieldDefaultValues,
                                                      Map<String, SearchExpressionMaker> fieldSearchExpressionMakers,
                                                      Map<String, EqualityChecker> equalityCheckers)
-            throws InvalidAnkiDatabase_fieldAndFieldNameCountMismatchException {
+            throws InvalidAnkiDatabase_rowValuesAndFieldsCountMismatchException {
         ArrayList<Map<String, String>> dataSet = new ArrayList<Map<String, String>>() {{
             add(data);
         }};
@@ -429,7 +429,7 @@ public class AnkiDroidHelper {
                                                      Map<String, String> fieldDefaultValues,
                                                      Map<String, SearchExpressionMaker> fieldSearchExpressionMakers,
                                                      Map<String, EqualityChecker> equalityCheckers)
-            throws InvalidAnkiDatabase_fieldAndFieldNameCountMismatchException {
+            throws InvalidAnkiDatabase_rowValuesAndFieldsCountMismatchException {
         if (dataSet.size() == 0) {
             return new LinkedList<>();
         }
@@ -521,7 +521,7 @@ public class AnkiDroidHelper {
                 if (flds != null) {
                     String[] rowValues = flds.split(FLDS_SEPARATOR, -1);
                     if (rowValues.length != fields.length) {
-                        throw new InvalidAnkiDatabase_fieldAndFieldNameCountMismatchException();
+                        throw new InvalidAnkiDatabase_rowValuesAndFieldsCountMismatchException();
                     }
 
                     Map<String, String> rowData = new HashMap<>();
@@ -599,5 +599,5 @@ public class AnkiDroidHelper {
     }
 
     public abstract static class InvalidAnkiDatabaseException extends Throwable {}
-    public static class InvalidAnkiDatabase_fieldAndFieldNameCountMismatchException extends InvalidAnkiDatabaseException {}
+    public static class InvalidAnkiDatabase_rowValuesAndFieldsCountMismatchException extends InvalidAnkiDatabaseException {}
 }
