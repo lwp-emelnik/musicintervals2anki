@@ -60,9 +60,9 @@ public class MusInterval {
 
             public static final String[] VALUES = new String[NOTES.length * OCTAVES.length];
             static {
-                for (int i = 0; i < NOTES.length; i++) {
-                    for (int j = 0; j < OCTAVES.length; j++) {
-                        VALUES[i * OCTAVES.length + j] = NOTES[i] + OCTAVES[j];
+                for (int i = 0; i < OCTAVES.length; i++) {
+                    for (int j = 0; j < NOTES.length; j++) {
+                        VALUES[i * NOTES.length + j] = NOTES[j] + OCTAVES[i];
                     }
                 }
             }
