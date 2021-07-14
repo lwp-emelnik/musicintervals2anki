@@ -81,9 +81,17 @@ public abstract class RelatedIntervalSoundField {
         final String relatedSoundField = musInterval.modelFields.getOrDefault(relatedSoundFieldKey, relatedSoundFieldKey);
         String relatedSound = noteData.remove(relatedSoundField);
 
-        final String reverseRelatedSoundFieldKey = getReverseFieldKey();
+        final String relatedSoundAltFieldKey = getAltFieldKey();
+        final String relatedSoundAltField = musInterval.modelFields.getOrDefault(relatedSoundAltFieldKey, relatedSoundAltFieldKey);
+        final String relatedSoundAlt = noteData.remove(relatedSoundAltField);
+
+        final String reverseRelatedSoundFieldKey = reverse.getFieldKey();
         final String reverseRelatedSoundField = musInterval.modelFields.getOrDefault(reverseRelatedSoundFieldKey, reverseRelatedSoundFieldKey);
         final String reverseRelatedSound = noteData.remove(reverseRelatedSoundField);
+
+        final String reverseRelatedSoundAltFieldKey = reverse.getAltFieldKey();
+        final String reverseRelatedSoundAltField = musInterval.modelFields.getOrDefault(reverseRelatedSoundAltFieldKey, reverseRelatedSoundAltFieldKey);
+        final String reverseRelatedSoundAlt = noteData.remove(reverseRelatedSoundAltField);
 
         final String soundField = musInterval.modelFields.getOrDefault(MusInterval.Fields.SOUND, MusInterval.Fields.SOUND);
         final String sound = noteData.remove(soundField);
@@ -177,7 +185,9 @@ public abstract class RelatedIntervalSoundField {
         noteData.put(intervalField, interval);
         noteData.put(directionField, direction);
         noteData.put(relatedSoundField, relatedSound);
+        noteData.put(relatedSoundAltField, relatedSoundAlt);
         noteData.put(reverseRelatedSoundField, reverseRelatedSound);
+        noteData.put(reverseRelatedSoundAltField, reverseRelatedSoundAlt);
         noteData.put(soundField, sound);
         noteData.put(versionField, version);
         return updatedLinks;
@@ -274,7 +284,7 @@ public abstract class RelatedIntervalSoundField {
 
     protected abstract String getFieldKey();
 
-    protected abstract String getReverseFieldKey();
+    protected abstract String getAltFieldKey();
 
     protected abstract boolean isRelationPossible(int intervalIdx);
 
@@ -288,7 +298,9 @@ public abstract class RelatedIntervalSoundField {
         return new HashMap<String, String>(data) {{
             remove(musInterval.modelFields.get(MusInterval.Fields.SOUND));
             remove(musInterval.modelFields.get(MusInterval.Fields.SOUND_SMALLER));
+            remove(musInterval.modelFields.get(MusInterval.Fields.SOUND_SMALLER_ALT));
             remove(musInterval.modelFields.get(MusInterval.Fields.SOUND_LARGER));
+            remove(musInterval.modelFields.get(MusInterval.Fields.SOUND_LARGER_ALT));
             remove(musInterval.modelFields.get(MusInterval.Fields.VERSION));
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
@@ -341,8 +353,8 @@ class SmallerIntervalSoundField extends RelatedIntervalSoundField {
     }
 
     @Override
-    protected String getReverseFieldKey() {
-        return MusInterval.Fields.SOUND_LARGER;
+    protected String getAltFieldKey() {
+        return MusInterval.Fields.SOUND_SMALLER_ALT;
     }
 
     @Override
@@ -367,8 +379,8 @@ class LargerIntervalSoundField extends RelatedIntervalSoundField {
     }
 
     @Override
-    protected String getReverseFieldKey() {
-        return MusInterval.Fields.SOUND_SMALLER;
+    protected String getAltFieldKey() {
+        return MusInterval.Fields.SOUND_LARGER_ALT;
     }
 
     @Override

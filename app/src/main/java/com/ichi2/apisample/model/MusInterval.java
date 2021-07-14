@@ -38,8 +38,10 @@ public class MusInterval {
      */
     public static class Fields {
         public static final String SOUND = "sound";
-        public static final String SOUND_SMALLER = "sound_smaller";
+        public static final String SOUND_SMALLER = "sound_smaller"; // @todo: rename, reorder
+        public static final String SOUND_SMALLER_ALT = "sound.smaller.alt";
         public static final String SOUND_LARGER = "sound_larger";
+        public static final String SOUND_LARGER_ALT = "sound.larger.alt";
         public static final String START_NOTE = "note1";
         public static final String DIRECTION = "ascending_descending";
         public static final String TIMING = "melodic_harmonic";
@@ -67,7 +69,7 @@ public class MusInterval {
                 }
             }
 
-            private static String getEndNote(String startNote, String direction, String interval) {
+            public static String getEndNote(String startNote, String direction, String interval) {
                 ArrayList<String> notes = new ArrayList<>(Arrays.asList(VALUES));
                 int startIdx = notes.indexOf(startNote);
                 int distance = Interval.getIndex(interval);
@@ -278,7 +280,9 @@ public class MusInterval {
             ArrayList<String> signature = new ArrayList<String>() {{
                 add(SOUND);
                 add(SOUND_SMALLER);
+                add(SOUND_SMALLER_ALT);
                 add(SOUND_LARGER);
+                add(SOUND_LARGER_ALT);
                 add(START_NOTE);
                 add(DIRECTION);
                 add(TIMING);
@@ -337,7 +341,13 @@ public class MusInterval {
             put(SOUND_SMALLER, new Validator[]{
                     VALIDATOR_SOUND
             });
+            put(SOUND_SMALLER_ALT, new Validator[]{
+                    VALIDATOR_SOUND
+            });
             put(SOUND_LARGER, new Validator[]{
+                    VALIDATOR_SOUND
+            });
+            put(SOUND_LARGER_ALT, new Validator[]{
                     VALIDATOR_SOUND
             });
             put(START_NOTE, new Validator[]{
@@ -404,7 +414,9 @@ public class MusInterval {
         private Map<String, String> mModelFields = DEFAULT_MODEL_FIELDS;
         private String[] mSounds = new String[]{};
         private String[] mSoundsSmaller = new String[]{};
+        private String[] mSoundsSmallerAlt = new String[]{};
         private String[] mSoundsLarger = new String[]{};
+        private String[] mSoundsLargerAlt = new String[]{};
         private String[] mNotes = new String[]{};
         private String[] mOctaves = new String[]{};
         private String mDirection = "";
@@ -485,8 +497,18 @@ public class MusInterval {
             return this;
         }
 
-        public Builder sounds_larger(String[] sdls) {
-            mSoundsLarger = sdls;
+        public Builder sounds_smaller_alt(String[] sdssa) {
+            mSoundsSmallerAlt = sdssa;
+            return this;
+        }
+
+        public Builder sounds_larger(String[] sdsl) {
+            mSoundsLarger = sdsl;
+            return this;
+        }
+
+        public Builder sounds_larger_alt(String[] sdsla) {
+            mSoundsLargerAlt = sdsla;
             return this;
         }
 
@@ -657,7 +679,9 @@ public class MusInterval {
     // Data of model's fields
     public final String[] sounds;
     public final String[] soundsSmaller;
+    public final String[] soundsSmallerAlt;
     public final String[] soundsLarger;
+    public final String[] soundsLargerAlt;
     public final String[] notes;
     public final String[] octaves;
     public final String direction;
@@ -685,10 +709,22 @@ public class MusInterval {
                 return mi.soundsSmaller[0];
             }
         });
+        put(Fields.SOUND_SMALLER_ALT, new FieldAccessor() {
+            @Override
+            public String getFieldValue(MusInterval mi) {
+                return mi.soundsSmallerAlt[0];
+            }
+        });
         put(Fields.SOUND_LARGER, new FieldAccessor() {
             @Override
             public String getFieldValue(MusInterval mi) {
                 return mi.soundsLarger[0];
+            }
+        });
+        put(Fields.SOUND_LARGER_ALT, new FieldAccessor() {
+            @Override
+            public String getFieldValue(MusInterval mi) {
+                return mi.soundsLargerAlt[0];
             }
         });
         put(Builder.KEY_NOTES, new FieldAccessor() {
@@ -770,7 +806,9 @@ public class MusInterval {
 
         sounds = builder.mSounds;
         soundsSmaller = builder.mSoundsSmaller;
+        soundsSmallerAlt = builder.mSoundsSmallerAlt;
         soundsLarger = builder.mSoundsLarger;
+        soundsLargerAlt = builder.mSoundsLargerAlt;
         notes = builder.mNotes;
         octaves = builder.mOctaves;
         direction = builder.mDirection.trim().toLowerCase();
@@ -885,7 +923,9 @@ public class MusInterval {
             for (Map<String, String> data : dataSet) {
                 data.remove(modelFields.get(Fields.SOUND));
                 data.remove(modelFields.get(Fields.SOUND_SMALLER));
+                data.remove(modelFields.get(Fields.SOUND_SMALLER_ALT));
                 data.remove(modelFields.get(Fields.SOUND_LARGER));
+                data.remove(modelFields.get(Fields.SOUND_LARGER_ALT));
                 data.remove(modelFields.get(Fields.VERSION));
             }
             return helper.findNotes(
@@ -1158,7 +1198,9 @@ public class MusInterval {
                 .model_fields(modelFields)
                 .sounds(new String[]{data.get(modelFields.get(Fields.SOUND))})
                 .sounds_smaller(new String[]{data.get(modelFields.get(Fields.SOUND_SMALLER))})
+                .sounds_smaller_alt(new String[]{data.get(modelFields.get(Fields.SOUND_SMALLER_ALT))})
                 .sounds_larger(new String[]{data.get(modelFields.get(Fields.SOUND_LARGER))})
+                .sounds_larger_alt(new String[]{data.get(modelFields.get(Fields.SOUND_LARGER_ALT))})
                 .notes(note != null ? new String[]{note} : new String[]{})
                 .octaves(octave != null ? new String[]{octave} : new String[]{})
                 .direction(data.get(modelFields.get(Fields.DIRECTION)))
@@ -1180,7 +1222,9 @@ public class MusInterval {
                 .model_fields(modelFields)
                 .sounds(addedNotesOwnFields.get(Fields.SOUND).toArray(new String[0]))
                 .sounds_smaller(addedNotesOwnFields.get(Fields.SOUND_SMALLER).toArray(new String[0]))
+                .sounds_smaller_alt(addedNotesOwnFields.get(Fields.SOUND_SMALLER_ALT).toArray(new String[0]))
                 .sounds_larger(addedNotesOwnFields.get(Fields.SOUND_LARGER).toArray(new String[0]))
+                .sounds_larger_alt(addedNotesOwnFields.get(Fields.SOUND_LARGER_ALT).toArray(new String[0]))
                 .notes(addedNotesOwnFields.get(Builder.KEY_NOTES).toArray(new String[0]))
                 .octaves(addedNotesOwnFields.get(Builder.KEY_OCTAVES).toArray(new String[0]))
                 .direction(direction)
@@ -1209,7 +1253,9 @@ public class MusInterval {
         int i = 0;
         final boolean soundsProvided = sounds != null;
         final boolean soundsSmallerProvided = soundsSmaller != null;
+        final boolean soundsSmallerAltProvided = soundsSmallerAlt != null;
         final boolean soundsLargerProvided = soundsLarger != null;
+        final boolean soundsLargerAltProvided = soundsLargerAlt != null;
         for (String octave : octaves) {
             for (String note : notes) {
                 for (String interval : intervals) {
@@ -1218,8 +1264,12 @@ public class MusInterval {
                     miData.put(modelFields.get(Fields.SOUND), sound);
                     String soundSmaller = soundsSmallerProvided && soundsSmaller.length > i ? soundsSmaller[i] : "";
                     miData.put(modelFields.get(Fields.SOUND_SMALLER), soundSmaller);
+                    String soundSmallerAlt = soundsSmallerAltProvided && soundsSmallerAlt.length > i ? soundsSmallerAlt[i] : "";
+                    miData.put(modelFields.get(Fields.SOUND_SMALLER_ALT), soundSmallerAlt);
                     String soundLarger = soundsLargerProvided && soundsLarger.length > i ? soundsLarger[i] : "";
                     miData.put(modelFields.get(Fields.SOUND_LARGER), soundLarger);
+                    String soundLargerAlt = soundsLargerAltProvided && soundsLargerAlt.length > i ? soundsLargerAlt[i] : "";
+                    miData.put(modelFields.get(Fields.SOUND_LARGER_ALT), soundLargerAlt);
                     miData.put(modelFields.get(Fields.START_NOTE), note + octave);
                     miData.put(modelFields.get(Fields.DIRECTION), !Fields.Interval.VALUE_UNISON.equals(interval) ? direction : "");
                     miData.put(modelFields.get(Fields.TIMING), timing);

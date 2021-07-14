@@ -208,7 +208,9 @@ public class NotesIntegrity {
             Map<String, String> keyData = new HashMap<String, String>(noteData) {{
                 remove(musInterval.modelFields.get(MusInterval.Fields.SOUND));
                 remove(musInterval.modelFields.get(MusInterval.Fields.SOUND_SMALLER));
+                remove(musInterval.modelFields.get(MusInterval.Fields.SOUND_SMALLER_ALT));
                 remove(musInterval.modelFields.get(MusInterval.Fields.SOUND_LARGER));
+                remove(musInterval.modelFields.get(MusInterval.Fields.SOUND_LARGER_ALT));
                 remove(musInterval.modelFields.get(MusInterval.Fields.VERSION));
                 remove(AnkiDroidHelper.KEY_ID);
                 remove(AnkiDroidHelper.KEY_TAGS);
