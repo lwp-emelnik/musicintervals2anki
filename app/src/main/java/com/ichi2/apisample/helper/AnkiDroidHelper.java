@@ -434,7 +434,7 @@ public class AnkiDroidHelper {
             return new LinkedList<>();
         }
 
-        String[] fieldNames = getFieldList(modelId);
+        String[] fields = getFieldList(modelId);
 
         StringBuilder dataCondition = new StringBuilder();
         for (Map<String, String> data : dataSet) {
@@ -442,17 +442,17 @@ public class AnkiDroidHelper {
                 dataCondition.append(" or ");
             }
             ArrayList<String> defaultFields = new ArrayList<>();
-            for (String fieldName : fieldNames) {
-                if (data.containsKey(fieldName)) {
-                    String value = data.get(fieldName);
-                    if (!value.isEmpty() && fieldDefaultValues.containsKey(fieldName)) {
-                        EqualityChecker defaultEqualityChecker = new FieldEqualityChecker(fieldName, DEFAULT_EQUALITY_CHECKER);
-                        EqualityChecker equalityChecker = equalityCheckers.getOrDefault(fieldName, defaultEqualityChecker);
-                        String defaultValue = fieldDefaultValues.get(fieldName);
+            for (String field : fields) {
+                if (data.containsKey(field)) {
+                    String value = data.get(field);
+                    if (!value.isEmpty() && fieldDefaultValues.containsKey(field)) {
+                        EqualityChecker defaultEqualityChecker = new FieldEqualityChecker(field, DEFAULT_EQUALITY_CHECKER);
+                        EqualityChecker equalityChecker = equalityCheckers.getOrDefault(field, defaultEqualityChecker);
+                        String defaultValue = fieldDefaultValues.get(field);
                         Map<String, String> defaultData = new HashMap<>(data);
-                        defaultData.put(fieldName, defaultValue);
+                        defaultData.put(field, defaultValue);
                         if (equalityChecker.areEqual(data, defaultData)) {
-                            defaultFields.add(fieldName);
+                            defaultFields.add(field);
                         }
                     }
                 }
@@ -466,22 +466,22 @@ public class AnkiDroidHelper {
                 if (i > 0) {
                     dataCondition.append(" or ");
                 }
-                for (String fieldName : fieldNames) {
+                for (String field : fields) {
                     if (fieldsAggregated.length() > 0) {
                         fieldsAggregated.append(FLDS_SEPARATOR);
                     }
 
                     String expression;
-                    if (data.containsKey(fieldName)) {
-                        String value = data.get(fieldName);
-                        expression = fieldSearchExpressionMakers.getOrDefault(fieldName, DEFAULT_SEARCH_EXPRESSION_MAKER).getExpression(value);
+                    if (data.containsKey(field)) {
+                        String value = data.get(field);
+                        expression = fieldSearchExpressionMakers.getOrDefault(field, DEFAULT_SEARCH_EXPRESSION_MAKER).getExpression(value);
                     } else {
                         expression = "%";
                     }
 
                     // decide whether or not this is the "second" condition, for which we substitute
                     // the value that is being searched for with an empty string
-                    int idx = defaultFields.indexOf(fieldName);
+                    int idx = defaultFields.indexOf(field);
                     if (idx != -1 && i % (n / (int) Math.pow(2, idx)) >= (n / Math.pow(2, idx + 1))) {
                         expression = "";
                     }
@@ -519,39 +519,43 @@ public class AnkiDroidHelper {
                 String flds = notesTableCursor.getString(fldsIndex);
 
                 if (flds != null) {
-                    String[] fields = flds.split(FLDS_SEPARATOR, -1);
-                    if (fields.length != fieldNames.length) {
+                    String[] rowValues = flds.split(FLDS_SEPARATOR, -1);
+                    if (rowValues.length != fields.length) {
                         throw new InvalidAnkiDatabase_fieldAndFieldNameCountMismatchException();
                     }
 
-                    Map<String, String> item = new HashMap<>();
-                    item.put(KEY_ID, Long.toString(notesTableCursor.getLong(idIndex)));
-                    item.put(KEY_TAGS, notesTableCursor.getString(tagsIndex));
+                    Map<String, String> rowData = new HashMap<>();
+                    rowData.put(KEY_ID, Long.toString(notesTableCursor.getLong(idIndex)));
+                    rowData.put(KEY_TAGS, notesTableCursor.getString(tagsIndex));
 
-                    for (int i = 0; i < fieldNames.length; ++i) {
-                        String fieldName = fieldNames[i];
-                        String resultValue = fields[i];
-                        // additional filtering for non-definitive expressions
-                        // can be computationally expensive
-                        SearchExpressionMaker expressionMaker = fieldSearchExpressionMakers.getOrDefault(fieldName, DEFAULT_SEARCH_EXPRESSION_MAKER);
+                    for (int i = 0; i < fields.length; ++i) {
+                        String field = fields[i];
+                        String value = rowValues[i];
+                        rowData.put(field, value);
+                    }
+
+                    // additional filtering for non-definitive expressions
+                    // can be computationally expensive
+                    for (String field : fieldSearchExpressionMakers.keySet()) {
+                        String rowValue = rowData.getOrDefault(field, "");
+                        SearchExpressionMaker expressionMaker = fieldSearchExpressionMakers.getOrDefault(field, DEFAULT_SEARCH_EXPRESSION_MAKER);
                         if (!expressionMaker.isDefinitive()) {
-                            EqualityChecker defaultEqualityChecker = new FieldEqualityChecker(fieldName, DEFAULT_EQUALITY_CHECKER);
-                            EqualityChecker equalityChecker = equalityCheckers.getOrDefault(fieldName, defaultEqualityChecker);
+                            EqualityChecker defaultEqualityChecker = new FieldEqualityChecker(field, DEFAULT_EQUALITY_CHECKER);
+                            EqualityChecker equalityChecker = equalityCheckers.getOrDefault(field, defaultEqualityChecker);
                             boolean matching = false;
                             for (Map<String, String> data : dataSet) {
-                                String value = data.getOrDefault(fieldName, "");
+                                String value = data.getOrDefault(field, "");
                                 boolean defaultEquality = false;
-                                if (resultValue.isEmpty() && fieldDefaultValues.containsKey(fieldName)) {
-                                    String defaultValue = fieldDefaultValues.get(fieldName);
+                                if (rowValue.isEmpty() && fieldDefaultValues.containsKey(field)) {
+                                    String defaultValue = fieldDefaultValues.get(field);
                                     Map<String, String> defaultData = new HashMap<>(data);
-                                    defaultData.put(fieldName, defaultValue);
+                                    defaultData.put(field, defaultValue);
                                     if (equalityChecker.areEqual(data, defaultData)) {
                                         defaultEquality = true;
                                     }
                                 }
-                                Map<String, String> resultData = new HashMap<>(data);
-                                resultData.put(fieldName, resultValue);
-                                if (value.isEmpty() || equalityChecker.areEqual(data, resultData) || defaultEquality) {
+                                // @todo: revisit first condition
+                                if (value.matches("^%*$") || equalityChecker.areEqual(data, rowData) || defaultEquality) {
                                     matching = true;
                                     break;
                                 }
@@ -560,14 +564,12 @@ public class AnkiDroidHelper {
                                 continue rows;
                             }
                         }
-                        item.put(fieldName, resultValue);
                     }
 
-                    result.add(item);
+                    result.add(rowData);
                 }
             }
-        }
-        finally {
+        } finally {
             notesTableCursor.close();
         }
 
