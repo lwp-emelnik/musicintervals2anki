@@ -22,24 +22,49 @@ public abstract class RelatedIntervalSoundField {
     private final AnkiDroidHelper helper;
     private final MusInterval musInterval;
 
+    private final String soundField;
+    private final String startNoteField;
+    private final String directionField;
+    private final String timingField;
+    private final String intervalField;
+    private final String versionField;
+
     private RelatedIntervalSoundField reverse;
+
+    private String relatedSoundField;
+    private String relatedSoundAltField;
+    private String reverseRelatedSoundField;
+    private String reverseRelatedSoundAltField;
 
     public RelatedIntervalSoundField(AnkiDroidHelper helper, MusInterval musInterval) {
         this.helper = helper;
         this.musInterval = musInterval;
+
+        soundField = musInterval.modelFields.getOrDefault(MusInterval.Fields.SOUND, MusInterval.Fields.SOUND);
+        startNoteField = musInterval.modelFields.getOrDefault(MusInterval.Fields.START_NOTE, MusInterval.Fields.START_NOTE);
+        directionField = musInterval.modelFields.getOrDefault(MusInterval.Fields.DIRECTION, MusInterval.Fields.DIRECTION);
+        timingField = musInterval.modelFields.getOrDefault(MusInterval.Fields.TIMING, MusInterval.Fields.TIMING);
+        intervalField = musInterval.modelFields.getOrDefault(MusInterval.Fields.INTERVAL, MusInterval.Fields.INTERVAL);
+        versionField = musInterval.modelFields.getOrDefault(MusInterval.Fields.VERSION, MusInterval.Fields.VERSION);
     }
 
     public void setReverse(RelatedIntervalSoundField reverse) {
         this.reverse = reverse;
+
+        String relatedSoundFieldKey = getFieldKey();
+        relatedSoundField = musInterval.modelFields.getOrDefault(relatedSoundFieldKey, relatedSoundFieldKey);
+        String relatedSoundAltFieldKey = getAltFieldKey();
+        relatedSoundAltField = musInterval.modelFields.getOrDefault(relatedSoundAltFieldKey, relatedSoundAltFieldKey);
+        String reverseRelatedSoundFieldKey = reverse.getFieldKey();
+        reverseRelatedSoundField = musInterval.modelFields.getOrDefault(reverseRelatedSoundFieldKey, reverseRelatedSoundFieldKey);
+        String reverseRelatedSoundAltFieldKey = reverse.getAltFieldKey();
+        reverseRelatedSoundAltField = musInterval.modelFields.getOrDefault(reverseRelatedSoundAltFieldKey, reverseRelatedSoundAltFieldKey);
     }
 
     public boolean isSuspicious(Map<String, String> noteData, Map<String, Map<String, String>> soundDict, Map<String, Set<Map<String, String>>> suspiciousRelatedNotesData) {
-        final String intervalField = musInterval.modelFields.getOrDefault(MusInterval.Fields.INTERVAL, MusInterval.Fields.INTERVAL);
         final String interval = noteData.getOrDefault(intervalField, "");
         final int intervalIdx = MusInterval.Fields.Interval.getIndex(interval);
 
-        final String relatedSoundFieldKey = getFieldKey();
-        final String relatedSoundField = musInterval.modelFields.getOrDefault(relatedSoundFieldKey, relatedSoundFieldKey);
         final String relatedSound = noteData.getOrDefault(relatedSoundField, "");
 
         Map<String, String> keyData = getIntervalIdentityData(noteData);
@@ -49,7 +74,7 @@ public abstract class RelatedIntervalSoundField {
             if (relatedNoteData != null) {
                 String relatedInterval = relatedNoteData.getOrDefault(intervalField, "");
                 Map<String, String> relatedNoteKeyData = getIntervalIdentityData(relatedNoteData);
-                if (!isEqualData(keyData, relatedNoteKeyData, musInterval.defaultValues, musInterval.relativesEqualityCheckers, intervalField, false)
+                if (!isEqualData(keyData, relatedNoteKeyData, musInterval.defaultValues, musInterval.relativesEqualityCheckers, false)
                         || !isCorrectRelation(intervalIdx, relatedInterval)) {
                     Set<Map<String, String>> pointed = suspiciousRelatedNotesData.getOrDefault(relatedSoundField, new HashSet<Map<String, String>>());
                     pointed.add(relatedNoteData);
@@ -68,47 +93,25 @@ public abstract class RelatedIntervalSoundField {
     }
 
     public int autoFill(Map<String, String> noteData, boolean updateReverse) throws AnkiDroidHelper.InvalidAnkiDatabaseException {
-        final String startNoteField = musInterval.modelFields.getOrDefault(MusInterval.Fields.START_NOTE, MusInterval.Fields.START_NOTE);
         final String startNote = noteData.getOrDefault(startNoteField, "");
-
-        final String intervalField = musInterval.modelFields.getOrDefault(MusInterval.Fields.INTERVAL, MusInterval.Fields.INTERVAL);
         final String interval = noteData.getOrDefault(intervalField, "");
-        final int intervalIdx = MusInterval.Fields.Interval.getIndex(interval);
-
-        final String unisonInterval = MusInterval.Fields.Interval.VALUE_UNISON; // @todo: fill these in constructor (also get rid of this)
-        final String directionField = musInterval.modelFields.getOrDefault(MusInterval.Fields.DIRECTION, MusInterval.Fields.DIRECTION);
         final String direction = noteData.getOrDefault(directionField, "");
-
-        final String timingField = musInterval.modelFields.getOrDefault(MusInterval.Fields.TIMING, MusInterval.Fields.TIMING);
         final String timing = noteData.getOrDefault(timingField, "");
-
-        final String relatedSoundFieldKey = getFieldKey();
-        final String relatedSoundField = musInterval.modelFields.getOrDefault(relatedSoundFieldKey, relatedSoundFieldKey);
         String relatedSound = noteData.containsKey(relatedSoundField) ? noteData.remove(relatedSoundField) : "";
-
-        final String relatedSoundAltFieldKey = getAltFieldKey();
-        final String relatedSoundAltField = musInterval.modelFields.getOrDefault(relatedSoundAltFieldKey, relatedSoundAltFieldKey);
         String relatedSoundAlt = noteData.containsKey(relatedSoundAltField) ? noteData.remove(relatedSoundAltField) : "";
-
-        final String reverseRelatedSoundFieldKey = reverse.getFieldKey();
-        final String reverseRelatedSoundField = musInterval.modelFields.getOrDefault(reverseRelatedSoundFieldKey, reverseRelatedSoundFieldKey);
         final String reverseRelatedSound = noteData.containsKey(reverseRelatedSoundField) ? noteData.remove(reverseRelatedSoundField) : "'";
-
-        final String reverseRelatedSoundAltFieldKey = reverse.getAltFieldKey();
-        final String reverseRelatedSoundAltField = musInterval.modelFields.getOrDefault(reverseRelatedSoundAltFieldKey, reverseRelatedSoundAltFieldKey);
         final String reverseRelatedSoundAlt = noteData.containsKey(reverseRelatedSoundAltField) ? noteData.remove(reverseRelatedSoundAltField) : "";
-
-        final String soundField = musInterval.modelFields.getOrDefault(MusInterval.Fields.SOUND, MusInterval.Fields.SOUND);
         final String sound = noteData.containsKey(soundField) ? noteData.remove(soundField) : "";
-
-        final String versionField = musInterval.modelFields.getOrDefault(MusInterval.Fields.VERSION, MusInterval.Fields.VERSION);
         final String version = noteData.containsKey(versionField) ? noteData.remove(versionField) : "";
+
+        final int intervalIdx = MusInterval.Fields.Interval.getIndex(interval);
 
         int updatedLinks = 0;
         if (isRelationPossible(intervalIdx)) {
             String relatedInterval = getRelatedInterval(intervalIdx);
             noteData.put(intervalField, relatedInterval);
-            if (unisonInterval.equalsIgnoreCase(interval) || unisonInterval.equals(relatedInterval)) {
+            if (MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval) ||
+                    MusInterval.Fields.Interval.VALUE_UNISON.equals(relatedInterval)) {
                 noteData.put(directionField, "");
             }
             LinkedList<Map<String, String>> relatedNotesData = helper.findNotes(
@@ -174,9 +177,7 @@ public abstract class RelatedIntervalSoundField {
             if (updateReverse) {
                 updatedLinks += updateReverse(
                         relatedNotesData, noteData, // @todo: revisit alt
-                        sound, relatedInterval, soundField,
-                        reverseRelatedSoundField, reverseRelatedSoundAltField,
-                        intervalField, directionField
+                        sound, relatedInterval
                 );
             }
 
@@ -188,12 +189,12 @@ public abstract class RelatedIntervalSoundField {
                 relatedAltNotesData = comparator.getLeadingRelatives(relatedAltNotesData);
             }
 
-            String newRelatedSound = getValue(relatedNotesData, soundField, relatedSound);
+            String newRelatedSound = getValue(relatedNotesData, relatedSound);
             if (!relatedSound.equals(newRelatedSound)) {
                 relatedSound = newRelatedSound;
                 updatedLinks++;
             }
-            String newRelatedSoundAlt = getValue(relatedAltNotesData, soundField, relatedSoundAlt);
+            String newRelatedSoundAlt = getValue(relatedAltNotesData, relatedSoundAlt);
             if (!relatedSoundAlt.equals(newRelatedSoundAlt)) {
                 relatedSoundAlt = newRelatedSoundAlt;
                 updatedLinks++;
@@ -212,9 +213,7 @@ public abstract class RelatedIntervalSoundField {
     }
 
     private int updateReverse(LinkedList<Map<String, String>> relatedNotesData, Map<String, String> data,
-                              String sound, String relatedInterval, final String soundField,
-                              String reverseRelatedSoundField, String reverseRelatedSoundAltField,
-                              String intervalField, String directionField)
+                              String sound, String relatedInterval)
             throws AnkiDroidHelper.InvalidAnkiDatabaseException {
         String startNoteField = musInterval.modelFields.getOrDefault(MusInterval.Fields.START_NOTE, MusInterval.Fields.START_NOTE);
         String timingField = musInterval.modelFields.getOrDefault(MusInterval.Fields.TIMING, MusInterval.Fields.TIMING);
@@ -278,7 +277,6 @@ public abstract class RelatedIntervalSoundField {
                                 getIntervalIdentityData(currentReverseData),
                                 musInterval.defaultValues,
                                 musInterval.relativesEqualityCheckers,
-                                intervalField,
                                 true)) {
                     continue;
                 }
@@ -299,7 +297,7 @@ public abstract class RelatedIntervalSoundField {
         return updatedLinks;
     }
 
-    private String getValue(LinkedList<Map<String, String>> relatedNotesData, String soundField, String relatedSound) {
+    private String getValue(LinkedList<Map<String, String>> relatedNotesData, String relatedSound) {
         return !relatedNotesData.isEmpty() ? relatedNotesData.getFirst().get(soundField) : relatedSound;
     }
 
@@ -331,7 +329,7 @@ public abstract class RelatedIntervalSoundField {
     private boolean isEqualData(Map<String, String> data1, Map<String, String> data2,
                                 Map<String, String> modelFieldsDefaultValues,
                                 Map<String, EqualityChecker> modelFieldsEqualityCheckers,
-                                String intervalField, boolean reverse) {
+                                boolean reverse) {
         String interval1 = data1.getOrDefault(intervalField, "");
         int interval1Idx = MusInterval.Fields.Interval.getIndex(interval1);
         String interval2 = data2.getOrDefault(intervalField, "");
