@@ -83,7 +83,7 @@ public class MusInterval {
                 } else if (direction.equalsIgnoreCase(Direction.DESC)) {
                     endIdx = startIdx - distance;
                 } else {
-                    throw new IllegalArgumentException();
+                    return startNote;
                 }
 
                 return endIdx >= 0 && endIdx < VALUES.length ? VALUES[endIdx] : null;
