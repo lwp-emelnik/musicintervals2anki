@@ -148,8 +148,8 @@ public abstract class RelatedIntervalSoundField {
                     if (updateReverse) {
                         updatedLinks += updateReverse(
                                 relatedNotesData, noteData,
-                                sound, relatedInterval,
-                                soundField, reverseRelatedSoundField,
+                                sound, relatedInterval, soundField,
+                                reverseRelatedSoundField, reverseRelatedSoundAltField,
                                 intervalField, directionField
                         );
                     }
@@ -194,8 +194,8 @@ public abstract class RelatedIntervalSoundField {
     }
 
     private int updateReverse(LinkedList<Map<String, String>> relatedNotesData, Map<String, String> data,
-                              String sound, String relatedInterval,
-                              final String soundField, String reverseRelatedSoundField,
+                              String sound, String relatedInterval, final String soundField,
+                              String reverseRelatedSoundField, String reverseRelatedSoundAltField,
                               String intervalField, String directionField)
             throws AnkiDroidHelper.InvalidAnkiDatabaseException {
         String startNoteField = musInterval.modelFields.getOrDefault(MusInterval.Fields.START_NOTE, MusInterval.Fields.START_NOTE);
@@ -209,11 +209,10 @@ public abstract class RelatedIntervalSoundField {
             String relatedStartNote = relatedData.getOrDefault(startNoteField, "");
             String relatedDirection = relatedData.getOrDefault(directionField, "");
             String relatedTiming = relatedData.getOrDefault(timingField, "");
-            if (!direction.equalsIgnoreCase(relatedDirection) &&
+            if (!direction.equalsIgnoreCase(relatedDirection) && !startNote.equalsIgnoreCase(relatedStartNote) &&
                     MusInterval.Fields.Timing.HARMONIC.equalsIgnoreCase(timing) &&
-                    MusInterval.Fields.Timing.HARMONIC.equalsIgnoreCase(relatedTiming) &&
-                    !startNote.equalsIgnoreCase(relatedStartNote)) {
-                continue;
+                    MusInterval.Fields.Timing.HARMONIC.equalsIgnoreCase(relatedTiming)) {
+                reverseRelatedSoundField = reverseRelatedSoundAltField;
             }
             final String relatedReverseSound = relatedData.getOrDefault(reverseRelatedSoundField, "");
             if (!relatedReverseSound.isEmpty()) {
