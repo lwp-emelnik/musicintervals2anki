@@ -6162,6 +6162,8 @@ public class MusIntervalTest {
             remove(MusInterval.Fields.SOUND_SMALLER_ALT);
             remove(MusInterval.Fields.SOUND_LARGER);
             remove(MusInterval.Fields.SOUND_LARGER_ALT);
+            replace(MusInterval.Fields.START_NOTE, "D2");
+            replace(MusInterval.Fields.DIRECTION, "descending");
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
         }};
@@ -6176,6 +6178,8 @@ public class MusIntervalTest {
             remove(MusInterval.Fields.SOUND_SMALLER_ALT);
             remove(MusInterval.Fields.SOUND_LARGER);
             remove(MusInterval.Fields.SOUND_LARGER_ALT);
+            replace(MusInterval.Fields.START_NOTE, "D2");
+            replace(MusInterval.Fields.DIRECTION, "descending");
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
         }};
@@ -6190,6 +6194,8 @@ public class MusIntervalTest {
             remove(MusInterval.Fields.SOUND_SMALLER_ALT);
             remove(MusInterval.Fields.SOUND_LARGER);
             remove(MusInterval.Fields.SOUND_LARGER_ALT);
+            replace(MusInterval.Fields.START_NOTE, "D2");
+            replace(MusInterval.Fields.DIRECTION, "descending");
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
         }};
@@ -6204,6 +6210,8 @@ public class MusIntervalTest {
             remove(MusInterval.Fields.SOUND_SMALLER_ALT);
             remove(MusInterval.Fields.SOUND_LARGER);
             remove(MusInterval.Fields.SOUND_LARGER_ALT);
+            replace(MusInterval.Fields.START_NOTE, "D2");
+            replace(MusInterval.Fields.DIRECTION, "descending");
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
         }};

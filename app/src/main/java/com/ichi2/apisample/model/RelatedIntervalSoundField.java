@@ -8,7 +8,6 @@ import com.ichi2.apisample.helper.search.SearchExpressionMaker;
 import com.ichi2.apisample.validation.ValidationUtil;
 import com.ichi2.apisample.validation.Validator;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -69,6 +68,9 @@ public abstract class RelatedIntervalSoundField {
     }
 
     public int autoFill(Map<String, String> noteData, boolean updateReverse) throws AnkiDroidHelper.InvalidAnkiDatabaseException {
+        final String startNoteField = musInterval.modelFields.getOrDefault(MusInterval.Fields.START_NOTE, MusInterval.Fields.START_NOTE);
+        final String startNote = noteData.getOrDefault(startNoteField, "");
+
         final String intervalField = musInterval.modelFields.getOrDefault(MusInterval.Fields.INTERVAL, MusInterval.Fields.INTERVAL);
         final String interval = noteData.getOrDefault(intervalField, "");
         final int intervalIdx = MusInterval.Fields.Interval.getIndex(interval);
@@ -77,27 +79,30 @@ public abstract class RelatedIntervalSoundField {
         final String directionField = musInterval.modelFields.getOrDefault(MusInterval.Fields.DIRECTION, MusInterval.Fields.DIRECTION);
         final String direction = noteData.getOrDefault(directionField, "");
 
+        final String timingField = musInterval.modelFields.getOrDefault(MusInterval.Fields.TIMING, MusInterval.Fields.TIMING);
+        final String timing = noteData.getOrDefault(timingField, "");
+
         final String relatedSoundFieldKey = getFieldKey();
         final String relatedSoundField = musInterval.modelFields.getOrDefault(relatedSoundFieldKey, relatedSoundFieldKey);
-        String relatedSound = noteData.remove(relatedSoundField);
+        String relatedSound = noteData.containsKey(relatedSoundField) ? noteData.remove(relatedSoundField) : "";
 
         final String relatedSoundAltFieldKey = getAltFieldKey();
         final String relatedSoundAltField = musInterval.modelFields.getOrDefault(relatedSoundAltFieldKey, relatedSoundAltFieldKey);
-        final String relatedSoundAlt = noteData.remove(relatedSoundAltField);
+        String relatedSoundAlt = noteData.containsKey(relatedSoundAltField) ? noteData.remove(relatedSoundAltField) : "";
 
         final String reverseRelatedSoundFieldKey = reverse.getFieldKey();
         final String reverseRelatedSoundField = musInterval.modelFields.getOrDefault(reverseRelatedSoundFieldKey, reverseRelatedSoundFieldKey);
-        final String reverseRelatedSound = noteData.remove(reverseRelatedSoundField);
+        final String reverseRelatedSound = noteData.containsKey(reverseRelatedSoundField) ? noteData.remove(reverseRelatedSoundField) : "'";
 
         final String reverseRelatedSoundAltFieldKey = reverse.getAltFieldKey();
         final String reverseRelatedSoundAltField = musInterval.modelFields.getOrDefault(reverseRelatedSoundAltFieldKey, reverseRelatedSoundAltFieldKey);
-        final String reverseRelatedSoundAlt = noteData.remove(reverseRelatedSoundAltField);
+        final String reverseRelatedSoundAlt = noteData.containsKey(reverseRelatedSoundAltField) ? noteData.remove(reverseRelatedSoundAltField) : "";
 
         final String soundField = musInterval.modelFields.getOrDefault(MusInterval.Fields.SOUND, MusInterval.Fields.SOUND);
-        final String sound = noteData.remove(soundField);
+        final String sound = noteData.containsKey(soundField) ? noteData.remove(soundField) : "";
 
         final String versionField = musInterval.modelFields.getOrDefault(MusInterval.Fields.VERSION, MusInterval.Fields.VERSION);
-        final String version = noteData.remove(versionField);
+        final String version = noteData.containsKey(versionField) ? noteData.remove(versionField) : "";
 
         int updatedLinks = 0;
         if (isRelationPossible(intervalIdx)) {
@@ -113,72 +118,85 @@ public abstract class RelatedIntervalSoundField {
                     musInterval.relativesSearchExpressionMakers,
                     musInterval.equalityCheckers
             );
+            LinkedList<Map<String, String>> relatedAltNotesData = new LinkedList<>();
+            if (timing.equalsIgnoreCase(MusInterval.Fields.Timing.HARMONIC)) {
+                String altStartNote = MusInterval.Fields.StartNote.getEndNote(startNote, direction, interval);
+                String altDirection = direction.equalsIgnoreCase(MusInterval.Fields.Direction.ASC) ?
+                        MusInterval.Fields.Direction.DESC : MusInterval.Fields.Direction.ASC;
+                noteData.put(startNoteField, altStartNote);
+                noteData.put(directionField, altDirection);
+                relatedAltNotesData = helper.findNotes(
+                        musInterval.modelId,
+                        noteData,
+                        musInterval.defaultValues,
+                        musInterval.relativesSearchExpressionMakers,
+                        musInterval.equalityCheckers
+                );
+                noteData.put(startNoteField, startNote);
+                noteData.put(directionField, direction);
+            }
 
-            if (relatedNotesData != null) {
-                Iterator<Map<String, String>> iterator = relatedNotesData.iterator();
-                outer:
-                while (iterator.hasNext()) {
-                    Map<String, String> relatedData = iterator.next();
-                    long relatedId = Long.parseLong(relatedData.get(AnkiDroidHelper.KEY_ID));
-                    for (Map.Entry<String, SearchExpressionMaker> relativesMakers :
-                            musInterval.relativesSearchExpressionMakers.entrySet()) {
-                        String modelField = relativesMakers.getKey();
-                        String fieldKey = MapUtil.getKeyByValue(musInterval.modelFields, modelField);
-                        Validator[] validators = MusInterval.Fields.VALIDATORS.getOrDefault(fieldKey, new Validator[]{});
-                        for (Validator validator : validators) {
-                            boolean isValid = ValidationUtil.isValid(
-                                    validator,
-                                    musInterval.modelId,
-                                    relatedId,
-                                    relatedData,
-                                    fieldKey,
-                                    musInterval.modelFields,
-                                    helper,
-                                    true
-                            );
-                            if (!isValid) {
-                                iterator.remove();
-                                continue outer;
-                            }
-                        }
-                    }
+            Iterator<Map<String, String>> iterator = relatedNotesData.iterator();
+            boolean overAlt = false;
+            outer:
+            while (iterator.hasNext() || !overAlt) {
+                if (!iterator.hasNext()) {
+                    iterator = relatedAltNotesData.iterator();
+                    overAlt = true;
+                    continue;
                 }
-
-                if (relatedNotesData.size() >= 1) {
-                    if (updateReverse) {
-                        updatedLinks += updateReverse(
-                                relatedNotesData, noteData,
-                                sound, relatedInterval, soundField,
-                                reverseRelatedSoundField, reverseRelatedSoundAltField,
-                                intervalField, directionField
+                Map<String, String> relatedData = iterator.next();
+                long relatedId = Long.parseLong(relatedData.get(AnkiDroidHelper.KEY_ID));
+                for (Map.Entry<String, SearchExpressionMaker> relativesMakers :
+                        musInterval.relativesSearchExpressionMakers.entrySet()) {
+                    String modelField = relativesMakers.getKey();
+                    String fieldKey = MapUtil.getKeyByValue(musInterval.modelFields, modelField);
+                    Validator[] validators = MusInterval.Fields.VALIDATORS.getOrDefault(fieldKey, new Validator[]{});
+                    for (Validator validator : validators) {
+                        boolean isValid = ValidationUtil.isValid(
+                                validator,
+                                musInterval.modelId,
+                                relatedId,
+                                relatedData,
+                                fieldKey,
+                                musInterval.modelFields,
+                                helper,
+                                true
                         );
-                    }
-
-                    int priorityCount = 0;
-                    while (relatedNotesData.size() > 1) {
-                        RelativesPriorityComparator comparator = musInterval.relativesPriorityComparators[priorityCount];
-                        comparator.setTargetValueFromData(noteData);
-
-                        relatedNotesData.sort(comparator);
-                        Collections.reverse(relatedNotesData);
-
-                        Map<String, String> maxData = relatedNotesData.getFirst();
-                        for (int i = relatedNotesData.size() - 1; i > 0; i--) {
-                            Map<String, String> relatedData = relatedNotesData.get(i);
-                            if (comparator.compare(maxData, relatedData) != 0) {
-                                relatedNotesData.remove(i);
-                            }
+                        if (!isValid) {
+                            iterator.remove();
+                            continue outer;
                         }
-
-                        priorityCount++;
-                    }
-
-                    String newRelatedSound = relatedNotesData.getFirst().get(soundField);
-                    if (!relatedSound.equals(newRelatedSound)) {
-                        relatedSound = newRelatedSound;
-                        updatedLinks++;
                     }
                 }
+            }
+
+            if (updateReverse) {
+                updatedLinks += updateReverse(
+                        relatedNotesData, noteData, // @todo: revisit alt
+                        sound, relatedInterval, soundField,
+                        reverseRelatedSoundField, reverseRelatedSoundAltField,
+                        intervalField, directionField
+                );
+            }
+
+            for (int i = 0; i < musInterval.relativesPriorityComparators.length; i++) {
+                RelativesPriorityComparator comparator = musInterval.relativesPriorityComparators[i];
+                comparator.setTargetValueFromData(noteData);
+
+                relatedNotesData = comparator.getLeadingRelatives(relatedNotesData);
+                relatedAltNotesData = comparator.getLeadingRelatives(relatedAltNotesData);
+            }
+
+            String newRelatedSound = getValue(relatedNotesData, soundField, relatedSound);
+            if (!relatedSound.equals(newRelatedSound)) {
+                relatedSound = newRelatedSound;
+                updatedLinks++;
+            }
+            String newRelatedSoundAlt = getValue(relatedAltNotesData, soundField, relatedSoundAlt);
+            if (!relatedSoundAlt.equals(newRelatedSoundAlt)) {
+                relatedSoundAlt = newRelatedSoundAlt;
+                updatedLinks++;
             }
         }
 
@@ -279,6 +297,10 @@ public abstract class RelatedIntervalSoundField {
             updatedLinks++;
         }
         return updatedLinks;
+    }
+
+    private String getValue(LinkedList<Map<String, String>> relatedNotesData, String soundField, String relatedSound) {
+        return !relatedNotesData.isEmpty() ? relatedNotesData.getFirst().get(soundField) : relatedSound;
     }
 
     protected abstract String getFieldKey();
