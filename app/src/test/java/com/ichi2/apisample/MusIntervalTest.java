@@ -6068,6 +6068,6 @@ public class MusIntervalTest {
         MusInterval miLargerDescAdded = addedMusIntervals.getLast();
         assertArrayEquals(musIntervalsAdded.getLast().sounds, miLargerDescAdded.soundsSmaller);
         assertArrayEquals(musIntervalsAdded.getLast().soundsLarger, new String[]{""});
-        assertArrayEquals(musIntervalsAdded.getLast().soundsLarger, miLargerDescAdded.sounds);
+        assertArrayEquals(musIntervalsAdded.getLast().soundsLargerAlt, miLargerDescAdded.sounds);
     }
 }
