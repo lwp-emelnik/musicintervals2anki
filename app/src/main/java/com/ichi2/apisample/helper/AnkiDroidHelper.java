@@ -267,7 +267,12 @@ public class AnkiDroidHelper {
                 values.put(FlashCardsContract.CardTemplate.NAME, cards[i]);
                 values.put(FlashCardsContract.CardTemplate.QUESTION_FORMAT, qfmt[i]);
                 values.put(FlashCardsContract.CardTemplate.ANSWER_FORMAT, afmt[i]);
-                Uri templateUri = mResolver.insert(templatesUri, values);
+                Uri templateUri;
+                try {
+                    templateUri = mResolver.insert(templatesUri, values);
+                } catch (IllegalArgumentException e) {
+                    return null;
+                }
                 if (templateUri == null) {
                     return null;
                 }
