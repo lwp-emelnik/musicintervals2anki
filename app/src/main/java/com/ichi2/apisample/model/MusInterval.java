@@ -69,6 +69,15 @@ public class MusInterval {
                 }
             }
 
+            public static int getIndex(String value) {
+                for (int i = 0; i < VALUES.length; i++) {
+                    if (VALUES[i].equalsIgnoreCase(value)) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+
             public static String getEndNote(String startNote, String direction, String interval) {
                 ArrayList<String> notes = new ArrayList<>(Arrays.asList(VALUES));
                 int startIdx = notes.indexOf(startNote);
@@ -112,7 +121,8 @@ public class MusInterval {
                             String interval2 = data2.getOrDefault(intervalField, "");
                             boolean regularEquality = match(startNote1, startNote2);
                             boolean harmonicEquality = (interval1.equals("%") || interval1.equalsIgnoreCase(interval2)) &&
-                                    (direction1.equalsIgnoreCase(Direction.ASC) && direction2.equalsIgnoreCase(Direction.DESC) ||
+                                    (direction1.isEmpty() ||
+                                            direction1.equalsIgnoreCase(Direction.ASC) && direction2.equalsIgnoreCase(Direction.DESC) ||
                                             direction1.equalsIgnoreCase(Direction.DESC) && direction2.equalsIgnoreCase(Direction.ASC)) &&
                                     timing1.equalsIgnoreCase(Timing.HARMONIC) && timing2.equalsIgnoreCase(Timing.HARMONIC) &&
                                     match(startNote1, StartNote.getEndNote(startNote2, direction2, interval2));

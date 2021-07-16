@@ -62,8 +62,11 @@ public abstract class RelatedIntervalSoundField {
     }
 
     public boolean isSuspicious(Map<String, String> noteData, Map<String, Map<String, String>> soundDict, Map<String, Set<Map<String, String>>> suspiciousRelatedNotesData) {
-        return isFieldSuspicious(noteData, relatedSoundField, soundDict, suspiciousRelatedNotesData) ||
-                isFieldSuspicious(noteData, relatedSoundAltField, soundDict, suspiciousRelatedNotesData);
+        return isFieldSuspicious(noteData, relatedSoundField, soundDict, suspiciousRelatedNotesData);
+    }
+
+    public boolean isAltSuspicious(Map<String, String> noteData, Map<String, Map<String, String>> soundDict, Map<String, Set<Map<String, String>>> suspiciousRelatedNotesData) {
+        return isFieldSuspicious(noteData, relatedSoundAltField, soundDict, suspiciousRelatedNotesData);
     }
 
     private boolean isFieldSuspicious(Map<String, String> noteData, String relatedSoundField, Map<String, Map<String, String>> soundDict, Map<String, Set<Map<String, String>>> suspiciousRelatedNotesData) {
@@ -76,7 +79,7 @@ public abstract class RelatedIntervalSoundField {
             if (relatedNoteData != null) {
                 String relatedInterval = relatedNoteData.getOrDefault(intervalField, "");
                 Map<String, String> relatedNoteKeyData = getIntervalIdentityData(relatedNoteData);
-                if (!isEqualData(keyData, relatedNoteKeyData, musInterval.defaultValues, musInterval.relativesEqualityCheckers, false)
+                if (!isEqualData(keyData, relatedNoteKeyData, musInterval.defaultValues, musInterval.relativesEqualityCheckers, relatedSoundField.equals(relatedSoundAltField), false)
                         || !isCorrectRelation(intervalIdx, relatedInterval)) {
                     Set<Map<String, String>> pointed = suspiciousRelatedNotesData.getOrDefault(relatedSoundField, new HashSet<Map<String, String>>());
                     pointed.add(relatedNoteData);
@@ -112,8 +115,9 @@ public abstract class RelatedIntervalSoundField {
         if (isRelationPossible(intervalIdx)) {
             String relatedInterval = getRelatedInterval(intervalIdx);
             noteData.put(intervalField, relatedInterval);
-            if (MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval) ||
-                    MusInterval.Fields.Interval.VALUE_UNISON.equals(relatedInterval)) {
+            boolean isUnison = MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval);
+            boolean isRelatedUnison = MusInterval.Fields.Interval.VALUE_UNISON.equals(relatedInterval);
+            if (isUnison || isRelatedUnison) {
                 noteData.put(directionField, "");
             }
             LinkedList<Map<String, String>> relatedNotesData = helper.findNotes(
@@ -123,10 +127,11 @@ public abstract class RelatedIntervalSoundField {
                     musInterval.relativesSearchExpressionMakers,
                     musInterval.equalityCheckers
             );
-            if (timing.equalsIgnoreCase(MusInterval.Fields.Timing.HARMONIC)) {
+            if (timing.equalsIgnoreCase(MusInterval.Fields.Timing.HARMONIC) && !isUnison) {
                 Map<String, String> altNoteData = new HashMap<>(noteData);
-                String oppositeDirection = direction.equalsIgnoreCase(MusInterval.Fields.Direction.ASC) ?
-                        MusInterval.Fields.Direction.DESC : MusInterval.Fields.Direction.ASC;
+                String oppositeDirection = isRelatedUnison ? "" :
+                        direction.equalsIgnoreCase(MusInterval.Fields.Direction.ASC) ?
+                                MusInterval.Fields.Direction.DESC : MusInterval.Fields.Direction.ASC;
                 altNoteData.put(startNoteField, endNote);
                 altNoteData.put(directionField, oppositeDirection);
                 LinkedList<Map<String, String>> relatedAltNotesData = helper.findNotes(
@@ -283,7 +288,7 @@ public abstract class RelatedIntervalSoundField {
                                 getIntervalIdentityData(currentReverseData),
                                 musInterval.defaultValues,
                                 musInterval.relativesEqualityCheckers,
-                                true)) {
+                                alt, true)) {
                     continue;
                 }
 
@@ -335,7 +340,7 @@ public abstract class RelatedIntervalSoundField {
     private boolean isEqualData(Map<String, String> data1, Map<String, String> data2,
                                 Map<String, String> modelFieldsDefaultValues,
                                 Map<String, EqualityChecker> modelFieldsEqualityCheckers,
-                                boolean reverse) {
+                                boolean alt, boolean reverse) {
         String interval1 = data1.getOrDefault(intervalField, "");
         int interval1Idx = MusInterval.Fields.Interval.getIndex(interval1);
         String interval2 = data2.getOrDefault(intervalField, "");
@@ -349,6 +354,21 @@ public abstract class RelatedIntervalSoundField {
         keySet2.remove(intervalField);
         if (!keySet1.equals(keySet2)) {
             return false;
+        }
+        boolean isUnison = MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval1);
+        if (alt || isUnison) {
+            data2 = new HashMap<>(data2);
+            String startNote1 = data1.getOrDefault(startNoteField, "");
+            String direction1 = data1.getOrDefault(directionField, "");
+            String endNote1 = MusInterval.Fields.StartNote.getEndNote(startNote1, direction1, interval1);
+            String startNote2 = data2.getOrDefault(startNoteField, "");
+            if (!startNote2.equalsIgnoreCase(endNote1)) {
+                int idx = MusInterval.Fields.StartNote.getIndex(startNote2);
+                int distance = !reverse && !isUnison ? getDistance() : this.reverse.getDistance();
+                data2.put(startNoteField, MusInterval.Fields.StartNote.VALUES[idx + distance]);
+            } else {
+                data2.put(intervalField, interval1);
+            }
         }
         for (String key : keySet1) {
             String defaultValue = modelFieldsDefaultValues.getOrDefault(key, "");

@@ -84,43 +84,11 @@ public class NotesIntegrity {
             String noteTags = noteData.get(AnkiDroidHelper.KEY_TAGS).toLowerCase();
             boolean suspicious = false;
             for (RelatedIntervalSoundField relatedSoundField : musInterval.relatedSoundFields) {
-                String fieldKey = relatedSoundField.getFieldKey();
-                final String suspiciousBaseTag =
-                        suspiciousTag
-                                + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR
-                                + fieldKey;
-
-                String suspiciousPointingTag = (
-                        suspiciousBaseTag
-                                + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR
-                                + RelatedIntervalSoundField.TAG_POINTING
-                ).toLowerCase();
-                boolean suspiciousPointing = processRelation(
-                        noteId,
-                        noteData,
-                        suspiciousPointingTag,
-                        noteTags,
-                        fieldSuspiciousPointing.getOrDefault(fieldKey, new HashSet<Map<String, String>>())
-                );
-                if (suspiciousPointing) {
-                    int current = suspiciousFieldCounts.getOrDefault(fieldKey, 0);
-                    suspiciousFieldCounts.put(fieldKey, current + 1);
-                }
-
-                String suspiciousPointedTag = (
-                        suspiciousBaseTag
-                                + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR
-                                + RelatedIntervalSoundField.TAG_POINTED
-                ).toLowerCase();
-                boolean suspiciousPointed = processRelation(
-                        noteId,
-                        noteData,
-                        suspiciousPointedTag,
-                        noteTags,
-                        fieldSuspiciousPointed.getOrDefault(fieldKey, new HashSet<Map<String, String>>())
-                );
-
-                suspicious = suspicious || suspiciousPointing || suspiciousPointed;
+                String relationFieldKey = relatedSoundField.getFieldKey();
+                boolean relationSuspicious = isRelationSuspicious(relationFieldKey, noteData, noteId, noteTags);
+                String relationAltFieldKey = relatedSoundField.getAltFieldKey();
+                boolean relationAltSuspicious = isRelationSuspicious(relationAltFieldKey, noteData, noteId, noteTags);
+                suspicious = relationSuspicious || relationAltSuspicious;
             }
 
             if (!suspicious) {
@@ -142,6 +110,45 @@ public class NotesIntegrity {
         }
 
         return new Summary();
+    }
+
+    private boolean isRelationSuspicious(String fieldKey, Map<String, String> noteData, long noteId, String noteTags) {
+        final String suspiciousBaseTag =
+                suspiciousTag
+                        + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR
+                        + fieldKey;
+
+        String suspiciousPointingTag = (
+                suspiciousBaseTag
+                        + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR
+                        + RelatedIntervalSoundField.TAG_POINTING
+        ).toLowerCase();
+        boolean suspiciousPointing = processRelation(
+                noteId,
+                noteData,
+                suspiciousPointingTag,
+                noteTags,
+                fieldSuspiciousPointing.getOrDefault(fieldKey, new HashSet<Map<String, String>>())
+        );
+        if (suspiciousPointing) {
+            int current = suspiciousFieldCounts.getOrDefault(fieldKey, 0);
+            suspiciousFieldCounts.put(fieldKey, current + 1);
+        }
+
+        String suspiciousPointedTag = (
+                suspiciousBaseTag
+                        + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR
+                        + RelatedIntervalSoundField.TAG_POINTED
+        ).toLowerCase();
+        boolean suspiciousPointed = processRelation(
+                noteId,
+                noteData,
+                suspiciousPointedTag,
+                noteTags,
+                fieldSuspiciousPointed.getOrDefault(fieldKey, new HashSet<Map<String, String>>())
+        );
+
+        return suspiciousPointing || suspiciousPointed;
     }
 
     private ArrayList<Map<String, String>> checkCorrectness(LinkedList<Map<String, String>> notesData) {
@@ -269,13 +276,19 @@ public class NotesIntegrity {
             progressIndicator.setMessage(R.string.integrity_verifying_relations, i, correctNotesCount);
             for (RelatedIntervalSoundField relatedSoundField : musInterval.relatedSoundFields) {
                 if (relatedSoundField.isSuspicious(noteData, soundDict, fieldSuspiciousPointed)) {
-                    final String fieldKey = relatedSoundField.getFieldKey();
-                    Set<Map<String, String>> fieldPointing = fieldSuspiciousPointing.getOrDefault(fieldKey, new HashSet<Map<String, String>>());
-                    fieldPointing.add(noteData);
-                    fieldSuspiciousPointing.put(fieldKey, fieldPointing);
+                    addSuspiciousPointing(noteData, relatedSoundField.getFieldKey());
+                }
+                if (relatedSoundField.isAltSuspicious(noteData, soundDict, fieldSuspiciousPointed)) {
+                    addSuspiciousPointing(noteData, relatedSoundField.getAltFieldKey());
                 }
             }
         }
+    }
+
+    private void addSuspiciousPointing(Map<String, String> noteData, String fieldKey) {
+        Set<Map<String, String>> fieldPointing = fieldSuspiciousPointing.getOrDefault(fieldKey, new HashSet<Map<String, String>>());
+        fieldPointing.add(noteData);
+        fieldSuspiciousPointing.put(fieldKey, fieldPointing);
     }
 
     private boolean processRelation(long noteId, Map<String, String> noteData, String tag, String noteTags, Set<Map<String, String>> suspiciousData) {
