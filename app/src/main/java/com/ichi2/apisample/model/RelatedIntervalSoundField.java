@@ -69,7 +69,9 @@ public abstract class RelatedIntervalSoundField {
         return isFieldSuspicious(noteData, relatedSoundAltField, soundDict, suspiciousRelatedNotesData);
     }
 
-    private boolean isFieldSuspicious(Map<String, String> noteData, String relatedSoundField, Map<String, Map<String, String>> soundDict, Map<String, Set<Map<String, String>>> suspiciousRelatedNotesData) {
+    private boolean isFieldSuspicious(Map<String, String> noteData, String relatedSoundField,
+                                      Map<String, Map<String, String>> soundDict,
+                                      Map<String, Set<Map<String, String>>> suspiciousRelatedNotesData) {
         String interval = noteData.getOrDefault(intervalField, "");
         int intervalIdx = MusInterval.Fields.Interval.getIndex(interval);
         Map<String, String> keyData = getIntervalIdentityData(noteData);
@@ -79,8 +81,11 @@ public abstract class RelatedIntervalSoundField {
             if (relatedNoteData != null) {
                 String relatedInterval = relatedNoteData.getOrDefault(intervalField, "");
                 Map<String, String> relatedNoteKeyData = getIntervalIdentityData(relatedNoteData);
-                if (!isEqualData(keyData, relatedNoteKeyData, musInterval.defaultValues, musInterval.relativesEqualityCheckers, relatedSoundField.equals(relatedSoundAltField), false)
-                        || !isCorrectRelation(intervalIdx, relatedInterval)) {
+                if (!isCorrectRelation(intervalIdx, relatedInterval) ||
+                        !isEqualData(
+                                keyData, relatedNoteKeyData,
+                                musInterval.defaultValues, musInterval.relativesEqualityCheckers,
+                                relatedSoundField.equals(relatedSoundAltField), false)) {
                     Set<Map<String, String>> pointed = suspiciousRelatedNotesData.getOrDefault(relatedSoundField, new HashSet<Map<String, String>>());
                     pointed.add(relatedNoteData);
                     suspiciousRelatedNotesData.put(relatedSoundField, pointed);
