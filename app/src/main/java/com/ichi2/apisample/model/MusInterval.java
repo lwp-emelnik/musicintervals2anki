@@ -915,14 +915,16 @@ public class MusInterval {
         return result;
     }
 
-    public MusInterval[] getExisting() throws ValidationException, AnkiDroidHelper.InvalidAnkiDatabaseException {
+    public Set<String> getUniqueValues(String fieldKey) throws AnkiDroidHelper.InvalidAnkiDatabaseException {
         LinkedList<Map<String, String>> notes = getExistingNotes();
-        int nNotes = notes.size();
-        MusInterval[] mis = new MusInterval[nNotes];
-        for (int i = 0; i < nNotes; i++) {
-            mis[i] = getMusIntervalFromData(notes.get(i));
+        Set<String> result = new HashSet<>();
+        String modelField = modelFields.getOrDefault(fieldKey, fieldKey);
+        for (Map<String, String> data : notes) {
+            if (data.containsKey(modelField)) {
+                result.add(data.get(modelField));
+            }
         }
-        return mis;
+        return result;
     }
 
     /**

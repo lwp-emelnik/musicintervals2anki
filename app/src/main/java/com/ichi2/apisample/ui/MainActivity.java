@@ -436,10 +436,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         Set<String> instrumentOptions = new HashSet<>();
         try {
             MusInterval searchMi = getMusInterval(true);
-            MusInterval[] mis = searchMi.getExisting();
-            for (MusInterval mi : mis) {
-                instrumentOptions.add(mi.instrument);
-            }
+            instrumentOptions = searchMi.getUniqueValues(MusInterval.Fields.INSTRUMENT);
         } catch (Throwable t) {
             // simply don't fill the options if there was an error
         }
