@@ -121,8 +121,7 @@ public class MusInterval {
                             String interval2 = data2.getOrDefault(intervalField, "");
                             boolean regularEquality = match(startNote1, startNote2);
                             boolean harmonicEquality = (interval1.equals("%") || interval1.equalsIgnoreCase(interval2)) &&
-                                    (direction1.isEmpty() ||
-                                            direction1.equalsIgnoreCase(Direction.ASC) && direction2.equalsIgnoreCase(Direction.DESC) ||
+                                    (direction1.equalsIgnoreCase(Direction.ASC) && direction2.equalsIgnoreCase(Direction.DESC) ||
                                             direction1.equalsIgnoreCase(Direction.DESC) && direction2.equalsIgnoreCase(Direction.ASC)) &&
                                     timing1.equalsIgnoreCase(Timing.HARMONIC) && timing2.equalsIgnoreCase(Timing.HARMONIC) &&
                                     match(startNote1, StartNote.getEndNote(startNote2, direction2, interval2));
@@ -140,6 +139,9 @@ public class MusInterval {
                     String providedPart = pattern.replaceAll("%", "");
                     boolean hasSharp = value.contains("#");
                     int octaveIdx = hasSharp ? 2 : 1;
+                    if (value.length() >= octaveIdx) {
+                        return false;
+                    }
                     if (noteProvided) {
                         return providedPart.equalsIgnoreCase(value.substring(0, octaveIdx));
                     } else {
