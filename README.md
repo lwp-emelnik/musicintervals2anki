@@ -56,7 +56,7 @@ would result in the following interval identification card:
 |-------|--------------------------------------------------------------------------------|
 | Back  | Major 3rd<br>C4, ascending, melodic, Maj3, 80BPM, bass guitar, 5 strings, MIDI |
 
-Under the hood, the app also manages two additional fields: smaller and larger sound files. These fields serve as links to related notes - ones with the same parameters but having respectively smaller and larger intervals by one semitone. Smaller & larger sound file fields are filled automatically and used in interval comparison cards.
+Under the hood, the app also manages two additional fields: "smaller" and "larger" sound files. These fields serve as links to related notes - ones with the same parameters but having respectively smaller and larger intervals by one semitone. "Smaller" & "larger" sound file fields are filled automatically and used in interval comparison cards.
 
 In other words, if we would to add another note, identical to the [previous](#note-1) one, but having `interval` field, say, smaller by one semitone (for Maj3 that would be min3):
 
