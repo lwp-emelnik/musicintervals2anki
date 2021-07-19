@@ -2,7 +2,7 @@ package com.ichi2.apisample.model;
 
 import com.ichi2.apisample.R;
 import com.ichi2.apisample.helper.AnkiDroidHelper;
-import com.ichi2.apisample.helper.search.SearchExpressionMaker;
+import com.ichi2.apisample.helper.equality.NoteEqualityChecker;
 import com.ichi2.apisample.validation.ValidationUtil;
 import com.ichi2.apisample.validation.Validator;
 
@@ -211,7 +211,7 @@ public class NotesIntegrity {
 
     private void countDuplicates(ArrayList<Map<String, String>> notesData) {
         Map<Map<String, String>, LinkedList<Map<String, String>>> keysDataNotes = new HashMap<>();
-        for (Map<String, String> noteData : notesData) {
+        for (final Map<String, String> noteData : notesData) {
             Map<String, String> keyData = new HashMap<String, String>(noteData) {{
                 remove(musInterval.modelFields.get(MusInterval.Fields.SOUND));
                 remove(musInterval.modelFields.get(MusInterval.Fields.SOUND_SMALLER));
@@ -222,24 +222,27 @@ public class NotesIntegrity {
                 remove(AnkiDroidHelper.KEY_ID);
                 remove(AnkiDroidHelper.KEY_TAGS);
             }};
-            for (Map.Entry<String, String> fieldDefaultValue : MusInterval.Fields.DEFAULT_VALUES.entrySet()) {
-                String fieldKey = fieldDefaultValue.getKey();
-                String modelKey = musInterval.modelFields.getOrDefault(fieldKey, fieldKey);
-                if (!keyData.containsKey(modelKey) || keyData.get(modelKey).isEmpty()) {
-                    keyData.put(modelKey, fieldDefaultValue.getValue());
+            boolean match = false;
+            outer:
+            for (Map.Entry<Map<String, String>, LinkedList<Map<String, String>>> keyDataNotes : keysDataNotes.entrySet()) {
+                Map<String, String> countedKeyData = keyDataNotes.getKey();
+                LinkedList<Map<String, String>> countedNotesData = keyDataNotes.getValue();
+                Map<String, String> countedData = countedNotesData.getFirst();
+                for (final String key : countedKeyData.keySet()) {
+                    if (!NoteEqualityChecker.areEqual(noteData, countedData, key,
+                            musInterval.equalityCheckers, musInterval.defaultValues)) {
+                        continue outer;
+                    }
                 }
+                match = true;
+                countedNotesData.add(noteData);
+                break;
             }
-            for (String key : keyData.keySet()) {
-                SearchExpressionMaker expressionMaker = musInterval.searchExpressionMakers.getOrDefault(
-                        key,
-                        AnkiDroidHelper.DEFAULT_SEARCH_EXPRESSION_MAKER
-                );
-                String value = keyData.get(key);
-                keyData.put(key, expressionMaker.getExpression(value));
+            if (!match) {
+                keysDataNotes.put(keyData, new LinkedList<Map<String, String>>() {{
+                    add(noteData);
+                }});
             }
-            LinkedList<Map<String, String>> current = keysDataNotes.getOrDefault(keyData, new LinkedList<Map<String, String>>());
-            current.add(noteData);
-            keysDataNotes.put(keyData, current);
         }
 
         final String duplicateTagCheckStr = String.format(" %s ", duplicateTag);
