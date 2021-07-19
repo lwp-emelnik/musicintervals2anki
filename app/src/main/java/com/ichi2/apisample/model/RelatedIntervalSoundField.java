@@ -242,7 +242,7 @@ public abstract class RelatedIntervalSoundField {
                 String relatedStartNote = relatedData.getOrDefault(startNoteField, "");
                 String relatedDirection = relatedData.getOrDefault(directionField, "");
                 if (!relatedStartNote.equalsIgnoreCase(startNote) && !relatedStartNote.equals(endNote) ||
-                        !isHarmonic && !direction.equalsIgnoreCase(relatedDirection)) {
+                        (!isHarmonic || isRelatedUnison) && !direction.equalsIgnoreCase(relatedDirection)) {
                     alt = true;
                 }
             }
