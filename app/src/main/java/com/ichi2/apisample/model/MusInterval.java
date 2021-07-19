@@ -357,7 +357,7 @@ public class MusInterval {
         public static final String DEFAULT_MODEL_NAME = "Music.interval";
         public static final Map<String, String> DEFAULT_MODEL_FIELDS = new HashMap<>();
         static {
-            String[] signature = MusInterval.Fields.getSignature(false);
+            String[] signature = MusInterval.Fields.getSignature(true);
             for (String fieldKey : signature) {
                 DEFAULT_MODEL_FIELDS.put(fieldKey, fieldKey);
             }
