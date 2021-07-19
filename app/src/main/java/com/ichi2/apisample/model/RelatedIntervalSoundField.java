@@ -178,7 +178,8 @@ public abstract class RelatedIntervalSoundField {
             if (updateReverse) {
                 updatedLinks += updateReverse(
                         noteData, relatedNotesData, relatedInterval,
-                        sound, startNote, endNote, timing
+                        sound, startNote, direction, endNote,
+                        isHarmonic, isUnison, isRelatedUnison
                 );
             }
 
@@ -190,8 +191,8 @@ public abstract class RelatedIntervalSoundField {
                     String relatedStartNote = relatedData.getOrDefault(startNoteField, "");
                     String relatedDirection = relatedData.getOrDefault(directionField, "");
                     String relatedEndNote = MusInterval.Fields.StartNote.getEndNote(relatedStartNote, relatedDirection, relatedInterval);
-                    if (!startNote.equalsIgnoreCase(relatedStartNote) && !startNote.equalsIgnoreCase(relatedEndNote) && !isUnison ||
-                            (((isUnison && !isHarmonic) || isRelatedUnison) && !direction.equalsIgnoreCase(relatedDirection))) {
+                    if (!startNote.equalsIgnoreCase(relatedStartNote) && !startNote.equalsIgnoreCase(relatedEndNote) ||
+                            !isHarmonic && !direction.equalsIgnoreCase(relatedDirection)) {
                         iterator.remove();
                         relatedAltNotesData.add(relatedData);
                     }
@@ -230,16 +231,18 @@ public abstract class RelatedIntervalSoundField {
     }
 
     private int updateReverse(Map<String, String> data, LinkedList<Map<String, String>> relatedNotesData,
-                              String relatedInterval, String sound, String startNote, String endNote, String timing)
+                              String relatedInterval, String sound, String startNote, String direction, String endNote,
+                              boolean isHarmonic, boolean isUnison, boolean isRelatedUnison)
             throws AnkiDroidHelper.InvalidAnkiDatabaseException {
         int updatedLinks = 0;
         outer:
         for (Map<String, String> relatedData : relatedNotesData) {
             boolean alt = false;
-            if (timing.equalsIgnoreCase(MusInterval.Fields.Timing.HARMONIC)) {
+            if (isHarmonic || isUnison || isRelatedUnison) {
                 String relatedStartNote = relatedData.getOrDefault(startNoteField, "");
-                if (!relatedStartNote.equalsIgnoreCase(startNote) &&
-                        !relatedStartNote.equals(endNote)) {
+                String relatedDirection = relatedData.getOrDefault(directionField, "");
+                if (!relatedStartNote.equalsIgnoreCase(startNote) && !relatedStartNote.equals(endNote) ||
+                        !isHarmonic && !direction.equalsIgnoreCase(relatedDirection)) {
                     alt = true;
                 }
             }
