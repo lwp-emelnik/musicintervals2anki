@@ -4109,7 +4109,7 @@ public class MusIntervalTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void add_SimilarAltUnison_shouldFillReverseAndAlt() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
+    public void add_SimilarAltUnison_shouldFillAltReverse() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
         final long deckId = new Random().nextLong();
         final long modelId = new Random().nextLong();
         final long noteId = new Random().nextLong();
@@ -7155,12 +7155,12 @@ public class MusIntervalTest {
             put(MusInterval.Fields.SOUND, noteSound);
             put(MusInterval.Fields.SOUND_SMALLER, "");
             put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
-            put(MusInterval.Fields.SOUND_LARGER, largerNoteSound);
-            put(MusInterval.Fields.SOUND_LARGER_ALT, "");
+            put(MusInterval.Fields.SOUND_LARGER, "");
+            put(MusInterval.Fields.SOUND_LARGER_ALT, largerNoteSound);
             put(MusInterval.Fields.START_NOTE, "C2");
             put(MusInterval.Fields.INTERVAL, "Uni");
             put(MusInterval.Fields.TIMING, "harmonic");
-            put(MusInterval.Fields.DIRECTION, "");
+            put(MusInterval.Fields.DIRECTION, "ascending");
             put(MusInterval.Fields.TEMPO, "80");
             put(MusInterval.Fields.INSTRUMENT, "guitar");
             put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
