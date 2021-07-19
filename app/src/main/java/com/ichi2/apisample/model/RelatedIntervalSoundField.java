@@ -2,8 +2,7 @@ package com.ichi2.apisample.model;
 
 import com.ichi2.apisample.helper.AnkiDroidHelper;
 import com.ichi2.apisample.helper.MapUtil;
-import com.ichi2.apisample.helper.equality.EqualityChecker;
-import com.ichi2.apisample.helper.equality.FieldEqualityChecker;
+import com.ichi2.apisample.helper.equality.NoteEqualityChecker;
 import com.ichi2.apisample.helper.search.SearchExpressionMaker;
 import com.ichi2.apisample.validation.ValidationUtil;
 import com.ichi2.apisample.validation.Validator;
@@ -84,7 +83,6 @@ public abstract class RelatedIntervalSoundField {
                 if (!isCorrectRelation(intervalIdx, relatedInterval) ||
                         !isEqualData(
                                 keyData, relatedNoteKeyData,
-                                musInterval.defaultValues, musInterval.relativesEqualityCheckers,
                                 relatedSoundField.equals(relatedSoundAltField), false)) {
                     Set<Map<String, String>> pointed = suspiciousRelatedNotesData.getOrDefault(relatedSoundField, new HashSet<Map<String, String>>());
                     pointed.add(relatedNoteData);
@@ -290,8 +288,6 @@ public abstract class RelatedIntervalSoundField {
                         !isEqualData(
                                 getIntervalIdentityData(relatedData),
                                 getIntervalIdentityData(currentReverseData),
-                                musInterval.defaultValues,
-                                musInterval.relativesEqualityCheckers,
                                 alt, true)) {
                     continue;
                 }
@@ -341,10 +337,7 @@ public abstract class RelatedIntervalSoundField {
         }};
     }
 
-    private boolean isEqualData(Map<String, String> data1, Map<String, String> data2,
-                                Map<String, String> modelFieldsDefaultValues,
-                                Map<String, EqualityChecker> modelFieldsEqualityCheckers,
-                                boolean alt, boolean reverse) {
+    private boolean isEqualData(Map<String, String> data1, Map<String, String> data2, boolean alt, boolean reverse) {
         String interval1 = data1.getOrDefault(intervalField, "");
         int interval1Idx = MusInterval.Fields.Interval.getIndex(interval1);
         String interval2 = data2.getOrDefault(intervalField, "");
@@ -374,16 +367,9 @@ public abstract class RelatedIntervalSoundField {
                 data2.put(intervalField, interval1);
             }
         }
-        for (String key : keySet1) {
-            String defaultValue = modelFieldsDefaultValues.getOrDefault(key, "");
-            String value1 = data1.getOrDefault(key, "");
-            String value2 = data2.getOrDefault(key, "");
-            boolean defaultEquality = !defaultValue.isEmpty() &&
-                    ((value1.equalsIgnoreCase(defaultValue) && value2.isEmpty() || value1.isEmpty() && value2.equalsIgnoreCase(defaultValue))
-                            || (value1.isEmpty() && value2.isEmpty()));
-            EqualityChecker defaultEqualityChecker = new FieldEqualityChecker(key, AnkiDroidHelper.DEFAULT_EQUALITY_CHECKER);
-            EqualityChecker equalityChecker = modelFieldsEqualityCheckers.getOrDefault(key, defaultEqualityChecker);
-            if (!equalityChecker.areEqual(data1, data2) && !defaultEquality) {
+        for (final String key : keySet1) {
+            if (!NoteEqualityChecker.areEqual(data1, data2, key,
+                    musInterval.relativesEqualityCheckers, musInterval.defaultValues)) {
                 return false;
             }
         }
