@@ -52,7 +52,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     }};
 
     public static final boolean DEFAULT_USE_DEFAULT_MODEL_CHECK = true;
-    public static final boolean DEFAULT_VERSION_FIELD_SWITCH = false;
+    public static final boolean DEFAULT_VERSION_FIELD_SWITCH = true;
     public static final boolean DEFAULT_TAG_DUPLICATES_SWITCH = true;
     public static final String DEFAULT_ANKI_DIR = Environment.getExternalStorageDirectory().getPath() + "/AnkiDroid";
     public static final String DEFAULT_FILES_DELETION = VALUE_FILES_DELETION_ALWAYS_ASK;
