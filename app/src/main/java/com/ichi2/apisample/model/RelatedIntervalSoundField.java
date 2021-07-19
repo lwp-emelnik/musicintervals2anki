@@ -120,6 +120,10 @@ public abstract class RelatedIntervalSoundField {
             noteData.put(intervalField, relatedInterval);
             boolean isUnison = MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval);
             boolean isRelatedUnison = MusInterval.Fields.Interval.VALUE_UNISON.equals(relatedInterval);
+            boolean isHarmonic = timing.equalsIgnoreCase(MusInterval.Fields.Timing.HARMONIC);
+            if (isHarmonic && isRelatedUnison) {
+                noteData.put(directionField, "");
+            }
             LinkedList<Map<String, String>> relatedNotesData = helper.findNotes(
                     musInterval.modelId,
                     noteData,
@@ -127,11 +131,12 @@ public abstract class RelatedIntervalSoundField {
                     musInterval.relativesSearchExpressionMakers,
                     musInterval.equalityCheckers
             );
-            boolean isHarmonic = timing.equalsIgnoreCase(MusInterval.Fields.Timing.HARMONIC);
+            noteData.put(directionField, direction);
             if (isHarmonic || isUnison || isRelatedUnison) {
                 Map<String, String> altNoteData = new HashMap<>(noteData);
-                String oppositeDirection = direction.equalsIgnoreCase(MusInterval.Fields.Direction.ASC) ?
-                        MusInterval.Fields.Direction.DESC : MusInterval.Fields.Direction.ASC;
+                String oppositeDirection = isHarmonic && isRelatedUnison ? "" :
+                        direction.equalsIgnoreCase(MusInterval.Fields.Direction.ASC) ?
+                                MusInterval.Fields.Direction.DESC : MusInterval.Fields.Direction.ASC;
                 if (isHarmonic) {
                     altNoteData.put(startNoteField, endNote);
                 }
@@ -192,7 +197,10 @@ public abstract class RelatedIntervalSoundField {
                     String relatedDirection = relatedData.getOrDefault(directionField, "");
                     String relatedEndNote = MusInterval.Fields.StartNote.getEndNote(relatedStartNote, relatedDirection, relatedInterval);
                     if (!startNote.equalsIgnoreCase(relatedStartNote) && !startNote.equalsIgnoreCase(relatedEndNote) ||
-                            (!isHarmonic || isUnison) && !direction.equalsIgnoreCase(relatedDirection)) {
+                            !isHarmonic && !direction.equalsIgnoreCase(relatedDirection) ||
+                            isHarmonic && isUnison &&
+                                    (startNote.equalsIgnoreCase(relatedStartNote) && !direction.equalsIgnoreCase(relatedDirection) ||
+                                            startNote.equalsIgnoreCase(relatedEndNote) && direction.equalsIgnoreCase(relatedDirection))) { // @todo: test reverse
                         iterator.remove();
                         relatedAltNotesData.add(relatedData);
                     }

@@ -7014,7 +7014,7 @@ public class MusIntervalTest {
             put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
             put(MusInterval.Fields.SOUND_LARGER, "");
             put(MusInterval.Fields.SOUND_LARGER_ALT, "");
-            put(MusInterval.Fields.START_NOTE, "C2");
+            put(MusInterval.Fields.START_NOTE, "B1");
             put(MusInterval.Fields.INTERVAL, "min2");
             put(MusInterval.Fields.TIMING, "harmonic");
             put(MusInterval.Fields.DIRECTION, "ascending");
@@ -7066,6 +7066,7 @@ public class MusIntervalTest {
             remove(MusInterval.Fields.SOUND_SMALLER_ALT);
             remove(MusInterval.Fields.SOUND_LARGER);
             remove(MusInterval.Fields.SOUND_LARGER_ALT);
+            replace(MusInterval.Fields.DIRECTION, "");
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
         }};
@@ -7080,6 +7081,8 @@ public class MusIntervalTest {
             remove(MusInterval.Fields.SOUND_SMALLER_ALT);
             remove(MusInterval.Fields.SOUND_LARGER);
             remove(MusInterval.Fields.SOUND_LARGER_ALT);
+            replace(MusInterval.Fields.START_NOTE, "C2");
+            replace(MusInterval.Fields.DIRECTION, "descending");
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
         }};
@@ -7095,6 +7098,7 @@ public class MusIntervalTest {
             remove(MusInterval.Fields.SOUND_LARGER);
             remove(MusInterval.Fields.SOUND_LARGER_ALT);
             replace(MusInterval.Fields.START_NOTE, "C2");
+            replace(MusInterval.Fields.DIRECTION, "ascending");
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
         }};
@@ -7146,9 +7150,9 @@ public class MusIntervalTest {
 
         assertEquals(3, is.getNotesCount());
         assertEquals(4, is.getAutoFilledRelationsCount());
-        assertEquals(min2AscSound, uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER));
-        assertEquals(min2DescSound, uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER_ALT));
-        assertEquals(uniAscSound, min2AscNoteData.get(MusInterval.Fields.SOUND_SMALLER));
+        assertEquals(min2AscSound, uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER_ALT));
+        assertEquals(min2DescSound, uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER));
+        assertEquals(uniAscSound, min2AscNoteData.get(MusInterval.Fields.SOUND_SMALLER_ALT));
         assertEquals(uniAscSound, min2DescNoteData.get(MusInterval.Fields.SOUND_SMALLER_ALT));
     }
 
@@ -7175,7 +7179,7 @@ public class MusIntervalTest {
                 .model(defaultModelName)
                 .deck(defaultDeckName)
                 .sounds(new String[]{"intervalAsc"})
-                .notes(new String[]{"C"})
+                .notes(new String[]{"D"})
                 .octaves(new String[]{defaultOctave})
                 .direction(MusInterval.Fields.Direction.ASC)
                 .timing(MusInterval.Fields.Timing.HARMONIC)
@@ -7187,7 +7191,7 @@ public class MusIntervalTest {
                 .model(defaultModelName)
                 .deck(defaultDeckName)
                 .sounds(new String[]{"intervalLargerAsc.mp3"})
-                .notes(new String[]{"C"})
+                .notes(new String[]{"C#"})
                 .octaves(new String[]{defaultOctave})
                 .direction(MusInterval.Fields.Direction.ASC)
                 .timing(MusInterval.Fields.Timing.HARMONIC)
@@ -7199,7 +7203,7 @@ public class MusIntervalTest {
                 .model(defaultModelName)
                 .deck(defaultDeckName)
                 .sounds(new String[]{"intervalLargerDesc.mp3"})
-                .notes(new String[]{"C#"})
+                .notes(new String[]{"D#"})
                 .octaves(new String[]{defaultOctave})
                 .direction(MusInterval.Fields.Direction.DESC)
                 .timing(MusInterval.Fields.Timing.HARMONIC)
@@ -7316,12 +7320,11 @@ public class MusIntervalTest {
 
         musIntervalLargerAsc.addToAnki(prompter, indicator);
         MusInterval miLargerAscAdded = addedMusIntervals.getLast();
-        assertArrayEquals(musIntervalsAdded.getLast().sounds, miLargerAscAdded.soundsSmaller);
+        assertArrayEquals(musIntervalsAdded.getLast().sounds, miLargerAscAdded.soundsSmallerAlt);
         assertArrayEquals(musIntervalsAdded.getLast().soundsLarger, miLargerAscAdded.sounds);
 
         musIntervalLargerDesc.addToAnki(prompter, indicator);
         MusInterval miLargerDescAdded = addedMusIntervals.getLast();
-        assertArrayEquals(new String[]{""}, miLargerDescAdded.soundsSmaller);
         assertArrayEquals(musIntervalsAdded.getLast().soundsLargerAlt, miLargerDescAdded.sounds);
         assertArrayEquals(musIntervalsAdded.getLast().sounds, miLargerDescAdded.soundsSmallerAlt);
     }
