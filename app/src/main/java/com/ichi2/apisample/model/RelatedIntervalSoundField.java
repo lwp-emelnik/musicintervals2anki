@@ -122,9 +122,6 @@ public abstract class RelatedIntervalSoundField {
             noteData.put(intervalField, relatedInterval);
             boolean isUnison = MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval);
             boolean isRelatedUnison = MusInterval.Fields.Interval.VALUE_UNISON.equals(relatedInterval);
-            if (isUnison || isRelatedUnison) {
-                noteData.put(directionField, "");
-            }
             LinkedList<Map<String, String>> relatedNotesData = helper.findNotes(
                     musInterval.modelId,
                     noteData,
@@ -132,12 +129,14 @@ public abstract class RelatedIntervalSoundField {
                     musInterval.relativesSearchExpressionMakers,
                     musInterval.equalityCheckers
             );
-            if (timing.equalsIgnoreCase(MusInterval.Fields.Timing.HARMONIC) && !isUnison) {
+            boolean isHarmonic = timing.equalsIgnoreCase(MusInterval.Fields.Timing.HARMONIC);
+            if (isHarmonic || isUnison || isRelatedUnison) {
                 Map<String, String> altNoteData = new HashMap<>(noteData);
-                String oppositeDirection = isRelatedUnison ? "" :
-                        direction.equalsIgnoreCase(MusInterval.Fields.Direction.ASC) ?
-                                MusInterval.Fields.Direction.DESC : MusInterval.Fields.Direction.ASC;
-                altNoteData.put(startNoteField, endNote);
+                String oppositeDirection = direction.equalsIgnoreCase(MusInterval.Fields.Direction.ASC) ?
+                        MusInterval.Fields.Direction.DESC : MusInterval.Fields.Direction.ASC;
+                if (isHarmonic) {
+                    altNoteData.put(startNoteField, endNote);
+                }
                 altNoteData.put(directionField, oppositeDirection);
                 LinkedList<Map<String, String>> relatedAltNotesData = helper.findNotes(
                         musInterval.modelId,
@@ -186,15 +185,15 @@ public abstract class RelatedIntervalSoundField {
             }
 
             LinkedList<Map<String, String>> relatedAltNotesData = new LinkedList<>();
-            if (timing.equalsIgnoreCase(MusInterval.Fields.Timing.HARMONIC)) {
+            if (isHarmonic || isUnison || isRelatedUnison) {
                 iterator = relatedNotesData.iterator();
                 while (iterator.hasNext()) {
                     Map<String, String> relatedData = iterator.next();
                     String relatedStartNote = relatedData.getOrDefault(startNoteField, "");
                     String relatedDirection = relatedData.getOrDefault(directionField, "");
                     String relatedEndNote = MusInterval.Fields.StartNote.getEndNote(relatedStartNote, relatedDirection, relatedInterval);
-                    if (!startNote.equalsIgnoreCase(relatedStartNote) &&
-                            !startNote.equalsIgnoreCase(relatedEndNote)) {
+                    if (!startNote.equalsIgnoreCase(relatedStartNote) && !startNote.equalsIgnoreCase(relatedEndNote) && !isUnison ||
+                            (((isUnison && !isHarmonic) || isRelatedUnison) && !direction.equalsIgnoreCase(relatedDirection))) {
                         iterator.remove();
                         relatedAltNotesData.add(relatedData);
                     }

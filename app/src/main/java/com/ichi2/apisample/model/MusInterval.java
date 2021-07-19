@@ -191,45 +191,6 @@ public class MusInterval {
                             return regularEquality || unisonEquality || harmonicEquality;
                         }
                     };
-
-            private static final FixableNoteValidator NON_EMPTY_UNISON_VALIDATOR = new FixableNoteValidator() {
-                @Override
-                public boolean fix(long modelId, long noteId, Map<String, String> data, Map<String, String> modelFields, AnkiDroidHelper helper) {
-                    String directionField = modelFields.getOrDefault(DIRECTION, DIRECTION);
-                    data.replace(directionField, "");
-                    return helper.updateNote(modelId, noteId, data);
-                }
-
-                @Override
-                public boolean isValid(Map<String, String> data, Map<String, String> modelFields) {
-                    String directionField = modelFields.getOrDefault(Fields.DIRECTION, Fields.DIRECTION);
-                    String direction = data.getOrDefault(directionField, "");
-                    String intervalField = modelFields.getOrDefault(Fields.INTERVAL, Fields.INTERVAL);
-                    String interval = data.getOrDefault(intervalField, "");
-                    return !Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval) || direction.trim().isEmpty();
-                }
-
-                @Override
-                public String getErrorTag() {
-                    return "non-empty";
-                }
-            };
-
-            private static final NoteValidator EMPTY_NON_UNISON_VALIDATOR = new NoteValidator() {
-                @Override
-                public boolean isValid(Map<String, String> data, Map<String, String> modelFields) {
-                    String directionField = modelFields.getOrDefault(Fields.DIRECTION, Fields.DIRECTION);
-                    String direction = data.getOrDefault(directionField, "");
-                    String intervalField = modelFields.getOrDefault(Fields.INTERVAL, Fields.INTERVAL);
-                    String interval = data.getOrDefault(intervalField, "");
-                    return !direction.trim().isEmpty() || Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval);
-                }
-
-                @Override
-                public String getErrorTag() {
-                    return "empty";
-                }
-            };
         }
 
         public static class Timing {
@@ -365,8 +326,7 @@ public class MusInterval {
                     new PatternValidator(StartNote.getValidationPattern())
             });
             put(DIRECTION, new Validator[]{
-                    Direction.NON_EMPTY_UNISON_VALIDATOR,
-                    Direction.EMPTY_NON_UNISON_VALIDATOR,
+                    VALIDATOR_EMPTY,
                     new PatternValidator(String.format("^$|(?i)%s|%s", Direction.ASC, Direction.DESC))
             });
             put(TIMING, new Validator[]{
@@ -1283,7 +1243,7 @@ public class MusInterval {
                     String soundLargerAlt = soundsLargerAltProvided && soundsLargerAlt.length > i ? soundsLargerAlt[i] : "";
                     miData.put(modelFields.get(Fields.SOUND_LARGER_ALT), soundLargerAlt);
                     miData.put(modelFields.get(Fields.START_NOTE), note + octave);
-                    miData.put(modelFields.get(Fields.DIRECTION), !Fields.Interval.VALUE_UNISON.equals(interval) ? direction : "");
+                    miData.put(modelFields.get(Fields.DIRECTION), direction);
                     miData.put(modelFields.get(Fields.TIMING), timing);
                     miData.put(modelFields.get(Fields.INTERVAL), interval);
                     miData.put(modelFields.get(Fields.TEMPO), tempo);

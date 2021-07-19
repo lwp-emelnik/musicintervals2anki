@@ -3855,17 +3855,22 @@ public class MusIntervalTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void checkIntegrity_EmptyDirectionUnison_ShouldFillLinks() throws MusInterval.ValidationException, AnkiDroidHelper.InvalidAnkiDatabaseException {
+    public void checkIntegrity_MelodicUnisonAltLarger_ShouldFillAltLinks() throws MusInterval.ValidationException, AnkiDroidHelper.InvalidAnkiDatabaseException {
         final long modelId = new Random().nextLong();
-        final long uniNoteId = new Random().nextLong();
-        final long min2NoteId = new Random().nextLong();
+        final long uniAscNoteId = new Random().nextLong();
+        final long min2AscNoteId = new Random().nextLong();
+        final long min2DescNoteId = new Random().nextLong();
 
         final AnkiDroidHelper helper = mock(AnkiDroidHelper.class);
         doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
         doReturn(SIGNATURE).when(helper).getFieldList(eq(modelId));
 
-        final Map<String, String> uniNoteData = new HashMap<String, String>() {{
-            put(MusInterval.Fields.SOUND, "[sound:dir/uni.mp3]");
+        final String uniAscSound = "[sound:dir/uniAsc.mp3]";
+        final String min2AscSound = "[sound:dir/min2Asc.mp3]";
+        final String min2DescSound = "[sound:dir/min2Desc.mp3]";
+
+        final Map<String, String> uniAscNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, uniAscSound);
             put(MusInterval.Fields.SOUND_SMALLER, "");
             put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
             put(MusInterval.Fields.SOUND_LARGER, "");
@@ -3873,15 +3878,15 @@ public class MusIntervalTest {
             put(MusInterval.Fields.START_NOTE, "C2");
             put(MusInterval.Fields.INTERVAL, MusInterval.Fields.Interval.VALUE_UNISON); // unison
             put(MusInterval.Fields.TIMING, "melodic");
-            put(MusInterval.Fields.DIRECTION, ""); // empty direction
+            put(MusInterval.Fields.DIRECTION, "ascending");
             put(MusInterval.Fields.TEMPO, "80");
             put(MusInterval.Fields.INSTRUMENT, "guitar");
             put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
-            put(AnkiDroidHelper.KEY_ID, String.valueOf(uniNoteId));
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(uniAscNoteId));
             put(AnkiDroidHelper.KEY_TAGS, "");
         }};
-        final Map<String, String> min2NoteData = new HashMap<String, String>() {{
-            put(MusInterval.Fields.SOUND, "[sound:dir/min2.mp3]");
+        final Map<String, String> min2AscNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, min2AscSound);
             put(MusInterval.Fields.SOUND_SMALLER, "");
             put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
             put(MusInterval.Fields.SOUND_LARGER, "");
@@ -3893,7 +3898,23 @@ public class MusIntervalTest {
             put(MusInterval.Fields.TEMPO, "80");
             put(MusInterval.Fields.INSTRUMENT, "guitar");
             put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
-            put(AnkiDroidHelper.KEY_ID, String.valueOf(min2NoteId));
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(min2AscNoteId));
+            put(AnkiDroidHelper.KEY_TAGS, "");
+        }};
+        final Map<String, String> min2DescNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, min2DescSound);
+            put(MusInterval.Fields.SOUND_SMALLER, "");
+            put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
+            put(MusInterval.Fields.SOUND_LARGER, "");
+            put(MusInterval.Fields.SOUND_LARGER_ALT, "");
+            put(MusInterval.Fields.START_NOTE, "C2");
+            put(MusInterval.Fields.INTERVAL, "min2");
+            put(MusInterval.Fields.TIMING, "melodic");
+            put(MusInterval.Fields.DIRECTION, "descending");
+            put(MusInterval.Fields.TEMPO, "80");
+            put(MusInterval.Fields.INSTRUMENT, "guitar");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(min2DescNoteId));
             put(AnkiDroidHelper.KEY_TAGS, "");
         }};
         final Map<String, String> searchData = new HashMap<String, String>() {{
@@ -3907,15 +3928,16 @@ public class MusIntervalTest {
         }};
 
         LinkedList<Map<String, String>> searchResult = new LinkedList<Map<String, String>>() {{
-            add(uniNoteData);
-            add(min2NoteData);
+            add(uniAscNoteData);
+            add(min2AscNoteData);
+            add(min2DescNoteData);
         }};
         doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(new HashMap<String, String>()), any(Map.class), any(Map.class), any(Map.class));
         ArrayList<Map<String, String>> searchDataset = new ArrayList<Map<String, String>>() {{
             add(searchData);
         }};
         doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(searchDataset), any(Map.class), any(Map.class), any(Map.class));
-        Map<String, String> uniNoteKeyData = new HashMap<String, String>(uniNoteData) {{
+        Map<String, String> uniAscNoteKeyData = new HashMap<String, String>(uniAscNoteData) {{
             remove(MusInterval.Fields.SOUND);
             remove(MusInterval.Fields.SOUND_SMALLER);
             remove(MusInterval.Fields.SOUND_SMALLER_ALT);
@@ -3926,24 +3948,151 @@ public class MusIntervalTest {
         }};
         doReturn(
                 new LinkedList<Map<String, String>>() {{
-                    add(uniNoteData);
+                    add(uniAscNoteData);
                 }}
-        ).when(helper).findNotes(eq(modelId), eq(uniNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
-        Map<String, String> min2NoteKeyData = new HashMap<String, String>(min2NoteData) {{
+        ).when(helper).findNotes(eq(modelId), eq(uniAscNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
+        Map<String, String> min2AscNoteKeyData = new HashMap<String, String>(min2AscNoteData) {{
             remove(MusInterval.Fields.SOUND);
             remove(MusInterval.Fields.SOUND_SMALLER);
             remove(MusInterval.Fields.SOUND_SMALLER_ALT);
             remove(MusInterval.Fields.SOUND_LARGER);
             remove(MusInterval.Fields.SOUND_LARGER_ALT);
-            replace(MusInterval.Fields.DIRECTION, "");
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
         }};
         doReturn(
                 new LinkedList<Map<String, String>>() {{
-                    add(min2NoteData);
+                    add(min2AscNoteData);
                 }}
-        ).when(helper).findNotes(eq(modelId), eq(min2NoteKeyData), any(Map.class), any(Map.class), any(Map.class));
+        ).when(helper).findNotes(eq(modelId), eq(min2AscNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
+        Map<String, String> min2DescNoteKeyData = new HashMap<String, String>(min2DescNoteData) {{
+            remove(MusInterval.Fields.SOUND);
+            remove(MusInterval.Fields.SOUND_SMALLER);
+            remove(MusInterval.Fields.SOUND_SMALLER_ALT);
+            remove(MusInterval.Fields.SOUND_LARGER);
+            remove(MusInterval.Fields.SOUND_LARGER_ALT);
+            remove(AnkiDroidHelper.KEY_ID);
+            remove(AnkiDroidHelper.KEY_TAGS);
+        }};
+        doReturn(
+                new LinkedList<Map<String, String>>() {{
+                    add(min2DescNoteData);
+                }}
+        ).when(helper).findNotes(eq(modelId), eq(min2DescNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    uniAscNoteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(uniAscNoteId), any(Map.class));
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    min2AscNoteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(min2AscNoteId), any(Map.class));
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    min2DescNoteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(min2DescNoteId), any(Map.class));
+
+        MusInterval mi = new MusInterval.Builder(helper)
+                .model(defaultModelName)
+                .notes(null)
+                .octaves(null)
+                .intervals(null)
+                .build();
+        ProgressIndicator progressIndicator = mock(ProgressIndicator.class);
+        NotesIntegrity.Summary is = new NotesIntegrity(helper, mi, corruptedTag, suspiciousTag, duplicateTag, progressIndicator).check();
+
+        assertEquals(3, is.getNotesCount());
+        assertEquals(4, is.getAutoFilledRelationsCount());
+        assertEquals(uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER), min2AscSound);
+        assertEquals(uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER_ALT), min2DescSound);
+        assertEquals(uniAscSound, min2AscNoteData.get(MusInterval.Fields.SOUND_SMALLER));
+        assertEquals(uniAscSound, min2DescNoteData.get(MusInterval.Fields.SOUND_SMALLER_ALT));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void checkIntegrity_DifferentMelodicUnisonAltLargerLink_ShouldCountAsSuspicious() throws MusInterval.ValidationException, AnkiDroidHelper.InvalidAnkiDatabaseException {
+        final long modelId = new Random().nextLong();
+        final long uniAscNoteId = new Random().nextLong();
+        final long min2DescNoteId = new Random().nextLong();
+
+        final AnkiDroidHelper helper = mock(AnkiDroidHelper.class);
+        doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
+        doReturn(SIGNATURE).when(helper).getFieldList(eq(modelId));
+
+        final String uniAscSound = "[sound:dir/uniAsc.mp3]";
+        final String min2DescSound = "[sound:dir/min2Desc.mp3]";
+
+        final Map<String, String> uniAscNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, uniAscSound);
+            put(MusInterval.Fields.SOUND_SMALLER, "");
+            put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
+            put(MusInterval.Fields.SOUND_LARGER, "");
+            put(MusInterval.Fields.SOUND_LARGER_ALT, min2DescSound);
+            put(MusInterval.Fields.START_NOTE, "C2");
+            put(MusInterval.Fields.INTERVAL, MusInterval.Fields.Interval.VALUE_UNISON); // unison
+            put(MusInterval.Fields.TIMING, "melodic");
+            put(MusInterval.Fields.DIRECTION, "ascending");
+            put(MusInterval.Fields.TEMPO, "80");
+            put(MusInterval.Fields.INSTRUMENT, "violin");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(uniAscNoteId));
+            put(AnkiDroidHelper.KEY_TAGS, "");
+        }};
+        final Map<String, String> min2DescNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, min2DescSound);
+            put(MusInterval.Fields.SOUND_SMALLER, "");
+            put(MusInterval.Fields.SOUND_SMALLER_ALT, uniAscSound);
+            put(MusInterval.Fields.SOUND_LARGER, "");
+            put(MusInterval.Fields.SOUND_LARGER_ALT, "");
+            put(MusInterval.Fields.START_NOTE, "C2");
+            put(MusInterval.Fields.INTERVAL, "min2");
+            put(MusInterval.Fields.TIMING, "melodic");
+            put(MusInterval.Fields.DIRECTION, "descending");
+            put(MusInterval.Fields.TEMPO, "80");
+            put(MusInterval.Fields.INSTRUMENT, "guitar");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(min2DescNoteId));
+            put(AnkiDroidHelper.KEY_TAGS, "");
+        }};
+        final Map<String, String> searchData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.START_NOTE, "%%");
+            put(MusInterval.Fields.INTERVAL, "%");
+            put(MusInterval.Fields.TIMING, "");
+            put(MusInterval.Fields.DIRECTION, "");
+            put(MusInterval.Fields.TEMPO, "");
+            put(MusInterval.Fields.INSTRUMENT, "");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
+        }};
+
+        LinkedList<Map<String, String>> searchResult = new LinkedList<Map<String, String>>() {{
+            add(uniAscNoteData);
+            add(min2DescNoteData);
+        }};
+        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(new HashMap<String, String>()), any(Map.class), any(Map.class), any(Map.class));
+        ArrayList<Map<String, String>> searchDataset = new ArrayList<Map<String, String>>() {{
+            add(searchData);
+        }};
+        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(searchDataset), any(Map.class), any(Map.class), any(Map.class));
 
         MusInterval mi = new MusInterval.Builder(helper)
                 .model(defaultModelName)
@@ -3955,77 +4104,7 @@ public class MusIntervalTest {
         NotesIntegrity.Summary is = new NotesIntegrity(helper, mi, corruptedTag, suspiciousTag, duplicateTag, progressIndicator).check();
 
         assertEquals(2, is.getNotesCount());
-        assertEquals(2, is.getAutoFilledRelationsCount());
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void checkIntegrity_NonEmptyDirectionUnison_ShouldClear() throws MusInterval.ValidationException, AnkiDroidHelper.InvalidAnkiDatabaseException {
-        final long modelId = new Random().nextLong();
-        final long uniNoteId = new Random().nextLong();
-
-        final AnkiDroidHelper helper = mock(AnkiDroidHelper.class);
-        doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
-        doReturn(SIGNATURE).when(helper).getFieldList(eq(modelId));
-
-        final Map<String, String> uniNoteData = new HashMap<String, String>() {{
-            put(MusInterval.Fields.SOUND, "[sound:dir/uni.mp3]");
-            put(MusInterval.Fields.SOUND_SMALLER, "");
-            put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
-            put(MusInterval.Fields.SOUND_LARGER, "");
-            put(MusInterval.Fields.SOUND_LARGER_ALT, "");
-            put(MusInterval.Fields.START_NOTE, "C2");
-            put(MusInterval.Fields.INTERVAL, MusInterval.Fields.Interval.VALUE_UNISON); // unison
-            put(MusInterval.Fields.TIMING, "melodic");
-            put(MusInterval.Fields.DIRECTION, "ascending"); // non-empty direction
-            put(MusInterval.Fields.TEMPO, "80");
-            put(MusInterval.Fields.INSTRUMENT, "guitar");
-            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
-            put(AnkiDroidHelper.KEY_ID, String.valueOf(uniNoteId));
-            put(AnkiDroidHelper.KEY_TAGS, "");
-        }};
-        final Map<String, String> searchData = new HashMap<String, String>() {{
-            put(MusInterval.Fields.START_NOTE, "%%");
-            put(MusInterval.Fields.INTERVAL, "%");
-            put(MusInterval.Fields.TIMING, "");
-            put(MusInterval.Fields.DIRECTION, "");
-            put(MusInterval.Fields.TEMPO, "");
-            put(MusInterval.Fields.INSTRUMENT, "");
-            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
-        }};
-
-        LinkedList<Map<String, String>> searchResult = new LinkedList<Map<String, String>>() {{
-            add(uniNoteData);
-        }};
-        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(new HashMap<String, String>()), any(Map.class), any(Map.class), any(Map.class));
-        ArrayList<Map<String, String>> searchDataset = new ArrayList<Map<String, String>>() {{
-            add(searchData);
-        }};
-        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(searchDataset), any(Map.class), any(Map.class), any(Map.class));
-
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) {
-                Map<String, String> data = invocation.getArgument(2);
-                for (Map.Entry<String, String> entry : data.entrySet()) {
-                    uniNoteData.replace(entry.getKey(), entry.getValue());
-                }
-                return true;
-            }
-        }).when(helper).updateNote(eq(modelId), eq(uniNoteId), any(Map.class));
-
-        MusInterval mi = new MusInterval.Builder(helper)
-                .model(defaultModelName)
-                .notes(null)
-                .octaves(null)
-                .intervals(null)
-                .build();
-        ProgressIndicator progressIndicator = mock(ProgressIndicator.class);
-        NotesIntegrity.Summary is = new NotesIntegrity(helper, mi, corruptedTag, suspiciousTag, duplicateTag, progressIndicator).check();
-
-        assertEquals(1, is.getNotesCount());
-        assertEquals(0, is.getCorruptedNotesCount());
-        assertEquals("", uniNoteData.get(MusInterval.Fields.DIRECTION));
+        assertEquals(2, is.getSuspiciousNotesCount());
     }
 
     @Test
@@ -6260,6 +6339,188 @@ public class MusIntervalTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    public void checkIntegrity_SimilarIntervalsDifferentHarmonicNotations_shouldFillAltLinks() throws MusInterval.ValidationException, AnkiDroidHelper.InvalidAnkiDatabaseException {
+        final long modelId = new Random().nextLong();
+        final long smallerNoteId = new Random().nextLong();
+        final long noteId = new Random().nextLong();
+        final long largerNoteId = new Random().nextLong();
+
+        final AnkiDroidHelper helper = mock(AnkiDroidHelper.class);
+        doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
+        doReturn(SIGNATURE).when(helper).getFieldList(eq(modelId));
+
+        final String smallerNoteSound = "[sound:dir/file_smaller.mp3]";
+        final String noteSound = "[sound:dir/file.mp3]";
+        final String largerNoteSound = "[sound:dir/file_larger.mp3]";
+
+        final Map<String, String> smallerNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, smallerNoteSound);
+            put(MusInterval.Fields.SOUND_SMALLER, "");
+            put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
+            put(MusInterval.Fields.SOUND_LARGER, "");
+            put(MusInterval.Fields.SOUND_LARGER_ALT, "");
+            put(MusInterval.Fields.START_NOTE, "D#2");
+            put(MusInterval.Fields.INTERVAL, "min2");
+            put(MusInterval.Fields.TIMING, "harmonic");
+            put(MusInterval.Fields.DIRECTION, "descending");
+            put(MusInterval.Fields.TEMPO, "80");
+            put(MusInterval.Fields.INSTRUMENT, "guitar");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(smallerNoteId));
+            put(AnkiDroidHelper.KEY_TAGS, "");
+        }};
+        final Map<String, String> noteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, noteSound);
+            put(MusInterval.Fields.SOUND_SMALLER, "");
+            put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
+            put(MusInterval.Fields.SOUND_LARGER, "");
+            put(MusInterval.Fields.SOUND_LARGER_ALT, "");
+            put(MusInterval.Fields.START_NOTE, "C#2");
+            put(MusInterval.Fields.INTERVAL, "Maj2");
+            put(MusInterval.Fields.TIMING, "harmonic");
+            put(MusInterval.Fields.DIRECTION, "ascending");
+            put(MusInterval.Fields.TEMPO, "80");
+            put(MusInterval.Fields.INSTRUMENT, "guitar");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(noteId));
+            put(AnkiDroidHelper.KEY_TAGS, "");
+        }};
+        final Map<String, String> largerNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, largerNoteSound);
+            put(MusInterval.Fields.SOUND_SMALLER, "");
+            put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
+            put(MusInterval.Fields.SOUND_LARGER, "");
+            put(MusInterval.Fields.SOUND_LARGER_ALT, "");
+            put(MusInterval.Fields.START_NOTE, "D#2");
+            put(MusInterval.Fields.INTERVAL, "min3");
+            put(MusInterval.Fields.TIMING, "harmonic");
+            put(MusInterval.Fields.DIRECTION, "descending");
+            put(MusInterval.Fields.TEMPO, "80");
+            put(MusInterval.Fields.INSTRUMENT, "guitar");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(largerNoteId));
+            put(AnkiDroidHelper.KEY_TAGS, "");
+        }};
+
+        final Map<String, String> searchData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.START_NOTE, "%%");
+            put(MusInterval.Fields.INTERVAL, "%");
+            put(MusInterval.Fields.TIMING, "");
+            put(MusInterval.Fields.DIRECTION, "");
+            put(MusInterval.Fields.TEMPO, "");
+            put(MusInterval.Fields.INSTRUMENT, "");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
+        }};
+
+        LinkedList<Map<String, String>> searchResult = new LinkedList<Map<String, String>>() {{
+            add(smallerNoteData);
+            add(noteData);
+            add(largerNoteData);
+        }};
+        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(new HashMap<String, String>()), any(Map.class), any(Map.class), any(Map.class));
+        ArrayList<Map<String, String>> searchDataset = new ArrayList<Map<String, String>>() {{
+            add(searchData);
+        }};
+        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(searchDataset), any(Map.class), any(Map.class), any(Map.class));
+        Map<String, String> smallerNoteKeyData = new HashMap<String, String>(smallerNoteData) {{
+            remove(MusInterval.Fields.SOUND);
+            remove(MusInterval.Fields.SOUND_SMALLER);
+            remove(MusInterval.Fields.SOUND_SMALLER_ALT);
+            remove(MusInterval.Fields.SOUND_LARGER);
+            remove(MusInterval.Fields.SOUND_LARGER_ALT);
+            replace(MusInterval.Fields.START_NOTE, "C#2");
+            replace(MusInterval.Fields.DIRECTION, "ascending");
+            remove(AnkiDroidHelper.KEY_ID);
+            remove(AnkiDroidHelper.KEY_TAGS);
+        }};
+        doReturn(
+                new LinkedList<Map<String, String>>() {{
+                    add(smallerNoteData);
+                }}
+        ).when(helper).findNotes(eq(modelId), eq(smallerNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
+        Map<String, String> noteKeyData = new HashMap<String, String>(noteData) {{
+            remove(MusInterval.Fields.SOUND);
+            remove(MusInterval.Fields.SOUND_SMALLER);
+            remove(MusInterval.Fields.SOUND_SMALLER_ALT);
+            remove(MusInterval.Fields.SOUND_LARGER);
+            remove(MusInterval.Fields.SOUND_LARGER_ALT);
+            replace(MusInterval.Fields.START_NOTE, "D#2");
+            replace(MusInterval.Fields.DIRECTION, "descending");
+            remove(AnkiDroidHelper.KEY_ID);
+            remove(AnkiDroidHelper.KEY_TAGS);
+        }};
+        doReturn(
+                new LinkedList<Map<String, String>>() {{
+                    add(noteData);
+                }}
+        ).when(helper).findNotes(eq(modelId), eq(noteKeyData), any(Map.class), any(Map.class), any(Map.class));
+        Map<String, String> largerNoteKeyData = new HashMap<String, String>(largerNoteData) {{
+            remove(MusInterval.Fields.SOUND);
+            remove(MusInterval.Fields.SOUND_SMALLER);
+            remove(MusInterval.Fields.SOUND_SMALLER_ALT);
+            remove(MusInterval.Fields.SOUND_LARGER);
+            remove(MusInterval.Fields.SOUND_LARGER_ALT);
+            replace(MusInterval.Fields.START_NOTE, "C#2");
+            replace(MusInterval.Fields.DIRECTION, "ascending");
+            remove(AnkiDroidHelper.KEY_ID);
+            remove(AnkiDroidHelper.KEY_TAGS);
+        }};
+        doReturn(
+                new LinkedList<Map<String, String>>() {{
+                    add(largerNoteData);
+                }}
+        ).when(helper).findNotes(eq(modelId), eq(largerNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    smallerNoteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(smallerNoteId), any(Map.class));
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    noteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(noteId), any(Map.class));
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    largerNoteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(largerNoteId), any(Map.class));
+
+        MusInterval mi = new MusInterval.Builder(helper)
+                .model(defaultModelName)
+                .notes(null)
+                .octaves(null)
+                .intervals(null)
+                .build();
+        ProgressIndicator progressIndicator = mock(ProgressIndicator.class);
+        NotesIntegrity.Summary is = new NotesIntegrity(helper, mi, corruptedTag, suspiciousTag, duplicateTag, progressIndicator).check();
+
+        assertEquals(3, is.getNotesCount());
+        assertEquals(4, is.getAutoFilledRelationsCount());
+        assertEquals(smallerNoteSound, noteData.get(MusInterval.Fields.SOUND_SMALLER_ALT));
+        assertEquals(largerNoteSound, noteData.get(MusInterval.Fields.SOUND_LARGER_ALT));
+        assertEquals(noteSound, smallerNoteData.get(MusInterval.Fields.SOUND_LARGER));
+        assertEquals(noteSound, largerNoteData.get(MusInterval.Fields.SOUND_SMALLER));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     public void checkIntegrity_SimilarAltIntervalsSameHarmonicNotations_shouldFillAltLinks() throws MusInterval.ValidationException, AnkiDroidHelper.InvalidAnkiDatabaseException {
         final long modelId = new Random().nextLong();
         final long smallerNoteId = new Random().nextLong();
@@ -6359,7 +6620,7 @@ public class MusIntervalTest {
                     add(smallerNoteData);
                 }}
         ).when(helper).findNotes(eq(modelId), eq(smallerNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
-        Map<String, String> noteKeyData1 = new HashMap<String, String>(noteData) {{
+        Map<String, String> noteKeyData = new HashMap<String, String>(noteData) {{
             remove(MusInterval.Fields.SOUND);
             remove(MusInterval.Fields.SOUND_SMALLER);
             remove(MusInterval.Fields.SOUND_SMALLER_ALT);
@@ -6374,23 +6635,7 @@ public class MusIntervalTest {
                 new LinkedList<Map<String, String>>() {{
                     add(noteData);
                 }}
-        ).when(helper).findNotes(eq(modelId), eq(noteKeyData1), any(Map.class), any(Map.class), any(Map.class));
-        Map<String, String> noteKeyData2 = new HashMap<String, String>(noteData) {{
-            remove(MusInterval.Fields.SOUND);
-            remove(MusInterval.Fields.SOUND_SMALLER);
-            remove(MusInterval.Fields.SOUND_SMALLER_ALT);
-            remove(MusInterval.Fields.SOUND_LARGER);
-            remove(MusInterval.Fields.SOUND_LARGER_ALT);
-            replace(MusInterval.Fields.START_NOTE, "D2");
-            replace(MusInterval.Fields.DIRECTION, "descending");
-            remove(AnkiDroidHelper.KEY_ID);
-            remove(AnkiDroidHelper.KEY_TAGS);
-        }};
-        doReturn(
-                new LinkedList<Map<String, String>>() {{
-                    add(noteData);
-                }}
-        ).when(helper).findNotes(eq(modelId), eq(noteKeyData2), any(Map.class), any(Map.class), any(Map.class));
+        ).when(helper).findNotes(eq(modelId), eq(noteKeyData), any(Map.class), any(Map.class), any(Map.class));
         Map<String, String> largerNoteKeyData = new HashMap<String, String>(largerNoteData) {{
             remove(MusInterval.Fields.SOUND);
             remove(MusInterval.Fields.SOUND_SMALLER);
@@ -6408,6 +6653,37 @@ public class MusIntervalTest {
                 }}
         ).when(helper).findNotes(eq(modelId), eq(largerNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
 
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    smallerNoteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(smallerNoteId), any(Map.class));
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    noteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(noteId), any(Map.class));
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    largerNoteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(largerNoteId), any(Map.class));
+
         MusInterval mi = new MusInterval.Builder(helper)
                 .model(defaultModelName)
                 .notes(null)
@@ -6418,8 +6694,11 @@ public class MusIntervalTest {
         NotesIntegrity.Summary is = new NotesIntegrity(helper, mi, corruptedTag, suspiciousTag, duplicateTag, progressIndicator).check();
 
         assertEquals(3, is.getNotesCount());
-        assertEquals(0, is.getCorruptedNotesCount());
         assertEquals(4, is.getAutoFilledRelationsCount());
+        assertEquals(smallerNoteSound, noteData.get(MusInterval.Fields.SOUND_SMALLER_ALT));
+        assertEquals(largerNoteSound, noteData.get(MusInterval.Fields.SOUND_LARGER_ALT));
+        assertEquals(noteSound, smallerNoteData.get(MusInterval.Fields.SOUND_LARGER_ALT));
+        assertEquals(noteSound, largerNoteData.get(MusInterval.Fields.SOUND_SMALLER_ALT));
     }
 
     @Test
@@ -6525,15 +6804,20 @@ public class MusIntervalTest {
     @SuppressWarnings("unchecked")
     public void checkIntegrity_HarmonicUnisonAltLarger_ShouldFillRegularAndAltLinks() throws MusInterval.ValidationException, AnkiDroidHelper.InvalidAnkiDatabaseException {
         final long modelId = new Random().nextLong();
-        final long uniNoteId = new Random().nextLong();
-        final long min2NoteId = new Random().nextLong();
+        final long uniAscNoteId = new Random().nextLong();
+        final long min2AscNoteId = 1;
+        final long min2DescNoteId = min2AscNoteId + 1;
 
         final AnkiDroidHelper helper = mock(AnkiDroidHelper.class);
         doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
         doReturn(SIGNATURE).when(helper).getFieldList(eq(modelId));
 
-        final Map<String, String> uniNoteData = new HashMap<String, String>() {{
-            put(MusInterval.Fields.SOUND, "[sound:dir/uni.mp3]");
+        final String uniAscSound = "[sound:dir/uniAsc.mp3]";
+        final String min2AscSound = "[sound:dir/min2Asc.mp3]";
+        final String min2DescSound = "[sound:dir/min2Desc.mp3]";
+
+        final Map<String, String> uniAscNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, uniAscSound);
             put(MusInterval.Fields.SOUND_SMALLER, "");
             put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
             put(MusInterval.Fields.SOUND_LARGER, "");
@@ -6541,15 +6825,31 @@ public class MusIntervalTest {
             put(MusInterval.Fields.START_NOTE, "C2");
             put(MusInterval.Fields.INTERVAL, MusInterval.Fields.Interval.VALUE_UNISON); // unison
             put(MusInterval.Fields.TIMING, "harmonic");
-            put(MusInterval.Fields.DIRECTION, ""); // empty direction
+            put(MusInterval.Fields.DIRECTION, "ascending");
             put(MusInterval.Fields.TEMPO, "80");
             put(MusInterval.Fields.INSTRUMENT, "guitar");
             put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
-            put(AnkiDroidHelper.KEY_ID, String.valueOf(uniNoteId));
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(uniAscNoteId));
             put(AnkiDroidHelper.KEY_TAGS, "");
         }};
-        final Map<String, String> min2NoteData = new HashMap<String, String>() {{
-            put(MusInterval.Fields.SOUND, "[sound:dir/min2.mp3]");
+        final Map<String, String> min2AscNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, min2AscSound);
+            put(MusInterval.Fields.SOUND_SMALLER, "");
+            put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
+            put(MusInterval.Fields.SOUND_LARGER, "");
+            put(MusInterval.Fields.SOUND_LARGER_ALT, "");
+            put(MusInterval.Fields.START_NOTE, "C2");
+            put(MusInterval.Fields.INTERVAL, "min2");
+            put(MusInterval.Fields.TIMING, "harmonic");
+            put(MusInterval.Fields.DIRECTION, "ascending");
+            put(MusInterval.Fields.TEMPO, "80");
+            put(MusInterval.Fields.INSTRUMENT, "guitar");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(min2AscNoteId));
+            put(AnkiDroidHelper.KEY_TAGS, "");
+        }};
+        final Map<String, String> min2DescNoteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, min2DescSound);
             put(MusInterval.Fields.SOUND_SMALLER, "");
             put(MusInterval.Fields.SOUND_SMALLER_ALT, "");
             put(MusInterval.Fields.SOUND_LARGER, "");
@@ -6561,7 +6861,7 @@ public class MusIntervalTest {
             put(MusInterval.Fields.TEMPO, "80");
             put(MusInterval.Fields.INSTRUMENT, "guitar");
             put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
-            put(AnkiDroidHelper.KEY_ID, String.valueOf(min2NoteId));
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(min2DescNoteId));
             put(AnkiDroidHelper.KEY_TAGS, "");
         }};
         final Map<String, String> searchData = new HashMap<String, String>() {{
@@ -6575,46 +6875,75 @@ public class MusIntervalTest {
         }};
 
         LinkedList<Map<String, String>> searchResult = new LinkedList<Map<String, String>>() {{
-            add(uniNoteData);
-            add(min2NoteData);
+            add(uniAscNoteData);
+            add(min2AscNoteData);
+            add(min2DescNoteData);
         }};
         doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(new HashMap<String, String>()), any(Map.class), any(Map.class), any(Map.class));
         ArrayList<Map<String, String>> searchDataset = new ArrayList<Map<String, String>>() {{
             add(searchData);
         }};
         doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(searchDataset), any(Map.class), any(Map.class), any(Map.class));
-        Map<String, String> uniNoteKeyData = new HashMap<String, String>(uniNoteData) {{
+        Map<String, String> uniAscNoteKeyData = new HashMap<String, String>(uniAscNoteData) {{
             remove(MusInterval.Fields.SOUND);
             remove(MusInterval.Fields.SOUND_SMALLER);
             remove(MusInterval.Fields.SOUND_SMALLER_ALT);
             remove(MusInterval.Fields.SOUND_LARGER);
             remove(MusInterval.Fields.SOUND_LARGER_ALT);
-            replace(MusInterval.Fields.START_NOTE, "C2");
-            replace(MusInterval.Fields.DIRECTION, "");
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
         }};
         doReturn(
                 new LinkedList<Map<String, String>>() {{
-                    add(uniNoteData);
+                    add(uniAscNoteData);
                 }}
-        ).when(helper).findNotes(eq(modelId), eq(uniNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
-        Map<String, String> min2NoteKeyData = new HashMap<String, String>(min2NoteData) {{
+        ).when(helper).findNotes(eq(modelId), eq(uniAscNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
+        Map<String, String> min2AscNoteKeyData = new HashMap<String, String>(min2AscNoteData) {{
             remove(MusInterval.Fields.SOUND);
             remove(MusInterval.Fields.SOUND_SMALLER);
             remove(MusInterval.Fields.SOUND_SMALLER_ALT);
             remove(MusInterval.Fields.SOUND_LARGER);
             remove(MusInterval.Fields.SOUND_LARGER_ALT);
-            replace(MusInterval.Fields.START_NOTE, "C2");
-            replace(MusInterval.Fields.DIRECTION, "");
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
         }};
         doReturn(
                 new LinkedList<Map<String, String>>() {{
-                    add(min2NoteData);
+                    add(min2AscNoteData);
+                    add(min2DescNoteData);
                 }}
-        ).when(helper).findNotes(eq(modelId), eq(min2NoteKeyData), any(Map.class), any(Map.class), any(Map.class));
+        ).when(helper).findNotes(eq(modelId), eq(min2AscNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
+
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    uniAscNoteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(uniAscNoteId), any(Map.class));
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    min2AscNoteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(min2AscNoteId), any(Map.class));
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> data = invocation.getArgument(2);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    min2DescNoteData.replace(entry.getKey(), entry.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(min2DescNoteId), any(Map.class));
 
         MusInterval mi = new MusInterval.Builder(helper)
                 .model(defaultModelName)
@@ -6625,8 +6954,11 @@ public class MusIntervalTest {
         ProgressIndicator progressIndicator = mock(ProgressIndicator.class);
         NotesIntegrity.Summary is = new NotesIntegrity(helper, mi, corruptedTag, suspiciousTag, duplicateTag, progressIndicator).check();
 
-        assertEquals(2, is.getNotesCount());
-        assertEquals(2, is.getAutoFilledRelationsCount());
+        assertEquals(3, is.getNotesCount());
+        assertEquals(3, is.getAutoFilledRelationsCount());
+        assertEquals(min2DescSound, uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER));
+        assertEquals(uniAscSound, min2AscNoteData.get(MusInterval.Fields.SOUND_SMALLER));
+        assertEquals(uniAscSound, min2DescNoteData.get(MusInterval.Fields.SOUND_SMALLER_ALT));
     }
 
     @Test
