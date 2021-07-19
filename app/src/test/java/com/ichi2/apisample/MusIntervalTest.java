@@ -6978,11 +6978,11 @@ public class MusIntervalTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void checkIntegrity_HarmonicUnisonAltLarger_ShouldFillRegularAndAltLinks() throws MusInterval.ValidationException, AnkiDroidHelper.InvalidAnkiDatabaseException {
+    public void checkIntegrity_HarmonicUnisonAltLarger_shouldFillRegularAndAltLinks() throws MusInterval.ValidationException, AnkiDroidHelper.InvalidAnkiDatabaseException {
         final long modelId = new Random().nextLong();
         final long uniAscNoteId = new Random().nextLong();
-        final long min2AscNoteId = 1;
-        final long min2DescNoteId = min2AscNoteId + 1;
+        final long min2AscNoteId = new Random().nextLong();
+        final long min2DescNoteId = new Random().nextLong();
 
         final AnkiDroidHelper helper = mock(AnkiDroidHelper.class);
         doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
@@ -7086,9 +7086,23 @@ public class MusIntervalTest {
         doReturn(
                 new LinkedList<Map<String, String>>() {{
                     add(min2AscNoteData);
-                    add(min2DescNoteData);
                 }}
         ).when(helper).findNotes(eq(modelId), eq(min2AscNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
+        Map<String, String> min2DescNoteKeyData = new HashMap<String, String>(min2DescNoteData) {{
+            remove(MusInterval.Fields.SOUND);
+            remove(MusInterval.Fields.SOUND_SMALLER);
+            remove(MusInterval.Fields.SOUND_SMALLER_ALT);
+            remove(MusInterval.Fields.SOUND_LARGER);
+            remove(MusInterval.Fields.SOUND_LARGER_ALT);
+            replace(MusInterval.Fields.START_NOTE, "C2");
+            remove(AnkiDroidHelper.KEY_ID);
+            remove(AnkiDroidHelper.KEY_TAGS);
+        }};
+        doReturn(
+                new LinkedList<Map<String, String>>() {{
+                    add(min2DescNoteData);
+                }}
+        ).when(helper).findNotes(eq(modelId), eq(min2DescNoteKeyData), any(Map.class), any(Map.class), any(Map.class));
 
         doAnswer(new Answer() {
             @Override
@@ -7131,8 +7145,9 @@ public class MusIntervalTest {
         NotesIntegrity.Summary is = new NotesIntegrity(helper, mi, corruptedTag, suspiciousTag, duplicateTag, progressIndicator).check();
 
         assertEquals(3, is.getNotesCount());
-        assertEquals(3, is.getAutoFilledRelationsCount());
-        assertEquals(min2DescSound, uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER));
+        assertEquals(4, is.getAutoFilledRelationsCount());
+        assertEquals(min2AscSound, uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER));
+        assertEquals(min2DescSound, uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER_ALT));
         assertEquals(uniAscSound, min2AscNoteData.get(MusInterval.Fields.SOUND_SMALLER));
         assertEquals(uniAscSound, min2DescNoteData.get(MusInterval.Fields.SOUND_SMALLER_ALT));
     }

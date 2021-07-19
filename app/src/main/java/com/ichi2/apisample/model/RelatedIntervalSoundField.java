@@ -192,7 +192,7 @@ public abstract class RelatedIntervalSoundField {
                     String relatedDirection = relatedData.getOrDefault(directionField, "");
                     String relatedEndNote = MusInterval.Fields.StartNote.getEndNote(relatedStartNote, relatedDirection, relatedInterval);
                     if (!startNote.equalsIgnoreCase(relatedStartNote) && !startNote.equalsIgnoreCase(relatedEndNote) ||
-                            !isHarmonic && !direction.equalsIgnoreCase(relatedDirection)) {
+                            (!isHarmonic || isUnison) && !direction.equalsIgnoreCase(relatedDirection)) {
                         iterator.remove();
                         relatedAltNotesData.add(relatedData);
                     }
