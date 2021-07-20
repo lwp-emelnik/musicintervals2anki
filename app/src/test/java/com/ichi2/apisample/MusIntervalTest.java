@@ -4025,7 +4025,7 @@ public class MusIntervalTest {
         assertEquals(uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER), min2AscSound);
         assertEquals(uniAscNoteData.get(MusInterval.Fields.SOUND_LARGER_ALT), min2DescSound);
         assertEquals(uniAscSound, min2AscNoteData.get(MusInterval.Fields.SOUND_SMALLER));
-        assertEquals(uniAscSound, min2DescNoteData.get(MusInterval.Fields.SOUND_SMALLER_ALT));
+        assertEquals(uniAscSound, min2DescNoteData.get(MusInterval.Fields.SOUND_SMALLER));
     }
 
     @Test
@@ -4271,8 +4271,8 @@ public class MusIntervalTest {
 
         musIntervalLargerDesc.addToAnki(prompter, indicator);
         MusInterval miLargerDescAdded = addedMusIntervals.getLast();
-        assertArrayEquals(new String[]{""}, miLargerDescAdded.soundsSmaller);
-        assertArrayEquals(musIntervalsAdded.getLast().sounds, miLargerDescAdded.soundsSmallerAlt);
+        assertArrayEquals(new String[]{""}, miLargerDescAdded.soundsSmallerAlt);
+        assertArrayEquals(musIntervalsAdded.getLast().sounds, miLargerDescAdded.soundsSmaller);
         assertArrayEquals(musIntervalsAdded.getLast().soundsLarger, new String[]{""});
         assertArrayEquals(musIntervalsAdded.getLast().soundsLargerAlt, miLargerDescAdded.sounds);
 

@@ -197,7 +197,7 @@ public abstract class RelatedIntervalSoundField {
                     String relatedDirection = relatedData.getOrDefault(directionField, "");
                     String relatedEndNote = MusInterval.Fields.StartNote.getEndNote(relatedStartNote, relatedDirection, relatedInterval);
                     if (!startNote.equalsIgnoreCase(relatedStartNote) && !startNote.equalsIgnoreCase(relatedEndNote) ||
-                            !isHarmonic && !direction.equalsIgnoreCase(relatedDirection) ||
+                            !isHarmonic && isUnison && !direction.equalsIgnoreCase(relatedDirection) ||
                             isHarmonic && isUnison &&
                                     (startNote.equalsIgnoreCase(relatedStartNote) && !direction.equalsIgnoreCase(relatedDirection) ||
                                             startNote.equalsIgnoreCase(relatedEndNote) && direction.equalsIgnoreCase(relatedDirection))) {
@@ -250,7 +250,7 @@ public abstract class RelatedIntervalSoundField {
                 String relatedStartNote = relatedData.getOrDefault(startNoteField, "");
                 String relatedDirection = relatedData.getOrDefault(directionField, "");
                 if (!relatedStartNote.equalsIgnoreCase(startNote) && !relatedStartNote.equals(endNote) ||
-                        !isHarmonic && !direction.equalsIgnoreCase(relatedDirection) ||
+                        !isHarmonic && isRelatedUnison && !direction.equalsIgnoreCase(relatedDirection) ||
                         isHarmonic && isRelatedUnison && (
                                 relatedStartNote.equalsIgnoreCase(startNote) && !relatedDirection.equalsIgnoreCase(direction) ||
                                         relatedStartNote.equalsIgnoreCase(endNote) && relatedDirection.equalsIgnoreCase(direction))) {
@@ -366,21 +366,66 @@ public abstract class RelatedIntervalSoundField {
         if (!keySet1.equals(keySet2)) {
             return false;
         }
-        boolean isUnison = MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval1);
-        if (alt || isUnison) {
-            data2 = new HashMap<>(data2);
-            String startNote1 = data1.getOrDefault(startNoteField, "");
-            String direction1 = data1.getOrDefault(directionField, "");
-            String endNote1 = MusInterval.Fields.StartNote.getEndNote(startNote1, direction1, interval1);
-            String startNote2 = data2.getOrDefault(startNoteField, "");
-            if (!startNote2.equalsIgnoreCase(endNote1)) {
-                int idx = MusInterval.Fields.StartNote.getIndex(startNote2);
-                int distance = !reverse && !isUnison ? getDistance() : this.reverse.getDistance();
-                data2.put(startNoteField, MusInterval.Fields.StartNote.VALUES[idx + distance]);
+        boolean isUnison1 = MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval1);
+        boolean isUnison2 = MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval2);
+        String startNote1 = data1.getOrDefault(startNoteField, "");
+        String direction1 = data1.getOrDefault(directionField, "");
+        String endNote1 = MusInterval.Fields.StartNote.getEndNote(startNote1, direction1, interval1);
+        String startNote2 = data2.getOrDefault(startNoteField, "");
+        String direction2 = data2.getOrDefault(directionField, "");
+        data2 = new HashMap<>(data2);
+        String direction2Opposite = direction2.equalsIgnoreCase(MusInterval.Fields.Direction.ASC) ?
+                MusInterval.Fields.Direction.DESC : MusInterval.Fields.Direction.ASC;
+        if (alt) {
+            if (isUnison1) {
+                if (startNote1.equalsIgnoreCase(startNote2)) {
+                    data2.put(directionField, direction2Opposite);
+                } else {
+                    int idx = MusInterval.Fields.StartNote.getIndex(startNote2);
+                    int distance = Math.abs(getDistance());
+                    if (direction1.equalsIgnoreCase(MusInterval.Fields.Direction.DESC)) {
+                        distance = -distance;
+                    }
+                    if (reverse) {
+                        distance = -distance;
+                    }
+                    data2.put(startNoteField, MusInterval.Fields.StartNote.VALUES[idx + distance]);
+                }
             } else {
-                data2.put(intervalField, interval1);
+                String direction1Opposite = direction1.equalsIgnoreCase(MusInterval.Fields.Direction.ASC) ?
+                        MusInterval.Fields.Direction.DESC : MusInterval.Fields.Direction.ASC;
+                if (isUnison2) {
+                    data2.put(directionField, direction1Opposite);
+                }
+                if (!startNote2.equalsIgnoreCase(endNote1)) {
+                    int idx = MusInterval.Fields.StartNote.getIndex(startNote2);
+                    int distance = !reverse ? getDistance() : this.reverse.getDistance();
+                    data2.put(startNoteField, MusInterval.Fields.StartNote.VALUES[idx + distance]);
+                } else {
+                    data2.put(intervalField, interval1);
+                }
+            }
+        } else {
+            if (isUnison1) {
+                if (!startNote1.equalsIgnoreCase(startNote2)) {
+                    int idx = MusInterval.Fields.StartNote.getIndex(startNote2);
+                    int distance = -Math.abs(getDistance());
+                    if (direction1.equalsIgnoreCase(MusInterval.Fields.Direction.DESC)) {
+                        distance = -distance;
+                    }
+                    if (reverse) {
+                        distance = -distance;
+                    }
+                    data2.put(startNoteField, MusInterval.Fields.StartNote.VALUES[idx + distance]);
+                    data2.put(directionField, direction2Opposite);
+                }
+            } else {
+                if (isUnison2) {
+                    data2.put(directionField, direction1);
+                }
             }
         }
+
         for (final String key : keySet1) {
             if (!NoteEqualityChecker.areEqual(data1, data2, key,
                     musInterval.relativesEqualityCheckers, musInterval.defaultValues)) {

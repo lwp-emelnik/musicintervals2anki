@@ -174,7 +174,8 @@ public class MusInterval {
                             String intervalField = modelFields[IDX_INTERVAL];
                             String interval1 = data1.getOrDefault(intervalField, "");
                             String interval2 = data2.getOrDefault(intervalField, "");
-                            boolean unisonEquality = interval1.equalsIgnoreCase(Interval.VALUE_UNISON) ||
+                            boolean unisonEquality = interval1.equals("%") ||
+                                    interval1.equalsIgnoreCase(Interval.VALUE_UNISON) ||
                                     interval2.equalsIgnoreCase(Interval.VALUE_UNISON);
                             return match(data1, data2, startNoteField, directionField, timingField, intervalField) || unisonEquality;
                         }

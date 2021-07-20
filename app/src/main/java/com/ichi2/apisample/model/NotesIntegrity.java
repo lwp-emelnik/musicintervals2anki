@@ -88,7 +88,7 @@ public class NotesIntegrity {
                 boolean relationSuspicious = isRelationSuspicious(relationFieldKey, noteData, noteId, noteTags);
                 String relationAltFieldKey = relatedSoundField.getAltFieldKey();
                 boolean relationAltSuspicious = isRelationSuspicious(relationAltFieldKey, noteData, noteId, noteTags);
-                suspicious = relationSuspicious || relationAltSuspicious;
+                suspicious |= relationSuspicious || relationAltSuspicious;
             }
 
             if (!suspicious) {
