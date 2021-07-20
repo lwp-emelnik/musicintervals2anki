@@ -7321,11 +7321,11 @@ public class MusIntervalTest {
         musIntervalLargerAsc.addToAnki(prompter, indicator);
         MusInterval miLargerAscAdded = addedMusIntervals.getLast();
         assertArrayEquals(musIntervalsAdded.getLast().sounds, miLargerAscAdded.soundsSmallerAlt);
-        assertArrayEquals(musIntervalsAdded.getLast().soundsLarger, miLargerAscAdded.sounds);
+        assertArrayEquals(musIntervalsAdded.getLast().soundsLargerAlt, miLargerAscAdded.sounds);
 
         musIntervalLargerDesc.addToAnki(prompter, indicator);
         MusInterval miLargerDescAdded = addedMusIntervals.getLast();
-        assertArrayEquals(musIntervalsAdded.getLast().soundsLargerAlt, miLargerDescAdded.sounds);
+        assertArrayEquals(musIntervalsAdded.getLast().soundsLarger, miLargerDescAdded.sounds);
         assertArrayEquals(musIntervalsAdded.getLast().sounds, miLargerDescAdded.soundsSmallerAlt);
     }
 

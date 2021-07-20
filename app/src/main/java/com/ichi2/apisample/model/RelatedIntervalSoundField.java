@@ -200,7 +200,7 @@ public abstract class RelatedIntervalSoundField {
                             !isHarmonic && !direction.equalsIgnoreCase(relatedDirection) ||
                             isHarmonic && isUnison &&
                                     (startNote.equalsIgnoreCase(relatedStartNote) && !direction.equalsIgnoreCase(relatedDirection) ||
-                                            startNote.equalsIgnoreCase(relatedEndNote) && direction.equalsIgnoreCase(relatedDirection))) { // @todo: test reverse
+                                            startNote.equalsIgnoreCase(relatedEndNote) && direction.equalsIgnoreCase(relatedDirection))) {
                         iterator.remove();
                         relatedAltNotesData.add(relatedData);
                     }
@@ -250,7 +250,10 @@ public abstract class RelatedIntervalSoundField {
                 String relatedStartNote = relatedData.getOrDefault(startNoteField, "");
                 String relatedDirection = relatedData.getOrDefault(directionField, "");
                 if (!relatedStartNote.equalsIgnoreCase(startNote) && !relatedStartNote.equals(endNote) ||
-                        (!isHarmonic || isRelatedUnison) && !direction.equalsIgnoreCase(relatedDirection)) {
+                        !isHarmonic && !direction.equalsIgnoreCase(relatedDirection) ||
+                        isHarmonic && isRelatedUnison && (
+                                relatedStartNote.equalsIgnoreCase(startNote) && !relatedDirection.equalsIgnoreCase(direction) ||
+                                        relatedStartNote.equalsIgnoreCase(endNote) && relatedDirection.equalsIgnoreCase(direction))) {
                     alt = true;
                 }
             }
