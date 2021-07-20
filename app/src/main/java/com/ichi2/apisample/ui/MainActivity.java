@@ -684,6 +684,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         actionClearAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (isCapturing) {
+                    closeCapturing();
+                }
                 filenames = new String[]{};
                 afterAdding = false;
                 mismatchingSorting = false;
