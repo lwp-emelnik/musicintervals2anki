@@ -1204,6 +1204,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
                     return;
                 }
+                if (isCapturing) {
+                    closeCapturing();
+                }
                 try {
                     MusInterval mi = getMusInterval();
 
