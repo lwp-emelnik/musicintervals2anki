@@ -12,8 +12,6 @@ import com.ichi2.apisample.helper.search.AnySearchExpressionMaker;
 import com.ichi2.apisample.helper.search.DoubleSearchExpressionMaker;
 import com.ichi2.apisample.helper.search.IntegerSearchExpressionMaker;
 import com.ichi2.apisample.helper.search.SearchExpressionMaker;
-import com.ichi2.apisample.validation.FixableNoteValidator;
-import com.ichi2.apisample.validation.NoteValidator;
 import com.ichi2.apisample.validation.PositiveDecimalValidator;
 import com.ichi2.apisample.validation.EmptyValidator;
 import com.ichi2.apisample.validation.IntegerRangeValidator;
@@ -139,7 +137,7 @@ public class MusInterval {
                     String providedPart = pattern.replaceAll("%", "");
                     boolean hasSharp = value.contains("#");
                     int octaveIdx = hasSharp ? 2 : 1;
-                    if (value.length() >= octaveIdx) {
+                    if (value.length() < octaveIdx) {
                         return false;
                     }
                     if (noteProvided) {
@@ -174,25 +172,49 @@ public class MusInterval {
                             String directionField = modelFields[IDX_DIRECTION];
                             String timingField = modelFields[IDX_TIMING];
                             String intervalField = modelFields[IDX_INTERVAL];
-                            String startNote1 = data1.getOrDefault(startNoteField, "");
-                            String startNote2 = data2.getOrDefault(startNoteField, "");
-                            String direction1 = data1.getOrDefault(directionField, "");
-                            String direction2 = data2.getOrDefault(directionField, "");
-                            String timing1 = data1.getOrDefault(timingField, "");
-                            String timing2 = data2.getOrDefault(timingField, "");
                             String interval1 = data1.getOrDefault(intervalField, "");
                             String interval2 = data2.getOrDefault(intervalField, "");
-                            boolean regularEquality = direction1.equalsIgnoreCase(direction2);
                             boolean unisonEquality = interval1.equalsIgnoreCase(Interval.VALUE_UNISON) ||
                                     interval2.equalsIgnoreCase(Interval.VALUE_UNISON);
-                            boolean harmonicEquality = (interval1.equals("%") || interval1.equalsIgnoreCase(interval2)) &&
-                                    (direction1.equalsIgnoreCase(Direction.ASC) && direction2.equalsIgnoreCase(Direction.DESC) ||
-                                            direction1.equalsIgnoreCase(Direction.DESC) && direction2.equalsIgnoreCase(Direction.ASC)) &&
-                                    timing1.equalsIgnoreCase(Timing.HARMONIC) && timing2.equalsIgnoreCase(Timing.HARMONIC) &&
-                                    StartNote.match(startNote1, StartNote.getEndNote(startNote2, direction2, interval2));
-                            return regularEquality || unisonEquality || harmonicEquality;
+                            return match(data1, data2, startNoteField, directionField, timingField, intervalField) || unisonEquality;
                         }
                     };
+
+            private static final NoteEqualityChecker RELATIVES_EQUALITY_CHECKER =
+                    new NoteEqualityChecker(new String[]{START_NOTE, DIRECTION, TIMING, INTERVAL}) {
+                        private static final int IDX_START_NOTE = 0;
+                        private static final int IDX_DIRECTION = 1;
+                        private static final int IDX_TIMING = 2;
+                        private static final int IDX_INTERVAL = 3;
+
+                        @Override
+                        public boolean areEqual(Map<String, String> data1, Map<String, String> data2) {
+                            String startNoteField = modelFields[IDX_START_NOTE];
+                            String directionField = modelFields[IDX_DIRECTION];
+                            String timingField = modelFields[IDX_TIMING];
+                            String intervalField = modelFields[IDX_INTERVAL];
+                            return match(data1, data2, startNoteField, directionField, timingField, intervalField);
+                        }
+                    };
+
+            private static boolean match(Map<String, String> data1, Map<String, String> data2,
+                                         String startNoteField, String directionField, String timingField, String intervalField) {
+                String startNote1 = data1.getOrDefault(startNoteField, "");
+                String startNote2 = data2.getOrDefault(startNoteField, "");
+                String direction1 = data1.getOrDefault(directionField, "");
+                String direction2 = data2.getOrDefault(directionField, "");
+                String timing1 = data1.getOrDefault(timingField, "");
+                String timing2 = data2.getOrDefault(timingField, "");
+                String interval1 = data1.getOrDefault(intervalField, "");
+                String interval2 = data2.getOrDefault(intervalField, "");
+                boolean regularEquality = direction1.equalsIgnoreCase(direction2);
+                boolean harmonicEquality = (interval1.equals("%") || interval1.equalsIgnoreCase(interval2)) &&
+                        (direction1.equalsIgnoreCase(Direction.ASC) && direction2.equalsIgnoreCase(Direction.DESC) ||
+                                direction1.equalsIgnoreCase(Direction.DESC) && direction2.equalsIgnoreCase(Direction.ASC)) &&
+                        timing1.equalsIgnoreCase(Timing.HARMONIC) && timing2.equalsIgnoreCase(Timing.HARMONIC) &&
+                        StartNote.match(startNote1, StartNote.getEndNote(startNote2, direction2, interval2));
+                return regularEquality || harmonicEquality;
+            }
         }
 
         public static class Timing {
@@ -296,6 +318,7 @@ public class MusInterval {
             put(FIRST_NOTE_DURATION_COEFFICIENT, new FieldEqualityChecker(FIRST_NOTE_DURATION_COEFFICIENT, new DoubleValueEqualityChecker()));
         }};
         private static final Map<String, EqualityChecker> RELATIVES_EQUALITY_CHECKERS = new HashMap<String, EqualityChecker>() {{
+            put(DIRECTION, Direction.RELATIVES_EQUALITY_CHECKER);
             put(TEMPO, new FieldEqualityChecker(TEMPO, new AnyEqualityChecker()));
         }};
 

@@ -7331,7 +7331,7 @@ public class MusIntervalTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void checkIntegrity_HarmonicUnisonAltLarger_ShouldNotCountAsSuspicious() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
+    public void checkIntegrity_BrokenHarmonicUnisonAltLargerLink_ShouldCountAsSuspicious() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
         final long modelId = new Random().nextLong();
         final long noteId = new Random().nextLong();
         final long largerNoteId = new Random().nextLong();
@@ -7352,7 +7352,7 @@ public class MusIntervalTest {
             put(MusInterval.Fields.START_NOTE, "C2");
             put(MusInterval.Fields.INTERVAL, "Uni");
             put(MusInterval.Fields.TIMING, "harmonic");
-            put(MusInterval.Fields.DIRECTION, "ascending");
+            put(MusInterval.Fields.DIRECTION, "descending");
             put(MusInterval.Fields.TEMPO, "80");
             put(MusInterval.Fields.INSTRUMENT, "guitar");
             put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
@@ -7368,7 +7368,7 @@ public class MusIntervalTest {
             put(MusInterval.Fields.START_NOTE, "C#2");
             put(MusInterval.Fields.INTERVAL, "min2");
             put(MusInterval.Fields.TIMING, "harmonic");
-            put(MusInterval.Fields.DIRECTION, "descending");
+            put(MusInterval.Fields.DIRECTION, "ascending");
             put(MusInterval.Fields.TEMPO, "");
             put(MusInterval.Fields.INSTRUMENT, "guitar");
             put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
@@ -7406,6 +7406,6 @@ public class MusIntervalTest {
         NotesIntegrity.Summary is = new NotesIntegrity(helper, mi, corruptedTag, suspiciousTag, duplicateTag, progressIndicator).check();
 
         assertEquals(2, is.getNotesCount());
-        assertEquals(0, is.getSuspiciousNotesCount());
+        assertEquals(2, is.getSuspiciousNotesCount());
     }
 }
