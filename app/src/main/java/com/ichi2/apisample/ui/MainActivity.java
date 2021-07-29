@@ -1691,6 +1691,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         uiDbEditor.apply();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (isCapturing) {
+            moveTaskToBack(true);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private void processInvalidAnkiDatabase(AnkiDroidHelper.InvalidAnkiDatabaseException invalidAnkiDatabaseException) {
         try {
             throw invalidAnkiDatabaseException;
