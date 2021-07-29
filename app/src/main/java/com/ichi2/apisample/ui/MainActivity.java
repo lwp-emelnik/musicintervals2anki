@@ -512,7 +512,25 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
+    private Runnable callbackRefreshExisting;
+
     void refreshExisting() {
+        handler.removeCallbacks(callbackRefreshExisting);
+        callbackRefreshExisting = new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        handleRefreshExisting();
+                    }
+                }).start();
+            }
+        };
+        handler.postDelayed(callbackRefreshExisting, 500);
+    }
+
+    private void handleRefreshExisting() {
         if (mAnkiDroid.shouldRequestPermission()) {
             return;
         }
@@ -547,10 +565,16 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         } catch (Throwable e) {
             textExisting = ""; // might wanna set some error message here
         } finally {
-            labelExisting.setText(textExisting);
+            final String _textExisting = textExisting;
             final int unmarkedCount = existingCount - markedCount;
-            actionMarkExisting.setText(getString(R.string.action_mark_n, unmarkedCount));
-            actionMarkExisting.setEnabled(unmarkedCount > 0);
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    labelExisting.setText(_textExisting);
+                    actionMarkExisting.setText(getString(R.string.action_mark_n, unmarkedCount));
+                    actionMarkExisting.setEnabled(unmarkedCount > 0);
+                }
+            });
         }
     }
 
