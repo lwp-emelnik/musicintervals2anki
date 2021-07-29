@@ -667,6 +667,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
             final FilenameAdapter.UriPathName uriFirst = uriPathNames[0];
 
+            soundPlayer.stop();
             actionPlay.setEnabled(true);
             if (filenames.length > 1) {
                 actionPlay.setText(R.string.view_all);

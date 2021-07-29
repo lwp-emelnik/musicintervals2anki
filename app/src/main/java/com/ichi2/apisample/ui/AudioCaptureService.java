@@ -161,6 +161,11 @@ public class AudioCaptureService extends Service {
             @Override
             public void onClick(View view) {
                 if (!isRecording) {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.stop();
+                    }
+                    hideLatestMenu();
+
                     actionRecord.setEnabled(false);
                     countdownView.setVisibility(View.VISIBLE);
 
@@ -253,6 +258,10 @@ public class AudioCaptureService extends Service {
         actionDiscardLatest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
+
                 Intent intent = new Intent(ACTION_FILES_UPDATED);
                 LocalBroadcastManager.getInstance(AudioCaptureService.this).sendBroadcast(intent);
 
@@ -276,8 +285,7 @@ public class AudioCaptureService extends Service {
 
                 textBottom.setText(getString(R.string.recorded_files, recordings.size()));
                 if (recordings.size() == 0) {
-                    layoutLatestActions.setVisibility(View.GONE);
-                    textLatest.setVisibility(View.GONE);
+                    hideLatestMenu();
                 } else {
                     Recording recording = recordings.getLast();
                     textLatest.setText(getString(R.string.latest_file, recording.getDuration() / 1000d));
@@ -313,6 +321,11 @@ public class AudioCaptureService extends Service {
         windowManager.addView(countdownView, layoutParams);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(closeReceiver, new IntentFilter(MainActivity.ACTION_CLOSE_CAPTURING));
+    }
+
+    private void hideLatestMenu() {
+        layoutLatestActions.setVisibility(View.GONE);
+        textLatest.setVisibility(View.GONE);
     }
 
     private void handleStartCapture() {
