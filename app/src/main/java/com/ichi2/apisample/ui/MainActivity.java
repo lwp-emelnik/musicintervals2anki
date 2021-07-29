@@ -1682,6 +1682,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        closeCapturing();
+        final SharedPreferences.Editor uiDbEditor = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE).edit();
+        uiDbEditor.putBoolean(REF_DB_IS_CAPTURING, isCapturing);
+        uiDbEditor.apply();
+    }
+
     private void processInvalidAnkiDatabase(AnkiDroidHelper.InvalidAnkiDatabaseException invalidAnkiDatabaseException) {
         try {
             throw invalidAnkiDatabaseException;
