@@ -90,7 +90,8 @@ public class MappingDialogFragment extends PreferenceDialogFragmentCompat {
             final Spinner spinner = new Spinner(context);
             spinner.setAdapter(isEnabled ? availableAdapter : adapter);
             String value = mapping.getOrDefault(key, "");
-            int position = (isEnabled ? availableValues : values).indexOf(value);
+            int index = (isEnabled ? availableValues : values).indexOf(value);
+            int position = index == -1 ? 0 : index;
             spinner.setSelection(position);
             spinner.setEnabled(isEnabled);
             row.addView(spinner);
