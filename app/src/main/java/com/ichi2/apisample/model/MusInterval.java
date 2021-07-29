@@ -293,6 +293,11 @@ public class MusInterval {
             return signature.toArray(new String[0]);
         }
 
+        public static final Set<String> MULTIPLE_SELECTION_FIELDS = new HashSet<String>() {{
+            add(Fields.START_NOTE);
+            add(Fields.INTERVAL);
+        }};
+
         public static final Map<String, String> DEFAULT_VALUES = new HashMap<String, String>() {{
             put(FIRST_NOTE_DURATION_COEFFICIENT, String.valueOf(FirstNoteDurationCoefficient.DEFAULT_VALUE));
         }};
@@ -662,6 +667,7 @@ public class MusInterval {
 
     public final String modelName;
     public final Map<String, String> modelFields;
+    final Set<String> multipleSelectionFields;
     final Map<String, String> defaultValues;
     final Map<String, SearchExpressionMaker> searchExpressionMakers;
     final Map<String, SearchExpressionMaker> relativesSearchExpressionMakers;
@@ -759,6 +765,10 @@ public class MusInterval {
         modelId = helper.findModelIdByName(builder.mModelName);
         modelFields = builder.mModelFields;
 
+        multipleSelectionFields = new HashSet<>(Fields.MULTIPLE_SELECTION_FIELDS.size());
+        for (String fieldKey : Fields.MULTIPLE_SELECTION_FIELDS) {
+            multipleSelectionFields.add(modelFields.getOrDefault(fieldKey, fieldKey));
+        }
         defaultValues = new HashMap<>();
         searchExpressionMakers = new HashMap<>();
         relativesSearchExpressionMakers = new HashMap<>();
@@ -929,6 +939,7 @@ public class MusInterval {
             return helper.findNotes(
                     modelId,
                     dataSet,
+                    multipleSelectionFields,
                     defaultValues,
                     searchExpressionMakers,
                     equalityCheckers

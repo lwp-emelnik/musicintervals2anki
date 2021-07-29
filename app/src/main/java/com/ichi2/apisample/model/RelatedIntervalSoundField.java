@@ -127,6 +127,7 @@ public abstract class RelatedIntervalSoundField {
             LinkedList<Map<String, String>> relatedNotesData = helper.findNotes(
                     musInterval.modelId,
                     noteData,
+                    musInterval.multipleSelectionFields,
                     musInterval.defaultValues,
                     musInterval.relativesSearchExpressionMakers,
                     musInterval.equalityCheckers
@@ -144,6 +145,7 @@ public abstract class RelatedIntervalSoundField {
                 LinkedList<Map<String, String>> relatedAltNotesData = helper.findNotes(
                         musInterval.modelId,
                         altNoteData,
+                        musInterval.multipleSelectionFields,
                         musInterval.defaultValues,
                         musInterval.relativesSearchExpressionMakers,
                         musInterval.equalityCheckers
@@ -266,6 +268,7 @@ public abstract class RelatedIntervalSoundField {
                 LinkedList<Map<String, String>> currentReverseSearchResult = helper.findNotes(
                         musInterval.modelId,
                         searchData,
+                        musInterval.multipleSelectionFields,
                         musInterval.defaultValues,
                         musInterval.searchExpressionMakers,
                         musInterval.equalityCheckers
