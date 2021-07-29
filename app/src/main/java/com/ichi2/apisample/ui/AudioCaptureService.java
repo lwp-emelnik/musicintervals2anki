@@ -104,11 +104,14 @@ public class AudioCaptureService extends Service {
 
     private TextView textLatest;
     private LinearLayout layoutLatestActions;
+    private TouchableButton actionPlayLatest;
 
     private LinkedList<Recording> recordings;
 
     private MediaPlayer mediaPlayer;
     private ToneGenerator toneGenerator;
+
+    private Runnable playbackFinishedCallback;
 
     private final BroadcastReceiver closeReceiver = new BroadcastReceiver() {
         @Override
@@ -238,15 +241,29 @@ public class AudioCaptureService extends Service {
         );
         toneGenerator = new ToneGenerator(AudioManager.STREAM_SYSTEM, 25);
 
-        TouchableButton actionPlayLatest = overlayView.findViewById(R.id.actionPlayLatest);
+        actionPlayLatest = overlayView.findViewById(R.id.actionPlayLatest);
         actionPlayLatest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
-                    mediaPlayer.reset();
-                    mediaPlayer.setDataSource(AudioCaptureService.this, recordings.getLast().getUri());
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
+                    if (!mediaPlayer.isPlaying()) {
+                        actionPlayLatest.setText(R.string.stop);
+                        Uri uri = recordings.getLast().getUri();
+                        mediaPlayer.reset();
+                        mediaPlayer.setDataSource(AudioCaptureService.this, uri);
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                        playbackFinishedCallback = new Runnable() {
+                            @Override
+                            public void run() {
+                                actionPlayLatest.setText(R.string.play);
+                            }
+                        };
+                        long duration = AudioUtil.getDuration(AudioCaptureService.this, uri);
+                        handler.postDelayed(playbackFinishedCallback, duration);
+                    } else {
+                        stopPlayback();
+                    }
                 } catch (IOException e) {
                     throw new Error();
                 }
@@ -259,7 +276,7 @@ public class AudioCaptureService extends Service {
             @Override
             public void onClick(View view) {
                 if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
+                    stopPlayback();
                 }
 
                 Intent intent = new Intent(ACTION_FILES_UPDATED);
@@ -321,6 +338,12 @@ public class AudioCaptureService extends Service {
         windowManager.addView(countdownView, layoutParams);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(closeReceiver, new IntentFilter(MainActivity.ACTION_CLOSE_CAPTURING));
+    }
+
+    private void stopPlayback() {
+        handler.removeCallbacks(playbackFinishedCallback);
+        mediaPlayer.stop();
+        actionPlayLatest.setText(R.string.play);
     }
 
     private void hideLatestMenu() {
