@@ -66,6 +66,7 @@ public class NotesIntegrity {
         LinkedList<Map<String, String>> allNotesData = helper.findNotes(
                 musInterval.modelId,
                 new HashMap<String, String>(),
+                musInterval.multipleSelectionFields,
                 musInterval.defaultValues,
                 musInterval.searchExpressionMakers,
                 musInterval.equalityCheckers

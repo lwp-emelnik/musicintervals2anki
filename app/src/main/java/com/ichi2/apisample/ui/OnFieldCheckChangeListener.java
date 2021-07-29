@@ -24,7 +24,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
         if (compoundButton.getId() == checkBoxAny.getId()) {
             if (b) {
                 for (CheckBox checkBox : checkBoxes) {
-                    checkBox.setChecked(false);
+                    setChecked(checkBox,false);
                 }
             } else if (enableMultiple) {
                 for (CheckBox checkBox : checkBoxes) {
@@ -33,15 +33,15 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
                     }
                 }
                 for (CheckBox checkBox : checkBoxes) {
-                    checkBox.setChecked(true);
+                    setChecked(checkBox,true);
                 }
             }
         } else if (b) {
-            checkBoxAny.setChecked(false);
+            setChecked(checkBoxAny, false);
             if (!enableMultiple) {
                 for (CheckBox checkBox : checkBoxes) {
                     if (checkBox.getId() != compoundButton.getId()) {
-                        checkBox.setChecked(false);
+                        setChecked(checkBox,false);
                     }
                 }
             }
@@ -62,10 +62,20 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
             }
             if (checked.size() > 1) {
                 for (CheckBox checkBox : checked) {
-                    checkBox.setChecked(false);
+                    setChecked(checkBox,false);
                 }
+                mainActivity.clearAddedFilenames();
+                mainActivity.refreshExisting();
+                mainActivity.refreshPermutations();
+                mainActivity.refreshKeys();
             }
         }
         this.enableMultiple = enableMultiple;
+    }
+
+    private void setChecked(CheckBox checkBox, boolean value) {
+        checkBox.setOnCheckedChangeListener(null);
+        checkBox.setChecked(value);
+        checkBox.setOnCheckedChangeListener(this);
     }
 }
