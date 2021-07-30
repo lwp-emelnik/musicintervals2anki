@@ -8,6 +8,10 @@ import com.ichi2.apisample.R;
 
 import java.io.IOException;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class SoundPlayer {
     private final MainActivity mainActivity;
     private MediaPlayer mediaPlayer;

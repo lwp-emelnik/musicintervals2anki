@@ -14,6 +14,10 @@ import com.ichi2.apisample.helper.AnkiDroidHelper;
 import com.ichi2.apisample.model.AddingHandler;
 import com.ichi2.apisample.model.MusInterval;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class DuplicatePromptWorker implements Runnable {
     private final MainActivity mainActivity;
 

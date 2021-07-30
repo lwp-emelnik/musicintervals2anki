@@ -1,5 +1,9 @@
 package com.ichi2.apisample.helper;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class StringUtil {
     public static String joinStrings(String separator, String[] values) {
         StringBuilder builder = new StringBuilder();

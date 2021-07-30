@@ -1,5 +1,9 @@
 package com.ichi2.apisample.ui;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class GetStringArgs {
     private final int resId;
     private final Object[] formatArgs;

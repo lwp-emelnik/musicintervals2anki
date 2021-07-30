@@ -14,6 +14,10 @@ import com.ichi2.apisample.model.NotesIntegrity;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class IntegrityCheckWorker implements Runnable {
     private final MainActivity mainActivity;
     private final ProgressDialog progressDialog;

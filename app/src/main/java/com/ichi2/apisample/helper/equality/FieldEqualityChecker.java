@@ -2,6 +2,10 @@ package com.ichi2.apisample.helper.equality;
 
 import java.util.Map;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class FieldEqualityChecker implements EqualityChecker {
     private String modelField;
     private ValueEqualityChecker valueEqualityChecker;

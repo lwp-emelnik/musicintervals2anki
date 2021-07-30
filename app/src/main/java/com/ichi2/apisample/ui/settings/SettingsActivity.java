@@ -8,6 +8,10 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.ichi2.apisample.R;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

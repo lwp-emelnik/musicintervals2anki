@@ -12,6 +12,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ichi2.apisample.R;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class FilenameAdapter extends RecyclerView.Adapter<FilenameAdapter.ViewHolder> {
     private final UriPathName[] uriPathNames;
     private final OnPlayClickListener[] listeners;

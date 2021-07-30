@@ -2,6 +2,10 @@ package com.ichi2.apisample.ui;
 
 import android.view.View;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class OnGroupPlayClickListener implements View.OnClickListener {
     private final OnPlayClickListener listener;
     private final OnPlayClickListener[] groupListeners;

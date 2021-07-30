@@ -13,6 +13,10 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class NotesIntegrity {
     private final AnkiDroidHelper helper;
     private final MusInterval musInterval;

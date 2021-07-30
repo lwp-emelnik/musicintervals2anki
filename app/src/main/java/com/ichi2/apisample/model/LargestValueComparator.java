@@ -2,6 +2,10 @@ package com.ichi2.apisample.model;
 
 import java.util.Map;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class LargestValueComparator extends RelativesPriorityComparator {
     public LargestValueComparator(String fieldKey) {
         super(fieldKey);

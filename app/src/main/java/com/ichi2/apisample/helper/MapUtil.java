@@ -3,6 +3,10 @@ package com.ichi2.apisample.helper;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class MapUtil {
     public static <K, V> void putMissingKeys(Map<K, V> source, Map<K, V> target) {
         for (Map.Entry<K, V> entry : source.entrySet()) {

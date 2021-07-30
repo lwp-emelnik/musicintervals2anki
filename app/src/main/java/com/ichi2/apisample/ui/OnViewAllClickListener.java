@@ -15,6 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ichi2.apisample.R;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class OnViewAllClickListener implements View.OnClickListener {
     private final MainActivity mainActivity;
     private final FilenameAdapter.UriPathName[] uriPathNames;

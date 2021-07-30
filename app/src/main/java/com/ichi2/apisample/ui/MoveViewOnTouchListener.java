@@ -5,6 +5,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class MoveViewOnTouchListener implements View.OnTouchListener {
     private static final long CLICK_THRESHOLD = 100;
 

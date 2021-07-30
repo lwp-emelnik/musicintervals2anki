@@ -2,6 +2,9 @@ package com.ichi2.apisample;
 
 import org.junit.Test;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
 
 public class AnkiDroidHelperTest {
 

@@ -1,5 +1,9 @@
 package com.ichi2.apisample.validation;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class IntegerRangeValidator implements FieldValidator {
     private final int minValue;
     private final int maxValue;

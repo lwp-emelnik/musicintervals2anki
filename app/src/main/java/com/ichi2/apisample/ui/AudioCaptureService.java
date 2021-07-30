@@ -56,6 +56,10 @@ import java.util.concurrent.TimeUnit;
 
 import linc.com.pcmdecoder.PCMDecoder;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class AudioCaptureService extends Service {
     public final static String CAPTURES_DIRECTORY = Environment.getExternalStorageDirectory().getPath() + "/MusicIntervals2Anki/AudioCaptures";
 

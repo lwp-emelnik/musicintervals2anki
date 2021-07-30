@@ -14,6 +14,10 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public abstract class RelatedIntervalSoundField {
     public static final String TAG_POINTING = "pointing";
     public static final String TAG_POINTED = "pointed";

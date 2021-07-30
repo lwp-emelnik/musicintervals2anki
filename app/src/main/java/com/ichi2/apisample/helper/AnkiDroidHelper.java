@@ -35,6 +35,10 @@ import java.util.Set;
 
 import static com.ichi2.anki.api.AddContentApi.READ_WRITE_PERMISSION;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class AnkiDroidHelper {
     public static final String KEY_ID = "id";
     public static final String KEY_TAGS = "tags";

@@ -4,6 +4,10 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.Button;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class TouchableButton extends Button {
 
     public TouchableButton(Context context) {

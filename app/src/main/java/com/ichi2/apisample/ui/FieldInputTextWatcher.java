@@ -3,6 +3,10 @@ package com.ichi2.apisample.ui;
 import android.text.Editable;
 import android.text.TextWatcher;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class FieldInputTextWatcher implements TextWatcher {
     private MainActivity mainActivity;
     private String prev;

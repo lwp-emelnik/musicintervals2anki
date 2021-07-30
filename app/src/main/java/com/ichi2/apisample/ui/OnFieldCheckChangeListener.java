@@ -5,6 +5,10 @@ import android.widget.CompoundButton;
 
 import java.util.ArrayList;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChangeListener {
     private final MainActivity mainActivity;
 

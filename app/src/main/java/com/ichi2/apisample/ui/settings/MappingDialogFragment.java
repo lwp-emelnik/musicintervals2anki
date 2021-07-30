@@ -21,6 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class MappingDialogFragment extends PreferenceDialogFragmentCompat {
     private final String[] keys;
     private final int nEntries;

@@ -4,6 +4,10 @@ import com.ichi2.apisample.helper.AnkiDroidHelper;
 
 import java.util.Map;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class ValidationUtil {
     public static boolean isValid(Validator validator, long modelId, long noteId, Map<String, String> noteData,
                                   String fieldKey, Map<String, String> modelFields, AnkiDroidHelper helper,

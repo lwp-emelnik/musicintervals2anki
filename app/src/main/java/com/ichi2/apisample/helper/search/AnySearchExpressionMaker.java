@@ -1,5 +1,9 @@
 package com.ichi2.apisample.helper.search;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class AnySearchExpressionMaker implements SearchExpressionMaker {
     @Override
     public String getExpression(String value) {

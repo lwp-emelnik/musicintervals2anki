@@ -15,6 +15,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class AudioUtil {
     private static final int BUFFER_CAPACITY = 500 * 1024;
 

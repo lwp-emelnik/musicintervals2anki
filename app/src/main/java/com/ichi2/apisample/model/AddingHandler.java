@@ -2,6 +2,10 @@ package com.ichi2.apisample.model;
 
 import com.ichi2.apisample.helper.AnkiDroidHelper;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public interface AddingHandler {
     MusInterval add();
 

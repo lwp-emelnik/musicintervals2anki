@@ -2,6 +2,10 @@ package com.ichi2.apisample.helper.search;
 
 import java.util.Locale;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class DoubleSearchExpressionMaker implements SearchExpressionMaker {
     @Override
     public String getExpression(String value) {

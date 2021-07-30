@@ -5,6 +5,10 @@ import com.ichi2.apisample.helper.AnkiDroidHelper;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public abstract class NoteEqualityChecker implements EqualityChecker {
     protected String[] modelFields;
 

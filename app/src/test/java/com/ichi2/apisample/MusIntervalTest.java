@@ -24,6 +24,9 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
 
 public class MusIntervalTest {
 

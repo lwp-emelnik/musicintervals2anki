@@ -5,6 +5,10 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Map;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public abstract class RelativesPriorityComparator implements Comparator<Map<String, String>> {
     protected final String fieldKey;
     protected Map<String, String> modelFields;

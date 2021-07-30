@@ -12,6 +12,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class MappingPreference extends DialogPreference {
     private static final String SEPARATOR = ":";
 

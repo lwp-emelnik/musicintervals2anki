@@ -15,6 +15,10 @@ import com.ichi2.apisample.helper.UriUtil;
 import java.io.File;
 import java.util.ArrayList;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class OnFilenamesSortingCheckedChangeListener implements RadioGroup.OnCheckedChangeListener {
     private final MainActivity mainActivity;
     private final FilenameAdapter.UriPathName[] uriPathNames;

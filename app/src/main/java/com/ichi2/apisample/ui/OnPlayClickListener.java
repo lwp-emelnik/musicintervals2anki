@@ -7,6 +7,10 @@ import android.widget.Button;
 import com.ichi2.apisample.R;
 import com.ichi2.apisample.helper.AudioUtil;
 
+/**
+ * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
+ */
+
 public class OnPlayClickListener implements View.OnClickListener {
     private final MainActivity mainActivity;
     private final FilenameAdapter.UriPathName uriPathName;
