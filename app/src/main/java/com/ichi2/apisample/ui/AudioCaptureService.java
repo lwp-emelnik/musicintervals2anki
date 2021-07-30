@@ -96,6 +96,7 @@ public class AudioCaptureService extends Service {
     private View overlayView;
     private TextView textTop;
     private TouchableButton actionRecord;
+    private TouchableButton actionClose;
     private TextView textBottom;
 
     private View countdownView;
@@ -205,7 +206,7 @@ public class AudioCaptureService extends Service {
         });
         actionRecord.setOnTouchListener(moveOnTouchListener);
 
-        TouchableButton actionClose = overlayView.findViewById(R.id.actionClose);
+        actionClose = overlayView.findViewById(R.id.actionClose);
         actionClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -370,6 +371,8 @@ public class AudioCaptureService extends Service {
     }
 
     private void tearDown() {
+        actionRecord.setOnClickListener(null);
+        actionClose.setOnClickListener(null);
         if (countdownCallbacks != null) {
             for (Runnable callback : countdownCallbacks) {
                 handler.removeCallbacks(callback);
