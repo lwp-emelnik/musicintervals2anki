@@ -164,9 +164,7 @@ public class AudioCaptureService extends Service {
             @Override
             public void onClick(View view) {
                 if (!isRecording) {
-                    if (mediaPlayer.isPlaying()) {
-                        mediaPlayer.stop();
-                    }
+                    stopPlayback();
                     hideLatestMenu();
 
                     actionRecord.setEnabled(false);
@@ -232,13 +230,6 @@ public class AudioCaptureService extends Service {
 
         recordings = new LinkedList<>();
 
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setAudioAttributes(
-                new AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .build()
-        );
         toneGenerator = new ToneGenerator(AudioManager.STREAM_SYSTEM, 25);
 
         actionPlayLatest = overlayView.findViewById(R.id.actionPlayLatest);
@@ -246,17 +237,23 @@ public class AudioCaptureService extends Service {
             @Override
             public void onClick(View view) {
                 try {
-                    if (!mediaPlayer.isPlaying()) {
+                    if (mediaPlayer == null) {
                         actionPlayLatest.setText(R.string.stop);
+                        mediaPlayer = new MediaPlayer();
+                        mediaPlayer.setAudioAttributes(
+                                new AudioAttributes.Builder()
+                                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                                        .build()
+                        );
                         Uri uri = recordings.getLast().getUri();
-                        mediaPlayer.reset();
                         mediaPlayer.setDataSource(AudioCaptureService.this, uri);
                         mediaPlayer.prepare();
                         mediaPlayer.start();
                         playbackFinishedCallback = new Runnable() {
                             @Override
                             public void run() {
-                                actionPlayLatest.setText(R.string.play);
+                                stopPlayback();
                             }
                         };
                         long duration = AudioUtil.getDuration(AudioCaptureService.this, uri);
@@ -275,9 +272,7 @@ public class AudioCaptureService extends Service {
         actionDiscardLatest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mediaPlayer.isPlaying()) {
-                    stopPlayback();
-                }
+                stopPlayback();
 
                 Intent intent = new Intent(ACTION_FILES_UPDATED);
                 LocalBroadcastManager.getInstance(AudioCaptureService.this).sendBroadcast(intent);
@@ -341,8 +336,17 @@ public class AudioCaptureService extends Service {
     }
 
     private void stopPlayback() {
-        handler.removeCallbacks(playbackFinishedCallback);
-        mediaPlayer.stop();
+        if (playbackFinishedCallback != null) {
+            handler.removeCallbacks(playbackFinishedCallback);
+            playbackFinishedCallback = null;
+        }
+        if (mediaPlayer != null) {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+            }
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
         actionPlayLatest.setText(R.string.play);
     }
 
@@ -378,10 +382,7 @@ public class AudioCaptureService extends Service {
         }
         record.release();
         projection.stop();
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-        }
-        mediaPlayer.release();
+        stopPlayback();
         toneGenerator.release();
         stopSelf();
     }
@@ -400,8 +401,6 @@ public class AudioCaptureService extends Service {
         if (intent == null) {
             return Service.START_NOT_STICKY;
         }
-        MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        projection = projectionManager.getMediaProjection(Activity.RESULT_OK, (Intent) intent.getParcelableExtra(EXTRA_RESULT_DATA));
         if (intent.hasExtra(EXTRA_RECORDINGS)) {
             String[] filenames = intent.getStringArrayExtra(EXTRA_RECORDINGS);
             for (String filename : filenames) {
@@ -418,6 +417,8 @@ public class AudioCaptureService extends Service {
                 layoutLatestActions.setVisibility(View.VISIBLE);
             }
         }
+        MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        projection = projectionManager.getMediaProjection(Activity.RESULT_OK, (Intent) intent.getParcelableExtra(EXTRA_RESULT_DATA));
         AudioPlaybackCaptureConfiguration config = new AudioPlaybackCaptureConfiguration.Builder(projection)
                 .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
                 .build();
