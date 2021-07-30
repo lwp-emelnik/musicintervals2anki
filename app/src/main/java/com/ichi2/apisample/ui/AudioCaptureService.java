@@ -170,8 +170,8 @@ public class AudioCaptureService extends Service {
                     actionRecord.setEnabled(false);
                     countdownView.setVisibility(View.VISIBLE);
 
-                    countdownCallbacks = new ArrayList<>(4);
                     final int t = 3;
+                    countdownCallbacks = new ArrayList<>(t + 1);
                     for (int i = 0; i < t; i++) {
                         final int count = t - i;
                         Runnable callback = new Runnable() {
@@ -188,6 +188,7 @@ public class AudioCaptureService extends Service {
                         @Override
                         public void run() {
                             handleStartCapture();
+                            countdownCallbacks = null;
                         }
                     };
                     handler.postDelayed(callback, t * 1000);
@@ -315,15 +316,15 @@ public class AudioCaptureService extends Service {
         actionSkip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (countdownCallbacks != null) {
-                    for (Runnable callback : countdownCallbacks) {
-                        handler.removeCallbacks(callback);
-                    }
-                }
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        handleStartCapture();
+                        if (countdownCallbacks != null) {
+                            for (Runnable callback : countdownCallbacks) {
+                                handler.removeCallbacks(callback);
+                            }
+                            handleStartCapture();
+                        }
                     }
                 });
             }
