@@ -377,6 +377,12 @@ public class AudioCaptureService extends Service {
         countdownCallbacks = null;
         if (captureThread != null && captureThread.isAlive()) {
             captureThread.interrupt();
+            try {
+                captureThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                throw new Error();
+            }
             record.stop();
             tempPcmFile.delete();
         }
