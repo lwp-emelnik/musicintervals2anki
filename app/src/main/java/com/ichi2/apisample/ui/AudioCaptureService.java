@@ -1,5 +1,6 @@
 package com.ichi2.apisample.ui;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.NotificationChannel;
@@ -127,6 +128,7 @@ public class AudioCaptureService extends Service {
 
     @Override
     @TargetApi(Build.VERSION_CODES.O)
+    @SuppressLint("InflateParams")
     public void onCreate() {
         super.onCreate();
         NotificationChannel notificationChannel = new NotificationChannel(
