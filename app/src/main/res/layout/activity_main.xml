@@ -429,6 +429,7 @@
                 android:id="@+id/inputTempo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autofillHints=""
                 android:ems="10"
                 android:inputType="number" />
 
@@ -455,6 +456,7 @@
                 android:id="@+id/inputFirstNoteDurationCoefficient"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autofillHints=""
                 android:ems="10"
                 android:inputType="numberDecimal" />
 
