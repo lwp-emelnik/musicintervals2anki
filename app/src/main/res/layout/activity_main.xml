@@ -424,6 +424,7 @@
                 android:id="@+id/labelTempo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:labelFor="@id/inputTempo"
                 android:text="@string/tempo" />
 
             <EditText
@@ -437,6 +438,7 @@
                 android:id="@+id/labelInstrument"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:labelFor="@id/inputInstrument"
                 android:text="@string/instrument" />
 
             <AutoCompleteTextView
@@ -448,6 +450,7 @@
                 android:id="@+id/labelFirstNoteDurationCoefficient"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:labelFor="@id/inputFirstNoteDurationCoefficient"
                 android:text="@string/first_note_duration_coefficient" />
 
             <EditText
