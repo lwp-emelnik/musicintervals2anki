@@ -770,9 +770,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             );
             return;
         }
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            Manifest.permission.READ_EXTERNAL_STORAGE},
                     PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_CAPTURE
             );
             return;
@@ -838,9 +838,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         actionSelectFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                    Manifest.permission.READ_EXTERNAL_STORAGE},
                             PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_OPEN_CHOOSER
                     );
                     return;
@@ -1189,12 +1189,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void deleteCapturedFiles(String[] filenames) {
+        String capturesDirectory = AudioCaptureService.getCapturesDirectory(this);
         for (String filename : filenames) {
             Uri uri = Uri.parse(filename);
             if ("file".equals(uri.getScheme())) {
                 String pathname = uri.getPath();
                 String parentDir = pathname.substring(0, pathname.lastIndexOf("/"));
-                if (AudioCaptureService.CAPTURES_DIRECTORY.equals(parentDir)) {
+                if (parentDir.equals(capturesDirectory)) {
                     File file = new File(pathname);
                     file.delete();
                 }

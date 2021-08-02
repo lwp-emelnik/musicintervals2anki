@@ -62,14 +62,14 @@ import linc.com.pcmdecoder.PCMDecoder;
  */
 
 public class AudioCaptureService extends Service {
-    public final static String CAPTURES_DIRECTORY = Environment.getExternalStorageDirectory().getPath() + "/MusicIntervals2Anki/AudioCaptures";
-
     public final static String EXTRA_RESULT_DATA = "AudioCaptureService:Extra:ResultData";
     public final static String EXTRA_RECORDINGS = "AudioCaptureService:Extra:Recordings";
 
     public final static String ACTION_FILES_UPDATED = "AudioCaptureService:FilesUpdated";
     public final static String EXTRA_URI_STRING = "AudioCaptureService:Extra:UriString";
     public final static String ACTION_CLOSED = "AudioCaptureService:Closed";
+
+    private final static String CAPTURES_DIRECTORY = "AudioCaptures";
 
     private final static int SERVICE_ID = 1;
     private final static String NOTIFICATION_CHANNEL_ID = "AudioCapture channel";
@@ -118,6 +118,10 @@ public class AudioCaptureService extends Service {
     private ToneGenerator toneGenerator;
 
     private Runnable playbackFinishedCallback;
+
+    public static String getCapturesDirectory(Context context) {
+        return context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/" + AudioCaptureService.CAPTURES_DIRECTORY;
+    }
 
     private final BroadcastReceiver closeReceiver = new BroadcastReceiver() {
         @Override
@@ -465,7 +469,7 @@ public class AudioCaptureService extends Service {
     }
 
     private File createAudioFile() {
-        File capturesDir = new File(CAPTURES_DIRECTORY);
+        File capturesDir = new File(getCapturesDirectory(this));
         if (!capturesDir.exists()) {
             capturesDir.mkdirs();
         }

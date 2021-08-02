@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -350,7 +349,7 @@ public class AnkiDroidHelper {
         uriString = uri.toString();
         mContext.grantUriPermission(PACKAGE_ANKI, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
         String type = mResolver.getType(uri);
-        final String tempAudioFilePath = Environment.getExternalStorageDirectory().getPath() + "/tempOutput.mp3";
+        final String tempAudioFilePath = mContext.getExternalCacheDir() + "/tempOutput.mp3";
         if (type.startsWith("video")) {
             Uri extractedAudioUri = AudioUtil.extractFromVideo(mContext, uri, tempAudioFilePath);
             // @todo: separate concerns
