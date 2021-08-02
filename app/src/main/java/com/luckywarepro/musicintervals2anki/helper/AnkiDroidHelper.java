@@ -79,9 +79,6 @@ public class AnkiDroidHelper {
      * Whether or not we should request full access to the AnkiDroid API
      */
     public boolean shouldRequestPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return false;
-        }
         return ContextCompat.checkSelfPermission(mContext, READ_WRITE_PERMISSION) != PackageManager.PERMISSION_GRANTED;
     }
 
