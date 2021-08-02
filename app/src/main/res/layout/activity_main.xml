@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    tools:context="com.luckywarepro.apisample.MainActivity">
+    tools:context="com.luckywarepro.musicintervals2anki.ui.MainActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarMain"
