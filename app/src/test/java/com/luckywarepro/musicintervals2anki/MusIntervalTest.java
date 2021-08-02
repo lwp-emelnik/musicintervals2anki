@@ -5150,6 +5150,11 @@ public class MusIntervalTest {
             remove(AnkiDroidHelper.KEY_ID);
             remove(AnkiDroidHelper.KEY_TAGS);
         }};
+        doReturn(
+                new LinkedList<Map<String, String>>() {{
+                    add(noteData);
+                }}
+        ).when(helper).findNotes(eq(modelId), eq(noteKeyData2), any(Set.class), any(Map.class), any(Map.class), any(Map.class));
         Map<String, String> largerNoteKeyData = new HashMap<String, String>(largerNoteData) {{
             remove(MusInterval.Fields.SOUND);
             remove(MusInterval.Fields.SOUND_SMALLER);
