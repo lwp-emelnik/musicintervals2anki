@@ -100,8 +100,8 @@ public class AudioCaptureService extends Service {
 
     private View overlayView;
     private TextView textTop;
-    private TouchableButton actionRecord;
-    private TouchableButton actionClose;
+    private Button actionRecord;
+    private Button actionClose;
     private TextView textBottom;
 
     private View countdownView;
@@ -110,7 +110,7 @@ public class AudioCaptureService extends Service {
 
     private TextView textLatest;
     private LinearLayout layoutLatestActions;
-    private TouchableButton actionPlayLatest;
+    private Button actionPlayLatest;
 
     private LinkedList<Recording> recordings;
 
@@ -132,7 +132,7 @@ public class AudioCaptureService extends Service {
 
     @Override
     @TargetApi(Build.VERSION_CODES.O)
-    @SuppressLint("InflateParams")
+    @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
     public void onCreate() {
         super.onCreate();
         NotificationChannel notificationChannel = new NotificationChannel(
@@ -280,7 +280,7 @@ public class AudioCaptureService extends Service {
         });
         actionPlayLatest.setOnTouchListener(moveOnTouchListener);
 
-        TouchableButton actionDiscardLatest = overlayView.findViewById(R.id.actionDiscardLatest);
+        Button actionDiscardLatest = overlayView.findViewById(R.id.actionDiscardLatest);
         actionDiscardLatest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
