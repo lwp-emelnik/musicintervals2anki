@@ -378,30 +378,30 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.actionSettings:
-                if (mAnkiDroid.shouldRequestPermission()) {
-                    mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
+        int itemId = item.getItemId();
+        if (itemId == R.id.actionSettings) {
+            if (mAnkiDroid.shouldRequestPermission()) {
+                mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
+                return true;
+            }
+            try {
+                getMusInterval();
+            } catch (Throwable e) {
+                // handle IllegalStateException on unconfirmed permissions in AnkiDroid
+                if (!(e instanceof MusInterval.ValidationException)) {
+                    handleError(e);
                     return true;
                 }
-                try {
-                    getMusInterval();
-                } catch (Throwable e) {
-                    // handle IllegalStateException on unconfirmed permissions in AnkiDroid
-                    if (!(e instanceof MusInterval.ValidationException)) {
-                        handleError(e);
-                        return true;
-                    }
-                }
-                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-                return true;
-            case R.id.actionHelp:
-                Uri uri = Uri.parse(getString(R.string.uri_readme));
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            }
+            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+            return true;
+        } else if (itemId == R.id.actionHelp) {
+            Uri uri = Uri.parse(getString(R.string.uri_readme));
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -1409,6 +1409,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     }
                 }
                 break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
