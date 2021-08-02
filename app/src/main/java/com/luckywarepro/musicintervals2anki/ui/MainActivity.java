@@ -5,7 +5,6 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,7 +19,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -220,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     };
 
     String[] filenames = new String[]{};
-    private String[] selectedFilenames;
+    String[] selectedFilenames;
     boolean mismatchingSorting;
     boolean intersectingNames;
     boolean sortByName;
@@ -239,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     };
 
-    private boolean afterSelecting;
+    boolean afterSelecting;
     private boolean afterCapturing;
     boolean isCapturing;
 
@@ -761,7 +759,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         });
     }
 
-    ActivityResultLauncher<Intent> overlayPermissionLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> overlayPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
@@ -840,7 +838,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         isCapturing = false;
     }
 
-    ActivityResultLauncher<Intent> capturingLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> capturingLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @TargetApi(Build.VERSION_CODES.Q)
@@ -926,86 +924,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 .show();
     }
 
-    ActivityResultLauncher<Intent> fileChooserLauncher = registerForActivityResult(
+    private final  ActivityResultLauncher<Intent> fileChooserLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() != RESULT_OK) {
-                        return;
-                    }
-
-                    Intent data = result.getData();
-                    final ArrayList<Uri> uriList = new ArrayList<>();
-                    if (data != null) {
-                        ClipData clipData = data.getClipData();
-                        if (clipData != null) {
-                            for (int i = 0; i < clipData.getItemCount(); i++) {
-                                Uri uri = clipData.getItemAt(i).getUri();
-                                uriList.add(uri);
-                            }
-                        } else {
-                            Uri uri = data.getData();
-                            uriList.add(uri);
-                        }
-                    }
-
-                    ContentResolver resolver = getContentResolver();
-                    final ArrayList<String> names = new ArrayList<>(uriList.size());
-                    final ArrayList<Long> dates = new ArrayList<>(uriList.size());
-                    for (Uri uri : uriList) {
-                        Cursor cursor = resolver.query(uri, null, null, null, null);
-                        int nameIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                        int dateIdx = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_LAST_MODIFIED);
-                        cursor.moveToFirst();
-                        names.add(cursor.getString(nameIdx));
-                        dates.add(cursor.getLong(dateIdx));
-                        cursor.close();
-                    }
-
-                    intersectingNames = new HashSet<>(names).size() != names.size();
-                    final ArrayList<String> namesSorted = new ArrayList<>(names);
-                    namesSorted.sort(COMPARATOR_FILE_NAME);
-                    intersectingDates = new HashSet<>(dates).size() != dates.size();
-                    final ArrayList<Long> datesSorted = new ArrayList<>(dates);
-                    datesSorted.sort(COMPARATOR_FILE_DATE);
-
-                    boolean areKeysUnique = !intersectingNames && !intersectingDates;
-
-                    String[] uriStrings;
-                    if (intersectingNames && intersectingDates) {
-                        uriStrings = new String[]{};
-                        new AlertDialog.Builder(MainActivity.this)
-                                .setMessage(R.string.intersecting_sorting_keys)
-                                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        dialogInterface.dismiss();
-                                    }
-                                })
-                                .show();
-                    } else {
-                        uriStrings = new String[uriList.size()];
-                        for (int i = 0; i < uriList.size(); i++) {
-                            int sortedNameIdx = names.indexOf(namesSorted.get(i));
-                            int sortedDateIdx = dates.indexOf(datesSorted.get(i));
-                            if (areKeysUnique && sortedNameIdx != sortedDateIdx) {
-                                mismatchingSorting = true;
-                                selectedFilenames = new String[]{};
-                                showMismatchingSortingDialog(uriList, names, namesSorted, dates, datesSorted);
-                                return;
-                            }
-                            uriStrings[i] = uriList.get(!intersectingNames ? sortedNameIdx : sortedDateIdx).toString();
-                        }
-                    }
-
-                    selectedFilenames = uriStrings;
-                    sortByName = !intersectingNames && intersectingDates;
-                    sortByDate = !intersectingDates && intersectingNames;
-                    mismatchingSorting = sortByName || sortByDate;
-                    afterSelecting = true;
-                }
-            }
+            new FileChooserResultCallback(this)
     );
 
     private void openChooser() {
@@ -1022,7 +943,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         fileChooserLauncher.launch(chooser);
     }
 
-    private void showMismatchingSortingDialog(final ArrayList<Uri> uriList, final ArrayList<String> names, final ArrayList<String> namesSorted, final ArrayList<Long> lastModifiedValues, final ArrayList<Long> lastModifiedSorted) {
+    void showMismatchingSortingDialog(final ArrayList<Uri> uriList, final ArrayList<String> names, final ArrayList<String> namesSorted, final ArrayList<Long> lastModifiedValues, final ArrayList<Long> lastModifiedSorted) {
         new AlertDialog.Builder(this)
                 .setMessage(R.string.mismatching_sorting)
                 .setPositiveButton(R.string.sort_by_date, new DialogInterface.OnClickListener() {
