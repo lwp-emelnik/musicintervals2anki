@@ -61,6 +61,7 @@ import linc.com.pcmdecoder.PCMDecoder;
  * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
  */
 
+@SuppressWarnings("FieldCanBeLocal")
 public class AudioCaptureService extends Service {
     public final static String EXTRA_RESULT_DATA = "AudioCaptureService:Extra:ResultData";
     public final static String EXTRA_RECORDINGS = "AudioCaptureService:Extra:Recordings";
