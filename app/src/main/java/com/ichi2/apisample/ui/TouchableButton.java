@@ -4,6 +4,9 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.Button;
 
+/**
+ * https://stackoverflow.com/questions/47107105/android-button-has-setontouchlistener-called-on-it-but-does-not-override-perform
+ */
 public class TouchableButton extends Button {
 
     public TouchableButton(Context context) {
