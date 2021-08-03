@@ -7334,6 +7334,179 @@ public class MusIntervalTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    public void add_DuplicateHarmonicUnisonAltLarger_shouldUpdateAltReverse() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
+        final long deckId = new Random().nextLong();
+        final long modelId = new Random().nextLong();
+        final long noteId = new Random().nextLong();
+
+        final AnkiDroidHelper helper = mock(AnkiDroidHelper.class);
+        doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
+        doReturn(SIGNATURE).when(helper).getFieldList(eq(modelId));
+        doReturn(deckId).when(helper).findDeckIdByName(defaultDeckName);
+        doAnswer(new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocation) {
+                return invocation.getArgument(0);
+            }
+        }).when(helper).addFileToAnkiMedia(any(String.class));
+        doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
+
+        final MusInterval musIntervalAsc = new MusInterval.Builder(helper)
+                .model(defaultModelName)
+                .deck(defaultDeckName)
+                .sounds(new String[]{"intervalAsc"})
+                .notes(new String[]{"D"})
+                .octaves(new String[]{defaultOctave})
+                .direction(MusInterval.Fields.Direction.ASC)
+                .timing(MusInterval.Fields.Timing.HARMONIC)
+                .intervals(new String[]{MusInterval.Fields.Interval.VALUE_UNISON})
+                .tempo("80")
+                .instrument("violin")
+                .build();
+        final MusInterval musIntervalAltLargerAsc = new MusInterval.Builder(helper)
+                .model(defaultModelName)
+                .deck(defaultDeckName)
+                .sounds(new String[]{"intervalLargerAsc.mp3"})
+                .notes(new String[]{"C#"})
+                .octaves(new String[]{defaultOctave})
+                .direction(MusInterval.Fields.Direction.ASC)
+                .timing(MusInterval.Fields.Timing.HARMONIC)
+                .intervals(new String[]{"min2"})
+                .tempo("80")
+                .instrument("violin")
+                .build();
+        final MusInterval musIntervalAltLargerDesc = new MusInterval.Builder(helper)
+                .model(defaultModelName)
+                .deck(defaultDeckName)
+                .sounds(new String[]{"intervalLargerDesc.mp3"})
+                .notes(new String[]{"D"})
+                .octaves(new String[]{defaultOctave})
+                .direction(MusInterval.Fields.Direction.DESC)
+                .timing(MusInterval.Fields.Timing.HARMONIC)
+                .intervals(new String[]{"min2"})
+                .tempo("80")
+                .instrument("violin")
+                .build();
+
+        final LinkedList<MusInterval> musIntervalsAdded = new LinkedList<>();
+        final LinkedList<MusInterval> addedMusIntervals = new LinkedList<>();
+
+        doAnswer(new Answer<LinkedList<Map<String, String>>>() {
+            @Override
+            public LinkedList<Map<String, String>> answer(InvocationOnMock invocation) {
+                Map<String, String> inputData = new HashMap<>((Map<String, String>) invocation.getArgument(1));
+                LinkedList<Map<String, String>> result = new LinkedList<>();
+
+                if (inputData.size() == 1) {
+                    for (int i = 0; i < addedMusIntervals.size(); i++) {
+                        MusInterval mi = addedMusIntervals.get(i);
+                        Map<String, String> data;
+                        try {
+                            data = mi.getCollectedDataSet().get(0);
+                        } catch (Throwable e) {
+                            data = new HashMap<>();
+                        }
+                        String key = inputData.keySet().toArray(new String[0])[0];
+                        String value = inputData.get(key);
+                        if (data.getOrDefault(key, "").equals(value)) {
+                            data.put("id", String.valueOf(i));
+                            result.add(data);
+                        }
+                    }
+                    return result;
+                }
+
+                for (int i = 0; i < musIntervalsAdded.size(); i++) {
+                    MusInterval mi = musIntervalsAdded.get(i);
+                    Map<String, String> data;
+                    try {
+                        data = mi.getCollectedDataSet().get(0);
+                    } catch (Throwable e) {
+                        data = new HashMap<>();
+                    }
+                    data.remove(MusInterval.Fields.SOUND);
+                    data.remove(MusInterval.Fields.SOUND_SMALLER);
+                    data.remove(MusInterval.Fields.SOUND_SMALLER_ALT);
+                    data.remove(MusInterval.Fields.SOUND_LARGER);
+                    data.remove(MusInterval.Fields.SOUND_LARGER_ALT);
+                    data.replace(MusInterval.Fields.START_NOTE, inputData.get(MusInterval.Fields.START_NOTE));
+                    data.replace(MusInterval.Fields.DIRECTION, inputData.get(MusInterval.Fields.DIRECTION));
+                    data.replace(MusInterval.Fields.TEMPO, inputData.get(MusInterval.Fields.TEMPO));
+                    data.remove(MusInterval.Fields.VERSION);
+                    if (inputData.equals(data)) {
+                        data.put("id", String.valueOf(i));
+                        result.add(data);
+                    }
+                    data.put(MusInterval.Fields.SOUND, mi.sounds[0]);
+                    data.put(MusInterval.Fields.SOUND_SMALLER, mi.soundsSmaller[0]);
+                    data.put(MusInterval.Fields.SOUND_SMALLER_ALT, mi.soundsSmallerAlt[0]);
+                    data.put(MusInterval.Fields.SOUND_LARGER, mi.soundsLarger[0]);
+                    data.put(MusInterval.Fields.SOUND_LARGER_ALT, mi.soundsLargerAlt[0]);
+                    data.replace(MusInterval.Fields.START_NOTE, mi.notes[0] + mi.octaves[0]);
+                    data.replace(MusInterval.Fields.DIRECTION, mi.direction);
+                    data.replace(MusInterval.Fields.TEMPO, mi.tempo);
+                }
+                return result;
+            }
+        }).when(helper).findNotes(eq(modelId), any(Map.class), any(Set.class), any(Map.class), any(Map.class), any(Map.class));
+
+        doAnswer(new Answer<Boolean>() {
+            @Override
+            public Boolean answer(InvocationOnMock invocation) throws Throwable {
+                int idx = (int) (long) invocation.getArgument(1);
+                Map<String, String> data = new HashMap<>((Map<String, String>) invocation.getArgument(2));
+                String startNote = data.get(MusInterval.Fields.START_NOTE);
+                String note = startNote.substring(0, startNote.length() - 1);
+                String octave = String.valueOf(startNote.charAt(startNote.length() - 1));
+                MusInterval updated = new MusInterval.Builder(helper)
+                        .model(defaultModelName)
+                        .deck(defaultDeckName)
+                        .sounds(new String[]{data.get(MusInterval.Fields.SOUND)})
+                        .sounds_smaller(new String[]{data.get(MusInterval.Fields.SOUND_SMALLER)})
+                        .sounds_smaller_alt(new String[]{data.get(MusInterval.Fields.SOUND_SMALLER_ALT)})
+                        .sounds_larger(new String[]{data.get(MusInterval.Fields.SOUND_LARGER)})
+                        .sounds_larger_alt(new String[]{data.get(MusInterval.Fields.SOUND_LARGER_ALT)})
+                        .notes(new String[]{note})
+                        .octaves(new String[]{octave})
+                        .direction(data.get(MusInterval.Fields.DIRECTION))
+                        .timing(data.get(MusInterval.Fields.TIMING))
+                        .intervals(new String[]{data.get(MusInterval.Fields.INTERVAL)})
+                        .tempo(data.get(MusInterval.Fields.TEMPO))
+                        .instrument(data.get(MusInterval.Fields.INSTRUMENT))
+                        .build();
+                musIntervalsAdded.set(idx, updated);
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), any(Long.class), any(Map.class));
+
+        AddingPrompter prompter = mock(AddingPrompter.class);
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                MusInterval.AddingResult addingResult = invocation.getArgument(0);
+                addedMusIntervals.add(addingResult.getMusInterval());
+                return null;
+            }
+        }).when(prompter).addingFinished(any(MusInterval.AddingResult.class));
+
+        ProgressIndicator indicator = mock(ProgressIndicator.class);
+
+        musIntervalAsc.addToAnki(prompter, indicator);
+        musIntervalsAdded.add(addedMusIntervals.getLast());
+
+        musIntervalAltLargerAsc.addToAnki(prompter, indicator);
+        MusInterval miAltLargerAscAdded = addedMusIntervals.getLast();
+        assertArrayEquals(musIntervalsAdded.getLast().sounds, miAltLargerAscAdded.soundsSmallerAlt);
+        assertArrayEquals(musIntervalsAdded.getLast().soundsLargerAlt, miAltLargerAscAdded.sounds);
+
+        musIntervalAltLargerDesc.addToAnki(prompter, indicator);
+        MusInterval miAltLargerDescAdded = addedMusIntervals.getLast();
+        assertArrayEquals(musIntervalsAdded.getLast().sounds, miAltLargerDescAdded.soundsSmaller);
+        assertArrayEquals(musIntervalsAdded.getLast().soundsLargerAlt, miAltLargerDescAdded.sounds);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     public void checkIntegrity_BrokenHarmonicUnisonAltLargerLink_ShouldCountAsSuspicious() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
         final long modelId = new Random().nextLong();
         final long noteId = new Random().nextLong();
