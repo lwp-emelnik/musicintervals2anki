@@ -29,6 +29,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -85,6 +86,8 @@ public class AudioCaptureService extends Service {
     private final static int NUM_SAMPLES_PER_READ = 1024;
     private final static int BYTES_PER_SAMPLE = 2;
     private final static int BUFFER_SIZE_IN_BYTES = NUM_SAMPLES_PER_READ * BYTES_PER_SAMPLE;
+
+    private final static String LOG_TAG = "AudioCaptureService";
 
     private MediaProjection projection;
     private AudioRecord record;
@@ -306,7 +309,9 @@ public class AudioCaptureService extends Service {
                 Recording discardedRecording = recordings.removeLast();
                 Uri uri = discardedRecording.getUri();
                 String path = uri.getPath();
-                new File(path).delete();
+                if (!new File(path).delete()) {
+                    Log.e(LOG_TAG, "Could not delete discarded recording file");
+                }
 
                 textBottom.setText(getString(R.string.recorded_files, recordings.size()));
                 if (recordings.size() == 0) {
@@ -399,7 +404,9 @@ public class AudioCaptureService extends Service {
                 throw new Error();
             }
             record.stop();
-            tempPcmFile.delete();
+            if (!tempPcmFile.delete()) {
+                Log.e(LOG_TAG, "Could not delete temp audio file");
+            }
         }
         record.release();
         projection.stop();
@@ -538,7 +545,9 @@ public class AudioCaptureService extends Service {
                     SAMPLE_RATE,
                     convertedPathname
             );
-            tempPcmFile.delete();
+            if (!tempPcmFile.delete()) {
+                Log.e(LOG_TAG, "Could not delete temp audio file");
+            }
 
             Uri uri = Uri.fromFile(convertedFile);
 

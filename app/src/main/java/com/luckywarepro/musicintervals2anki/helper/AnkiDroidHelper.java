@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -50,6 +51,8 @@ public class AnkiDroidHelper {
     private static final String DECK_REF_DB = "com.ichi2.anki.api.decks";
     private static final String MODEL_REF_DB = "com.ichi2.anki.api.models";
     private static final String FLDS_SEPARATOR = "\u001f";
+
+    private static final String LOG_TAG = "AnkiDroidHelper";
 
     private final Context mContext;
     final ContentResolver mResolver;
@@ -373,8 +376,8 @@ public class AnkiDroidHelper {
         } finally {
             mContext.revokeUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             File tempAudioFile = new File(tempAudioFilePath);
-            if (tempAudioFile.exists()) {
-                tempAudioFile.delete();
+            if (tempAudioFile.exists() && !tempAudioFile.delete()) {
+                Log.e(LOG_TAG, "Could not delete extracted audio file");
             }
         }
     }

@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -139,6 +140,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             throw new AssertionError();
         }
     }
+
+    private static final String LOG_TAG = "MainActivity";
 
     private SwitchCompat switchBatch;
     private TextView textFilename;
@@ -812,7 +815,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                             for (String filename : filenames) {
                                 Uri uri = Uri.parse(filename);
                                 String path = uri.getPath();
-                                new File(path).delete();
+                                if (!new File(path).delete()) {
+                                    Log.e(LOG_TAG, "Could not delete discarded recording file");
+                                }
                             }
                             filenames = new String[]{};
                             refreshFilenames();
@@ -1134,7 +1139,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 String parentDir = pathname.substring(0, pathname.lastIndexOf("/"));
                 if (parentDir.equals(capturesDirectory)) {
                     File file = new File(pathname);
-                    file.delete();
+                    if (!file.delete()) {
+                        Log.e(LOG_TAG, "Could not delete added recording file");
+                    }
                 }
             }
         }
@@ -1145,7 +1152,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             Uri uri = Uri.parse(filename);
             if ("file".equals(uri.getScheme())) {
                 File file = new File(uri.getPath());
-                file.delete();
+                if (!file.delete()) {
+                    Log.e(LOG_TAG, "Could not delete added file");
+                }
             } else {
                 DocumentFile documentFile = DocumentFile.fromSingleUri(MainActivity.this, uri);
                 documentFile.delete();
