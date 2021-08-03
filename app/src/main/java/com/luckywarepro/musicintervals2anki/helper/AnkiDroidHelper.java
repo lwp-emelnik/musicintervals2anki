@@ -73,8 +73,8 @@ public class AnkiDroidHelper {
      * The API could be unavailable if AnkiDroid is not installed or the user explicitly disabled the API
      * @return true if the API is available to use
      */
-    public static boolean isApiAvailable(Context context) {
-        return AddContentApi.getAnkiDroidPackageName(context) != null;
+    public static boolean isApiUnavailable(Context context) {
+        return AddContentApi.getAnkiDroidPackageName(context) == null;
     }
 
     /**
