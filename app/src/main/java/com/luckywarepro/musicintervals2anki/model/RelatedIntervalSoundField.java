@@ -84,7 +84,7 @@ public abstract class RelatedIntervalSoundField {
             if (relatedNoteData != null) {
                 String relatedInterval = relatedNoteData.getOrDefault(intervalField, "");
                 Map<String, String> relatedNoteKeyData = getIntervalIdentityData(relatedNoteData);
-                if (!isCorrectRelation(intervalIdx, relatedInterval) ||
+                if (isIncorrectRelation(intervalIdx, relatedInterval) ||
                         !isEqualData(
                                 keyData, relatedNoteKeyData,
                                 relatedSoundField.equals(relatedSoundAltField), false)) {
@@ -100,8 +100,8 @@ public abstract class RelatedIntervalSoundField {
         return false;
     }
 
-    private boolean isCorrectRelation(int intervalIdx, String relatedInterval) {
-        return isRelationPossible(intervalIdx) && relatedInterval.equalsIgnoreCase(getRelatedInterval(intervalIdx));
+    private boolean isIncorrectRelation(int intervalIdx, String relatedInterval) {
+        return !isRelationPossible(intervalIdx) || !relatedInterval.equalsIgnoreCase(getRelatedInterval(intervalIdx));
     }
 
     public int autoFill(Map<String, String> noteData, boolean updateReverse) throws AnkiDroidHelper.InvalidAnkiDatabaseException {
@@ -305,7 +305,7 @@ public abstract class RelatedIntervalSoundField {
 
                 int relatedIntervalIdx = MusInterval.Fields.Interval.getIndex(relatedInterval);
                 String currentReverseInterval = currentReverseData.getOrDefault(intervalField, "");
-                if (!reverse.isCorrectRelation(relatedIntervalIdx, currentReverseInterval) ||
+                if (reverse.isIncorrectRelation(relatedIntervalIdx, currentReverseInterval) ||
                         !isEqualData(
                                 getIntervalIdentityData(relatedData),
                                 getIntervalIdentityData(currentReverseData),
