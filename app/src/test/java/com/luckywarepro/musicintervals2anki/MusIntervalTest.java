@@ -28,6 +28,7 @@ import static org.mockito.Mockito.*;
  * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
  */
 
+@SuppressWarnings("rawtypes")
 public class MusIntervalTest {
 
     final static String defaultDeckName = "Music intervals";
