@@ -37,6 +37,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -478,8 +479,9 @@ public class AudioCaptureService extends Service {
 
     private File createAudioFile() {
         File capturesDir = new File(getCapturesDirectory(this));
-        if (!capturesDir.exists()) {
-            capturesDir.mkdirs();
+        if (!capturesDir.exists() && !capturesDir.mkdirs()) {
+            exitWithMsg(R.string.directory_creation_error);
+            return null;
         }
 
         String timestamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss-SSS", Locale.US).format(new Date());
@@ -489,7 +491,10 @@ public class AudioCaptureService extends Service {
 
     private void writeAudioToFile(File file) {
         try {
-            file.createNewFile();
+            if (!file.createNewFile()) {
+                exitWithMsg(R.string.file_creation_error);
+                return;
+            }
             FileOutputStream fileOutputStream = new FileOutputStream(file);
             short[] capturedSamples = new short[NUM_SAMPLES_PER_READ];
 
@@ -537,7 +542,10 @@ public class AudioCaptureService extends Service {
             String pathname = tempPcmFile.getAbsolutePath();
             String convertedPathname = pathname.substring(0, pathname.lastIndexOf(".")) + ".mp3";
             File convertedFile = new File(convertedPathname);
-            convertedFile.createNewFile();
+            if (!convertedFile.createNewFile()) {
+                exitWithMsg(R.string.file_creation_error);
+                return;
+            }
             PCMDecoder.encodeToMp3(
                     pathname,
                     CHANNEL_COUNT,
@@ -598,6 +606,16 @@ public class AudioCaptureService extends Service {
         }
 
         record.stop();
+    }
+
+    private void exitWithMsg(final int resId) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(AudioCaptureService.this, resId, Toast.LENGTH_LONG).show();
+                tearDown();
+            }
+        });
     }
 
     private static byte[] toByteArray(short[] array) {

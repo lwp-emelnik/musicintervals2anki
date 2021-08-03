@@ -234,4 +234,8 @@
     <string name="files_deletion_entry_created_only">Move to trash files created by MI2A once they processed</string>
     <string name="files_deletion_entry_all">Move to trash both files created by MI2A and input files after they processed</string>
     <string name="files_deletion_entry_always_ask">Always ask</string>
+
+    <!-- AudioCapturingService messages-->
+    <string name="directory_creation_error">Could not create captures directory</string>
+    <string name="file_creation_error">Could not create file</string>
 </resources>
