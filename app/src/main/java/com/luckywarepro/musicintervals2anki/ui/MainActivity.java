@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     final DialogInterface.OnDismissListener onStartDialogDismissListener = new DialogInterface.OnDismissListener() {
         @Override
         public void onDismiss(DialogInterface dialogInterface) {
-            activeOnStartDialogs.remove(dialogInterface);
+            activeOnStartDialogs.remove((AlertDialog) dialogInterface);
         }
     };
 
