@@ -260,6 +260,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 Set<String> disabledFieldKeys = !useDefaultModel ? new HashSet<String>() :
                         new HashSet<>(Arrays.asList(MusInterval.Fields.getSignature(true)));
                 MappingDialogFragment fragment = MappingDialogFragment.newInstance(key, signature, modelFields, disabledFieldKeys);
+                //noinspection deprecation @todo: fix once androidx preference no longer rely on this
                 fragment.setTargetFragment(this, 0);
                 fragment.show(getParentFragmentManager(), TAG_FIELDS_MAPPING_DIALOG);
                 break;
