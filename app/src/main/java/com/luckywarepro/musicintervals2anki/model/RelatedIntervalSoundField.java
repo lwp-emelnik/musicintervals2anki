@@ -85,7 +85,7 @@ public abstract class RelatedIntervalSoundField {
                 String relatedInterval = relatedNoteData.getOrDefault(intervalField, "");
                 Map<String, String> relatedNoteKeyData = getIntervalIdentityData(relatedNoteData);
                 if (isIncorrectRelation(intervalIdx, relatedInterval) ||
-                        !isEqualData(
+                        isDifferentData(
                                 keyData, relatedNoteKeyData,
                                 relatedSoundField.equals(relatedSoundAltField), false)) {
                     Set<Map<String, String>> pointed = suspiciousRelatedNotesData.getOrDefault(relatedSoundField, new HashSet<Map<String, String>>());
@@ -306,7 +306,7 @@ public abstract class RelatedIntervalSoundField {
                 int relatedIntervalIdx = MusInterval.Fields.Interval.getIndex(relatedInterval);
                 String currentReverseInterval = currentReverseData.getOrDefault(intervalField, "");
                 if (reverse.isIncorrectRelation(relatedIntervalIdx, currentReverseInterval) ||
-                        !isEqualData(
+                        isDifferentData(
                                 getIntervalIdentityData(relatedData),
                                 getIntervalIdentityData(currentReverseData),
                                 alt, true)) {
@@ -358,20 +358,20 @@ public abstract class RelatedIntervalSoundField {
         }};
     }
 
-    private boolean isEqualData(Map<String, String> data1, Map<String, String> data2, boolean alt, boolean reverse) {
+    private boolean isDifferentData(Map<String, String> data1, Map<String, String> data2, boolean alt, boolean reverse) {
         String interval1 = data1.getOrDefault(intervalField, "");
         int interval1Idx = MusInterval.Fields.Interval.getIndex(interval1);
         String interval2 = data2.getOrDefault(intervalField, "");
         int interval2Idx = MusInterval.Fields.Interval.getIndex(interval2);
         if (interval2Idx - interval1Idx != (reverse ? this.reverse.getDistance() : getDistance())) {
-            return false;
+            return true;
         }
         Set<String> keySet1 = new HashSet<>(data1.keySet());
         keySet1.remove(intervalField);
         Set<String> keySet2 = new HashSet<>(data2.keySet());
         keySet2.remove(intervalField);
         if (!keySet1.equals(keySet2)) {
-            return false;
+            return true;
         }
         boolean isUnison1 = MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval1);
         boolean isUnison2 = MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval2);
@@ -436,10 +436,10 @@ public abstract class RelatedIntervalSoundField {
         for (final String key : keySet1) {
             if (NoteEqualityChecker.areDifferent(data1, data2, key,
                     musInterval.relativesEqualityCheckers, musInterval.defaultValues)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 }
 
