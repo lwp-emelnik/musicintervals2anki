@@ -245,27 +245,25 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     @Override
     public void onDisplayPreferenceDialog(Preference preference) {
         String key = preference.getKey();
-        switch (key) {
-            case KEY_FIELDS_PREFERENCE:
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-                String modelName = preferences.getString(KEY_MODEL_PREFERENCE, MusInterval.Builder.DEFAULT_MODEL_NAME);
-                Long modelId = helper.findModelIdByName(modelName);
-                if (modelId == null) {
-                    return;
-                }
-                boolean versionField = preferences.getBoolean(KEY_VERSION_FIELD_SWITCH, DEFAULT_VERSION_FIELD_SWITCH);
-                String[] signature = MusInterval.Fields.getSignature(versionField);
-                String[] modelFields = helper.getFieldList(modelId);
-                boolean useDefaultModel = preferences.getBoolean(KEY_USE_DEFAULT_MODEL_CHECK, DEFAULT_USE_DEFAULT_MODEL_CHECK);
-                Set<String> disabledFieldKeys = !useDefaultModel ? new HashSet<String>() :
-                        new HashSet<>(Arrays.asList(MusInterval.Fields.getSignature(true)));
-                MappingDialogFragment fragment = MappingDialogFragment.newInstance(key, signature, modelFields, disabledFieldKeys);
-                //noinspection deprecation @todo: fix once androidx preference no longer rely on this
-                fragment.setTargetFragment(this, 0);
-                fragment.show(getParentFragmentManager(), TAG_FIELDS_MAPPING_DIALOG);
-                break;
-            default:
-                super.onDisplayPreferenceDialog(preference);
+        if (KEY_FIELDS_PREFERENCE.equals(key)) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            String modelName = preferences.getString(KEY_MODEL_PREFERENCE, MusInterval.Builder.DEFAULT_MODEL_NAME);
+            Long modelId = helper.findModelIdByName(modelName);
+            if (modelId == null) {
+                return;
+            }
+            boolean versionField = preferences.getBoolean(KEY_VERSION_FIELD_SWITCH, DEFAULT_VERSION_FIELD_SWITCH);
+            String[] signature = MusInterval.Fields.getSignature(versionField);
+            String[] modelFields = helper.getFieldList(modelId);
+            boolean useDefaultModel = preferences.getBoolean(KEY_USE_DEFAULT_MODEL_CHECK, DEFAULT_USE_DEFAULT_MODEL_CHECK);
+            Set<String> disabledFieldKeys = !useDefaultModel ? new HashSet<String>() :
+                    new HashSet<>(Arrays.asList(MusInterval.Fields.getSignature(true)));
+            MappingDialogFragment fragment = MappingDialogFragment.newInstance(key, signature, modelFields, disabledFieldKeys);
+            //noinspection deprecation @todo: fix once androidx preference no longer rely on this
+            fragment.setTargetFragment(this, 0);
+            fragment.show(getParentFragmentManager(), TAG_FIELDS_MAPPING_DIALOG);
+        } else {
+            super.onDisplayPreferenceDialog(preference);
         }
     }
 }
