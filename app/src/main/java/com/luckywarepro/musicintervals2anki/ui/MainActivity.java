@@ -380,6 +380,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.actionSettings) {
+            if (!AnkiDroidHelper.isApiAvailable(this)) {
+                showMsg(R.string.api_unavailable);
+                return true;
+            }
             if (mAnkiDroid.shouldRequestPermission()) {
                 mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
                 return true;
@@ -408,6 +412,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onStart() {
         super.onStart();
+        if (!AnkiDroidHelper.isApiAvailable(this)) {
+            showMsg(R.string.api_unavailable);
+            return;
+        }
         if (mAnkiDroid.shouldRequestPermission()) {
             mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
             return;
@@ -478,6 +486,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void refreshPreferences() {
+        if (!AnkiDroidHelper.isApiAvailable(this)) {
+            showMsg(R.string.api_unavailable);
+            return;
+        }
         if (mAnkiDroid.shouldRequestPermission()) {
             return;
         }
@@ -492,6 +504,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     void refreshPermutations() {
+        if (!AnkiDroidHelper.isApiAvailable(this)) {
+            showMsg(R.string.api_unavailable);
+            return;
+        }
         if (mAnkiDroid.shouldRequestPermission()) {
             return;
         }
@@ -534,6 +550,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void handleRefreshExisting() {
+        if (!AnkiDroidHelper.isApiAvailable(this)) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    showMsg(R.string.api_unavailable);
+                }
+            });
+            return;
+        }
         if (mAnkiDroid.shouldRequestPermission()) {
             return;
         }
@@ -990,6 +1015,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         actionMarkExisting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!AnkiDroidHelper.isApiAvailable(MainActivity.this)) {
+                    showMsg(R.string.api_unavailable);
+                    return;
+                }
                 if (mAnkiDroid.shouldRequestPermission()) {
                     mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
                     return;
@@ -1010,6 +1039,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         actionAddToAnki.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!AnkiDroidHelper.isApiAvailable(MainActivity.this)) {
+                    showMsg(R.string.api_unavailable);
+                    return;
+                }
                 if (mAnkiDroid.shouldRequestPermission()) {
                     mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
                     return;
@@ -1177,6 +1210,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         actionCheckIntegrity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!AnkiDroidHelper.isApiAvailable(MainActivity.this)) {
+                    showMsg(R.string.api_unavailable);
+                    return;
+                }
                 if (mAnkiDroid.shouldRequestPermission()) {
                     mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
                     return;

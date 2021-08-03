@@ -217,6 +217,7 @@
     <string name="intersecting_dates">Some of the selected files have equal last modification date - only sorting by name is available</string>
     <string name="skip">Skip</string>
     <string name="play_all">Play all</string>
+    <string name="api_unavailable">Anki API unavailable - please make sure AnkiDroid is installed and API usage isn\'t disabled</string>
 
     <!-- SettingsActivity labels, fields and buttons -->
     <string name="deck_preference_title">Deck</string>
