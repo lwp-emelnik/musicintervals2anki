@@ -487,7 +487,7 @@ public class AnkiDroidHelper {
                 // decide whether or not this is the "second" condition, for which we substitute
                 // the value that is being searched for with an empty string
                 int idx = defaultFields.indexOf(field);
-                if (idx != -1 && i % (n / (int) Math.pow(2, idx)) >= (n / Math.pow(2, idx + 1))) {
+                if (idx != -1 && i % (n / Math.pow(2, idx)) >= (n / Math.pow(2, idx + 1))) {
                     expression = "";
                 }
                 fieldsAggregated.append(expression);
