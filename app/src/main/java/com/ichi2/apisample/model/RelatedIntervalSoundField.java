@@ -84,10 +84,9 @@ public abstract class RelatedIntervalSoundField {
             if (relatedNoteData != null) {
                 String relatedInterval = relatedNoteData.getOrDefault(intervalField, "");
                 Map<String, String> relatedNoteKeyData = getIntervalIdentityData(relatedNoteData);
+                boolean alt = relatedSoundField.equals(relatedSoundAltField);
                 if (!isCorrectRelation(intervalIdx, relatedInterval) ||
-                        !isEqualData(
-                                keyData, relatedNoteKeyData,
-                                relatedSoundField.equals(relatedSoundAltField), false)) {
+                        !isEqualData(keyData, relatedNoteKeyData, alt)) {
                     Set<Map<String, String>> pointed = suspiciousRelatedNotesData.getOrDefault(relatedSoundField, new HashSet<Map<String, String>>());
                     pointed.add(relatedNoteData);
                     suspiciousRelatedNotesData.put(relatedSoundField, pointed);
@@ -306,10 +305,8 @@ public abstract class RelatedIntervalSoundField {
                 int relatedIntervalIdx = MusInterval.Fields.Interval.getIndex(relatedInterval);
                 String currentReverseInterval = currentReverseData.getOrDefault(intervalField, "");
                 if (!reverse.isCorrectRelation(relatedIntervalIdx, currentReverseInterval) ||
-                        !isEqualData(
-                                getIntervalIdentityData(relatedData),
-                                getIntervalIdentityData(currentReverseData),
-                                alt, true)) {
+                        !reverse.isEqualData(getIntervalIdentityData(relatedData),
+                                getIntervalIdentityData(currentReverseData), alt)) {
                     continue;
                 }
 
@@ -358,12 +355,12 @@ public abstract class RelatedIntervalSoundField {
         }};
     }
 
-    private boolean isEqualData(Map<String, String> data1, Map<String, String> data2, boolean alt, boolean reverse) {
+    private boolean isEqualData(Map<String, String> data1, Map<String, String> data2, boolean alt) {
         String interval1 = data1.getOrDefault(intervalField, "");
         int interval1Idx = MusInterval.Fields.Interval.getIndex(interval1);
         String interval2 = data2.getOrDefault(intervalField, "");
         int interval2Idx = MusInterval.Fields.Interval.getIndex(interval2);
-        if (interval2Idx - interval1Idx != (reverse ? this.reverse.getDistance() : getDistance())) {
+        if (interval2Idx - interval1Idx != getDistance()) {
             return false;
         }
         Set<String> keySet1 = new HashSet<>(data1.keySet());
@@ -393,9 +390,6 @@ public abstract class RelatedIntervalSoundField {
                     if (direction1.equalsIgnoreCase(MusInterval.Fields.Direction.DESC)) {
                         distance = -distance;
                     }
-                    if (reverse) {
-                        distance = -distance;
-                    }
                     data2.put(startNoteField, MusInterval.Fields.StartNote.VALUES[idx + distance]);
                 }
             } else {
@@ -406,7 +400,7 @@ public abstract class RelatedIntervalSoundField {
                 }
                 if (!startNote2.equalsIgnoreCase(endNote1)) {
                     int idx = MusInterval.Fields.StartNote.getIndex(startNote2);
-                    int distance = !reverse ? getDistance() : this.reverse.getDistance();
+                    int distance = getDistance();
                     data2.put(startNoteField, MusInterval.Fields.StartNote.VALUES[idx + distance]);
                 } else {
                     data2.put(intervalField, interval1);
@@ -418,9 +412,6 @@ public abstract class RelatedIntervalSoundField {
                     int idx = MusInterval.Fields.StartNote.getIndex(startNote2);
                     int distance = -Math.abs(getDistance());
                     if (direction1.equalsIgnoreCase(MusInterval.Fields.Direction.DESC)) {
-                        distance = -distance;
-                    }
-                    if (reverse) {
                         distance = -distance;
                     }
                     data2.put(startNoteField, MusInterval.Fields.StartNote.VALUES[idx + distance]);
