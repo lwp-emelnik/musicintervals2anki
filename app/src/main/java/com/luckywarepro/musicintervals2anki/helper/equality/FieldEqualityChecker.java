@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class FieldEqualityChecker implements EqualityChecker {
     private String modelField;
-    private ValueEqualityChecker valueEqualityChecker;
+    private final ValueEqualityChecker valueEqualityChecker;
 
     public FieldEqualityChecker(String modelField, ValueEqualityChecker valueEqualityChecker) {
         this.modelField = modelField;

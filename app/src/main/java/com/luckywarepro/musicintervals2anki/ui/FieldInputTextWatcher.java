@@ -8,7 +8,7 @@ import android.text.TextWatcher;
  */
 
 public class FieldInputTextWatcher implements TextWatcher {
-    private MainActivity mainActivity;
+    private final MainActivity mainActivity;
     private String prev;
 
     public FieldInputTextWatcher(MainActivity mainActivity) {
