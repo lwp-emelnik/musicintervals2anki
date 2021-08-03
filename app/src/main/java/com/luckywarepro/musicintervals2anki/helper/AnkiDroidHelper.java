@@ -579,6 +579,7 @@ public class AnkiDroidHelper {
         return result;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean updateNote(long modelId, long noteId, Map<String, String> data) {
         String[] fieldNames = getFieldList(modelId);
         String[] fieldValues = new String[fieldNames.length];
@@ -588,6 +589,7 @@ public class AnkiDroidHelper {
         return mApi.updateNoteFields(noteId, fieldValues);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean updateNoteTags(long noteId, String tagsField) {
         String[] tags = tagsField.split(" ");
         return mApi.updateNoteTags(noteId, new HashSet<>(Arrays.asList(tags)));

@@ -13,6 +13,7 @@ public interface AddingHandler {
 
     int mark() throws AnkiDroidHelper.InvalidAnkiDatabaseException, MusInterval.ValidationException, MusInterval.NoteNotExistsException;
 
+    @SuppressWarnings("UnusedReturnValue")
     int tag(String tag) throws AnkiDroidHelper.InvalidAnkiDatabaseException, MusInterval.ValidationException, MusInterval.NoteNotExistsException;
 
     void proceed() throws AnkiDroidHelper.InvalidAnkiDatabaseException, MusInterval.ValidationException;

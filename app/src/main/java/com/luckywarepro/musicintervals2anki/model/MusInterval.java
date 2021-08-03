@@ -475,6 +475,7 @@ public class MusInterval {
             return this;
         }
 
+        @SuppressWarnings("UnusedReturnValue")
         public Builder css(String css) {
             mCss = css;
             return this;
@@ -555,6 +556,7 @@ public class MusInterval {
             return this;
         }
 
+        @SuppressWarnings("UnusedReturnValue")
         public Builder version(String vs) {
             mVersion = vs;
             return this;
