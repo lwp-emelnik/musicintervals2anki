@@ -70,6 +70,8 @@ public class MusInterval {
                 }
             }
 
+            private final static String VALIDATION_PATTERN = "[A-Ga-g]#?[1-6]";
+
             public static int getIndex(String value) {
                 for (int i = 0; i < VALUES.length; i++) {
                     if (VALUES[i].equalsIgnoreCase(value)) {
@@ -151,10 +153,6 @@ public class MusInterval {
                 } else {
                     return true;
                 }
-            }
-
-            private static String getValidationPattern() {
-                return "[A-Ga-g]#?[1-6]";
             }
         }
 
@@ -356,7 +354,7 @@ public class MusInterval {
             });
             put(START_NOTE, new Validator[]{
                     VALIDATOR_EMPTY,
-                    new PatternValidator(StartNote.getValidationPattern())
+                    new PatternValidator(StartNote.VALIDATION_PATTERN)
             });
             put(DIRECTION, new Validator[]{
                     VALIDATOR_EMPTY,
