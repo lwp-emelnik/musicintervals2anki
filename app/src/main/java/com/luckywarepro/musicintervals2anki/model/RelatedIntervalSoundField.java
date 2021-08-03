@@ -434,7 +434,7 @@ public abstract class RelatedIntervalSoundField {
         }
 
         for (final String key : keySet1) {
-            if (!NoteEqualityChecker.areEqual(data1, data2, key,
+            if (NoteEqualityChecker.areDifferent(data1, data2, key,
                     musInterval.relativesEqualityCheckers, musInterval.defaultValues)) {
                 return false;
             }

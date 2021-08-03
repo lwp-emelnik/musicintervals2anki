@@ -24,8 +24,8 @@ public abstract class NoteEqualityChecker implements EqualityChecker {
         this.modelFields = modelFields;
     }
 
-    public static boolean areEqual(Map<String, String> data1, Map<String, String> data2, final String key,
-                                   Map<String, EqualityChecker> equalityCheckers, Map<String, String> defaultValues) {
+    public static boolean areDifferent(Map<String, String> data1, Map<String, String> data2, final String key,
+                                       Map<String, EqualityChecker> equalityCheckers, Map<String, String> defaultValues) {
         String value1 = data1.getOrDefault(key, "");
         String value2 = data2.getOrDefault(key, "");
 
@@ -44,6 +44,6 @@ public abstract class NoteEqualityChecker implements EqualityChecker {
                         value1.isEmpty() && equalityChecker.areEqual(data2, defaultData1)) ||
                         (value1.isEmpty() && value2.isEmpty()));
 
-        return defaultEquality || equalityChecker.areEqual(data1, data2);
+        return !defaultEquality && !equalityChecker.areEqual(data1, data2);
     }
 }

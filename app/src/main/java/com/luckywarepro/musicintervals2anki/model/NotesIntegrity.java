@@ -234,7 +234,7 @@ public class NotesIntegrity {
                 LinkedList<Map<String, String>> countedNotesData = keyDataNotes.getValue();
                 Map<String, String> countedData = countedNotesData.getFirst();
                 for (final String key : countedKeyData.keySet()) {
-                    if (!NoteEqualityChecker.areEqual(noteData, countedData, key,
+                    if (NoteEqualityChecker.areDifferent(noteData, countedData, key,
                             musInterval.equalityCheckers, musInterval.defaultValues)) {
                         continue outer;
                     }
