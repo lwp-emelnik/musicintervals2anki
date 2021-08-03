@@ -63,6 +63,8 @@ public class MappingPreference extends DialogPreference {
         if (defaultValue == null) {
             defaultValue = new HashSet<>();
         }
-        persistMapping(toMapping(getPersistedStringSet((Set<String>) defaultValue)));
+        @SuppressWarnings("unchecked")
+        Set<String> defaultStringSet = (Set<String>) defaultValue;
+        persistMapping(toMapping(getPersistedStringSet(defaultStringSet)));
     }
 }
