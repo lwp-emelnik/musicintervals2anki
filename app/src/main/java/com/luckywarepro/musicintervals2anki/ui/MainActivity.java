@@ -70,6 +70,7 @@ import com.luckywarepro.musicintervals2anki.ui.settings.SettingsFragment;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -121,23 +122,29 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private static final String DB_STRING_ARRAY_SEPARATOR = ",";
 
     private final static Map<String, Integer> FIELD_LABEL_STRING_IDS_SINGULAR = new HashMap<String, Integer>() {{
-        put(MusInterval.Fields.DIRECTION, R.string.direction);
-        put(MusInterval.Fields.TIMING, R.string.timing);
-        put(MusInterval.Fields.INSTRUMENT, R.string.instrument);
+        put(MusInterval.Builder.DIRECTION, R.string.direction);
+        put(MusInterval.Builder.TIMING, R.string.timing);
+        put(MusInterval.Builder.INSTRUMENT, R.string.instrument);
     }};
     static {
-        if (!FIELD_LABEL_STRING_IDS_SINGULAR.keySet().equals(MusInterval.Builder.ADDING_MANDATORY_SINGULAR_KEYS)) {
+        Set<String> addingMandatorySingularKeysSet = new HashSet<>(
+                Arrays.asList(MusInterval.Builder.ADDING_MANDATORY_SINGULAR_MEMBERS)
+        );
+        if (!FIELD_LABEL_STRING_IDS_SINGULAR.keySet().equals(addingMandatorySingularKeysSet)) {
             throw new AssertionError();
         }
     }
 
     private final static Map<String, Integer> FIELD_LABEL_STRING_IDS_SELECTION = new HashMap<String, Integer>() {{
-        put(MusInterval.Builder.KEY_NOTES, R.string.start_note);
-        put(MusInterval.Builder.KEY_OCTAVES, R.string.octave);
-        put(MusInterval.Builder.KEY_INTERVALS, R.string.interval);
+        put(MusInterval.Builder.NOTES, R.string.start_note);
+        put(MusInterval.Builder.OCTAVES, R.string.octave);
+        put(MusInterval.Builder.INTERVALS, R.string.interval);
     }};
     static {
-        if (!FIELD_LABEL_STRING_IDS_SELECTION.keySet().equals(MusInterval.Builder.ADDING_MANDATORY_SELECTION_KEYS)) {
+        Set<String> addingMandatorySelectionKeysSet = new HashSet<>(
+                Arrays.asList(MusInterval.Builder.ADDING_MANDATORY_SELECTION_MEMBERS)
+        );
+        if (!FIELD_LABEL_STRING_IDS_SELECTION.keySet().equals(addingMandatorySelectionKeysSet)) {
             throw new AssertionError();
         }
     }
@@ -405,6 +412,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             Uri uri = Uri.parse(getString(R.string.uri_readme));
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(intent);
+            return true;
+        } else if(itemId == R.id.actionAbout) {
+            startActivity(new Intent(MainActivity.this, AboutActivity.class));
             return true;
         } else {
             return super.onOptionsItemSelected(item);

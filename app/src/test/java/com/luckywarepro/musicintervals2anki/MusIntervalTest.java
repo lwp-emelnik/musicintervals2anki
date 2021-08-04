@@ -800,7 +800,10 @@ public class MusIntervalTest {
                 .sounds(new String[]{}) // should not be empty on adding
                 .notes(ALL_NOTES)
                 .octaves(ALL_OCTAVES)
+                .direction(MusInterval.Fields.Direction.ASC)
+                .timing(MusInterval.Fields.Timing.MELODIC)
                 .intervals(MusInterval.Fields.Interval.VALUES)
+                .instrument("guitar")
                 .build();
 
         mi.addToAnki(null, null); // should throw exception
@@ -859,6 +862,8 @@ public class MusIntervalTest {
                 .sounds(new String[]{"/path/to/file"})
                 .notes(new String[]{defaultNote})
                 .octaves(new String[]{defaultOctave})
+                .direction(MusInterval.Fields.Direction.ASC)
+                .timing(MusInterval.Fields.Timing.MELODIC)
                 .intervals(new String[]{}) // should throw exception
                 .build().addToAnki(null, null);
     }
@@ -2406,6 +2411,9 @@ public class MusIntervalTest {
                 .notes(ALL_NOTES)
                 .octaves(ALL_OCTAVES)
                 .intervals(MusInterval.Fields.Interval.VALUES)
+                .direction(MusInterval.Fields.Direction.ASC)
+                .timing(MusInterval.Fields.Timing.MELODIC)
+                .instrument("guitar")
                 .build().addToAnki(null, null);
     }
 

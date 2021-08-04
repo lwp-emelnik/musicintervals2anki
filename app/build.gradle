@@ -51,6 +51,7 @@ dependencies {
     androidTestImplementation 'org.mockito:mockito-android:3.10.0'
     driver 'org.xerial:sqlite-jdbc:3.34.0'
     implementation 'com.github.lincollincol:PCM-Decoder:1.0'
+    implementation 'io.github.medyo:android-about-page:2.0.0'
 }
 
 
