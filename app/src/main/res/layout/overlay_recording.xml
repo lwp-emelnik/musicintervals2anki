@@ -21,13 +21,13 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
 
-        <com.ichi2.apisample.ui.TouchableButton
+        <Button
             android:id="@+id/actionRecord"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/record" />
 
-        <com.ichi2.apisample.ui.TouchableButton
+        <Button
             android:id="@+id/actionClose"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -58,14 +58,14 @@
         android:orientation="horizontal"
         android:visibility="gone">
 
-        <com.ichi2.apisample.ui.TouchableButton
+        <Button
             android:id="@+id/actionPlayLatest"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/play" />
 
-        <com.ichi2.apisample.ui.TouchableButton
+        <Button
             android:id="@+id/actionDiscardLatest"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

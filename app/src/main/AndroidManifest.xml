@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ichi2.apisample">
-    <!-- should be changed to package="com.luckywarepro.musicintervals2anki" -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    package="com.luckywarepro.musicintervals2anki">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -31,7 +30,7 @@
         </provider>
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name="com.luckywarepro.musicintervals2anki.ui.MainActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:launchMode="singleTask">
@@ -42,12 +41,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.settings.SettingsActivity"
+            android:name="com.luckywarepro.musicintervals2anki.ui.settings.SettingsActivity"
             android:label="@string/settings"
-            android:parentActivityName=".ui.MainActivity" />
-
+            android:parentActivityName="com.luckywarepro.musicintervals2anki.ui.MainActivity" />
         <service
-            android:name=".ui.AudioCaptureService"
+            android:name="com.luckywarepro.musicintervals2anki.ui.AudioCaptureService"
             android:foregroundServiceType="mediaProjection" />
     </application>
 

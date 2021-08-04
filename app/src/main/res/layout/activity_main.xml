@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    tools:context="com.luckywarepro.apisample.MainActivity">
+    tools:context="com.luckywarepro.musicintervals2anki.ui.MainActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarMain"
@@ -55,29 +55,27 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
                     <Button
                         android:id="@+id/actionPlay"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.2
-"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.2"
                         android:text="@string/play" />
 
                     <Button
                         android:id="@+id/actionCaptureAudio"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="0.4"
                         android:text="@string/capture_audio" />
 
                     <Button
                         android:id="@+id/actionSelectFile"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_gravity="end"
                         android:layout_weight="0.4"
                         android:text="@string/action_select_file" />
@@ -105,7 +103,7 @@
                         android:id="@+id/checkNoteCSharp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
                         android:text="@string/note_c_sharp" />
 
                     <CheckBox
@@ -118,7 +116,7 @@
                         android:id="@+id/checkNoteFSharp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="20dp"
+                        android:layout_marginStart="20dp"
                         android:text="@string/note_f_sharp" />
 
                     <CheckBox
@@ -424,12 +422,14 @@
                 android:id="@+id/labelTempo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:labelFor="@id/inputTempo"
                 android:text="@string/tempo" />
 
             <EditText
                 android:id="@+id/inputTempo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autofillHints=""
                 android:ems="10"
                 android:inputType="number" />
 
@@ -437,6 +437,7 @@
                 android:id="@+id/labelInstrument"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:labelFor="@id/inputInstrument"
                 android:text="@string/instrument" />
 
             <AutoCompleteTextView
@@ -448,12 +449,14 @@
                 android:id="@+id/labelFirstNoteDurationCoefficient"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:labelFor="@id/inputFirstNoteDurationCoefficient"
                 android:text="@string/first_note_duration_coefficient" />
 
             <EditText
                 android:id="@+id/inputFirstNoteDurationCoefficient"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autofillHints=""
                 android:ems="10"
                 android:inputType="numberDecimal" />
 

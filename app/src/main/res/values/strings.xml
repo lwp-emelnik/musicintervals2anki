@@ -134,18 +134,6 @@
         <item quantity="one">One relation previously tagged as suspicious has been resolved</item>
         <item quantity="other">%d relations previously tagged as suspicious have been resolved</item>
     </plurals>
-    <plurals name="integrity_suspicious_fixed">
-        <item quantity="one">One note previously tagged as suspicious has been fixed</item>
-        <item quantity="other">%d notes previously tagged as suspicious have been fixed</item>
-    </plurals>
-    <plurals name="invalid_fields">
-        <item quantity="one">Invalid value of \%s\ field</item>
-        <item quantity="other">Invalid values of \%s\ fields </item>
-    </plurals>
-    <plurals name="empty_mandatory_fields">
-        <item quantity="one">Mandatory field \%s\ is empty</item>
-        <item quantity="other">Mandatory fields \%s\ are empty</item>
-    </plurals>
     <plurals name="integrity_links">
         <item quantity="one">Automatically filled one link field</item>
         <item quantity="other">Automatically filled %d link fields</item>
@@ -173,7 +161,7 @@
     <string name="add_card_error">Music interval adding to AnkiDroid failed</string>
     <string name="mandatory_field_empty">Mandatory field \"%s\" is empty</string>
     <string name="already_added">Music interval seems to be already added to AnkiDroid (try to select sound file)</string>
-    <string name="item_replaced">Music interval replaced. Please run "Check media" in AnkiDroid to find and delete the orphaned old sound file</string>
+    <string name="item_replaced">Music interval replaced - please run "Check media" in AnkiDroid to find and delete the orphaned old sound file</string>
     <string name="add_file_error">Failed to add file to AnkiDroid media</string>
     <string name="unknown_adding_error">Failed to add music interval to AnkiDroid</string>
     <string name="additional_filenames">\u0020+ %d more…</string>
@@ -193,7 +181,6 @@
     <string name="integrity_ok">No issues have been found</string>
     <string name="integrity_field_corrupted">- %s: %d corrupted, (%s)</string>
     <string name="integrity_field_suspicious">- %s: %d suspicious</string>
-    <string name="fix_link_confirmation_remember_answer">Remember answer</string>
     <string name="InvalidAnkiDatabase_rowValuesAndFieldsCountMismatchException">Invalid Anki Database: row values and fields count mismatch</string>
     <string name="InvalidAnkiDatabase_unknownError">Invalid Anki Database: unknown error</string>
     <string name="validation_sound">value must represent an AnkiDroid media reference (i. e. \"[sound:example.mp3]\")</string>
@@ -231,6 +218,7 @@
     <string name="intersecting_dates">Some of the selected files have equal last modification date - only sorting by name is available</string>
     <string name="skip">Skip</string>
     <string name="play_all">Play all</string>
+    <string name="api_unavailable">Anki API unavailable - please make sure AnkiDroid is installed and API usage isn\'t disabled</string>
 
     <!-- SettingsActivity labels, fields and buttons -->
     <string name="deck_preference_title">Deck</string>
@@ -255,4 +243,8 @@
     <string name="github">GitHub</string>
     <string name="copyright">Copyright &#169; 2021 LuckyWare Pro</string>
     <string name="license">Apache-2.0 License</string>
+
+    <!-- AudioCapturingService messages-->
+    <string name="directory_creation_error">Could not create captures directory</string>
+    <string name="file_creation_error">Could not create file</string>
 </resources>
