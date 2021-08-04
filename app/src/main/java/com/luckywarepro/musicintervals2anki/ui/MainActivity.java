@@ -498,7 +498,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean useDefaultModel = preferences.getBoolean(SettingsFragment.KEY_USE_DEFAULT_MODEL_CHECK, SettingsFragment.DEFAULT_USE_DEFAULT_MODEL_CHECK);
         if (useDefaultModel) {
-            Long modelId = mAnkiDroid.findModelIdByName(MusInterval.Builder.DEFAULT_MODEL_NAME);
+            Long modelId = null;
+            try {
+                modelId = mAnkiDroid.findModelIdByName(MusInterval.Builder.DEFAULT_MODEL_NAME);
+            } catch (Throwable e) {
+                handleError(e);
+            }
             if (modelId != null) {
                 updateDefaultModelPreferences(modelId);
             }
