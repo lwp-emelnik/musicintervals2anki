@@ -20,6 +20,13 @@ public class StringUtil {
         return !str.isEmpty() ? str.split(separator) : new String[]{};
     }
 
+
+    /**
+     * Replace line breaks with spaces followed by reducing whitespace sequences
+     * The primary use case is to cast the free-form languages code before comparison
+     * @param str input string
+     * @return processed string
+     */
     public static String strip(String str) {
         return str.replace('\n', ' ').trim().replaceAll(" +", " ");
     }

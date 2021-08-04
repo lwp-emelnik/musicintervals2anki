@@ -319,7 +319,7 @@ public class AudioCaptureService extends Service {
                     hideLatestMenu();
                 } else {
                     Recording recording = recordings.getLast();
-                    textLatest.setText(getString(R.string.latest_file, recording.getDuration() / 1000d));
+                    textLatest.setText(getString(R.string.latest_file, recording.getDurationSeconds()));
                 }
             }
         });
@@ -442,7 +442,7 @@ public class AudioCaptureService extends Service {
                 Recording recording = recordings.getLast();
                 textBottom.setText(getString(R.string.recorded_files, recordings.size()));
                 textLatest.setVisibility(View.VISIBLE);
-                textLatest.setText(getString(R.string.latest_file, recording.getDuration() / 1000d));
+                textLatest.setText(getString(R.string.latest_file, recording.getDurationSeconds()));
                 layoutLatestActions.setVisibility(View.VISIBLE);
             }
         }
@@ -590,7 +590,7 @@ public class AudioCaptureService extends Service {
             recordings.add(recording);
             textBottom.setText(getString(R.string.recorded_files, recordings.size()));
             textLatest.setVisibility(View.VISIBLE);
-            textLatest.setText(getString(R.string.latest_file, recording.getDuration() / 1000d));
+            textLatest.setText(getString(R.string.latest_file, recording.getDurationSeconds()));
             layoutLatestActions.setVisibility(View.VISIBLE);
             handler.post(new Runnable() {
                 @Override
@@ -648,8 +648,8 @@ public class AudioCaptureService extends Service {
             return uri;
         }
 
-        public long getDuration() {
-            return duration;
+        public double getDurationSeconds() {
+            return duration / 1000d;
         }
     }
 }
