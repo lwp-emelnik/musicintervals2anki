@@ -15,7 +15,10 @@
         android:requestLegacyExternalStorage="true"
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:windowSoftInputMode="stateHidden|adjustPan">
-        <activity android:name=".ui.AboutActivity" />
+        <activity
+            android:name=".ui.AboutActivity"
+            android:label="@string/about"
+            android:parentActivityName=".ui.MainActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
