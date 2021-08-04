@@ -13,6 +13,7 @@ import com.luckywarepro.musicintervals2anki.model.NotesIntegrity;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
@@ -120,7 +121,7 @@ public class IntegrityCheckWorker implements Runnable {
                 if (count > 0) {
                     String field = mi.modelFields.getOrDefault(fieldKey, fieldKey);
                     report.append("\n\n");
-                    GetStringArgs fieldValidationStringArgs = FIELD_VALIDATION_STRING_ARGS.get(fieldKey);
+                    GetStringArgs fieldValidationStringArgs = Objects.requireNonNull(FIELD_VALIDATION_STRING_ARGS.get(fieldKey));
                     String fieldValidationString = res.getString(fieldValidationStringArgs.getResId(), fieldValidationStringArgs.getFormatArgs());
                     report.append(res.getString(R.string.integrity_field_corrupted, field, count, fieldValidationString));
                 }

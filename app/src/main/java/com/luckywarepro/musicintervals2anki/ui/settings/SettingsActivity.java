@@ -8,6 +8,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.luckywarepro.musicintervals2anki.R;
 
+import java.util.Objects;
+
 /**
  * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
  */
@@ -18,10 +20,9 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        Toolbar settings_toolbar = findViewById(R.id.settings_toolbar);
-        setSupportActionBar(settings_toolbar);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Toolbar settingsToolbar = findViewById(R.id.settings_toolbar);
+        setSupportActionBar(settingsToolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         getSupportFragmentManager()
                 .beginTransaction()

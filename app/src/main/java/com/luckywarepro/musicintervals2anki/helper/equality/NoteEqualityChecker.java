@@ -4,6 +4,7 @@ import com.luckywarepro.musicintervals2anki.helper.AnkiDroidHelper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
@@ -26,13 +27,13 @@ public abstract class NoteEqualityChecker implements EqualityChecker {
 
     public static boolean areDifferent(Map<String, String> data1, Map<String, String> data2, final String key,
                                        Map<String, EqualityChecker> equalityCheckers, Map<String, String> defaultValues) {
-        String value1 = data1.getOrDefault(key, "");
-        String value2 = data2.getOrDefault(key, "");
+        String value1 = Objects.requireNonNull(data1.getOrDefault(key, ""));
+        String value2 = Objects.requireNonNull(data2.getOrDefault(key, ""));
 
         EqualityChecker defaultEqualityChecker = new FieldEqualityChecker(key, AnkiDroidHelper.DEFAULT_EQUALITY_CHECKER);
-        EqualityChecker equalityChecker = equalityCheckers.getOrDefault(key, defaultEqualityChecker);
+        EqualityChecker equalityChecker = Objects.requireNonNull(equalityCheckers.getOrDefault(key, defaultEqualityChecker));
 
-        final String defaultValue = defaultValues.getOrDefault(key, "");
+        final String defaultValue = Objects.requireNonNull(defaultValues.getOrDefault(key, ""));
         Map<String, String> defaultData1 = new HashMap<String, String>(data1) {{
             put(key, defaultValue);
         }};

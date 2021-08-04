@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -173,7 +174,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         String[] filesDeletionEntryValues = new String[filesDeletionValues.length];
         for (int i = 0; i < filesDeletionEntryValues.length; i++) {
             String value = filesDeletionValues[i];
-            int resId = FILES_DELETION_VALUE_ENTRIES.get(value);
+            int resId = Objects.requireNonNull(FILES_DELETION_VALUE_ENTRIES.get(value));
             filesDeletionEntries[i] = getResources().getString(resId);
             filesDeletionEntryValues[i] = value;
         }

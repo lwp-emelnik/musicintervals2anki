@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -78,7 +79,7 @@ public abstract class RelatedIntervalSoundField {
         String interval = noteData.getOrDefault(intervalField, "");
         int intervalIdx = MusInterval.Fields.Interval.getIndex(interval);
         Map<String, String> keyData = getIntervalIdentityData(noteData);
-        String relatedSound = noteData.getOrDefault(relatedSoundField, "");
+        String relatedSound = Objects.requireNonNull(noteData.getOrDefault(relatedSoundField, ""));
         if (!relatedSound.isEmpty()) {
             Map<String, String> relatedNoteData = soundDict.getOrDefault(relatedSound, null);
             if (relatedNoteData != null) {
@@ -88,7 +89,9 @@ public abstract class RelatedIntervalSoundField {
                         isDifferentData(
                                 keyData, relatedNoteKeyData,
                                 relatedSoundField.equals(relatedSoundAltField), false)) {
-                    Set<Map<String, String>> pointed = suspiciousRelatedNotesData.getOrDefault(relatedSoundField, new HashSet<Map<String, String>>());
+                    Set<Map<String, String>> pointed = Objects.requireNonNull(
+                            suspiciousRelatedNotesData.getOrDefault(relatedSoundField, new HashSet<Map<String, String>>())
+                    );
                     pointed.add(relatedNoteData);
                     suspiciousRelatedNotesData.put(relatedSoundField, pointed);
                     return true;
@@ -105,13 +108,15 @@ public abstract class RelatedIntervalSoundField {
     }
 
     public int autoFill(Map<String, String> noteData, boolean updateReverse) throws AnkiDroidHelper.InvalidAnkiDatabaseException {
-        final String startNote = noteData.getOrDefault(startNoteField, "");
+        final String startNote = Objects.requireNonNull(noteData.getOrDefault(startNoteField, ""));
         final String interval = noteData.getOrDefault(intervalField, "");
-        final String direction = noteData.getOrDefault(directionField, "");
+        final String direction = Objects.requireNonNull(noteData.getOrDefault(directionField, ""));
         final String endNote = MusInterval.Fields.StartNote.getEndNote(startNote, direction, interval);
-        final String timing = noteData.getOrDefault(timingField, "");
-        String relatedSound = noteData.containsKey(relatedSoundField) ? noteData.remove(relatedSoundField) : "";
-        String relatedSoundAlt = noteData.containsKey(relatedSoundAltField) ? noteData.remove(relatedSoundAltField) : "";
+        final String timing = Objects.requireNonNull(noteData.getOrDefault(timingField, ""));
+        String relatedSound = noteData.containsKey(relatedSoundField) ?
+                Objects.requireNonNull(noteData.remove(relatedSoundField)) : "";
+        String relatedSoundAlt = noteData.containsKey(relatedSoundAltField) ?
+                Objects.requireNonNull(noteData.remove(relatedSoundAltField)) : "";
         final String reverseRelatedSound = noteData.containsKey(reverseRelatedSoundField) ? noteData.remove(reverseRelatedSoundField) : "'";
         final String reverseRelatedSoundAlt = noteData.containsKey(reverseRelatedSoundAltField) ? noteData.remove(reverseRelatedSoundAltField) : "";
         final String sound = noteData.containsKey(soundField) ? noteData.remove(soundField) : "";
@@ -161,12 +166,12 @@ public abstract class RelatedIntervalSoundField {
             outer:
             while (iterator.hasNext()) {
                 Map<String, String> relatedData = iterator.next();
-                long relatedId = Long.parseLong(relatedData.get(AnkiDroidHelper.KEY_ID));
+                long relatedId = Long.parseLong(Objects.requireNonNull(relatedData.get(AnkiDroidHelper.KEY_ID)));
                 for (Map.Entry<String, SearchExpressionMaker> relativesMakers :
                         musInterval.relativesSearchExpressionMakers.entrySet()) {
                     String modelField = relativesMakers.getKey();
                     String fieldKey = MapUtil.getKeyByValue(musInterval.modelFields, modelField);
-                    Validator[] validators = MusInterval.Fields.VALIDATORS.getOrDefault(fieldKey, new Validator[]{});
+                    Validator[] validators = Objects.requireNonNull(MusInterval.Fields.VALIDATORS.getOrDefault(fieldKey, new Validator[]{}));
                     for (Validator validator : validators) {
                         boolean isValid = ValidationUtil.isValid(
                                 validator,
@@ -253,8 +258,8 @@ public abstract class RelatedIntervalSoundField {
         for (Map<String, String> relatedData : relatedNotesData) {
             boolean alt = false;
             if (isHarmonic || isUnison || isRelatedUnison) {
-                String relatedStartNote = relatedData.getOrDefault(startNoteField, "");
-                String relatedDirection = relatedData.getOrDefault(directionField, "");
+                String relatedStartNote = Objects.requireNonNull(relatedData.getOrDefault(startNoteField, ""));
+                String relatedDirection = Objects.requireNonNull(relatedData.getOrDefault(directionField, ""));
                 if (!relatedStartNote.equalsIgnoreCase(startNote) && !relatedStartNote.equals(endNote) ||
                         !isHarmonic && isRelatedUnison && !direction.equalsIgnoreCase(relatedDirection) ||
                         isHarmonic && isRelatedUnison && (
@@ -264,7 +269,7 @@ public abstract class RelatedIntervalSoundField {
                 }
             }
             String reverseRelatedSoundField = alt ? reverseRelatedSoundAltField : this.reverseRelatedSoundField;
-            final String relatedReverseSound = relatedData.getOrDefault(reverseRelatedSoundField, "");
+            final String relatedReverseSound = Objects.requireNonNull(relatedData.getOrDefault(reverseRelatedSoundField, ""));
             if (!relatedReverseSound.isEmpty()) {
                 Map<String, String> searchData = new HashMap<String, String>() {{
                     put(soundField, relatedReverseSound);
@@ -282,7 +287,7 @@ public abstract class RelatedIntervalSoundField {
                 }
 
                 Map<String, String> currentReverseData = currentReverseSearchResult.getFirst();
-                long currentReverseId = Long.parseLong(currentReverseData.get(AnkiDroidHelper.KEY_ID));
+                long currentReverseId = Long.parseLong(Objects.requireNonNull(currentReverseData.get(AnkiDroidHelper.KEY_ID)));
                 for (Map.Entry<String, Validator[]> fieldValidators : MusInterval.Fields.VALIDATORS.entrySet()) {
                     String fieldKey = fieldValidators.getKey();
                     Validator[] validators = fieldValidators.getValue();
@@ -322,7 +327,7 @@ public abstract class RelatedIntervalSoundField {
                 }
             }
             relatedData.put(reverseRelatedSoundField, sound);
-            long relatedId = Long.parseLong(relatedData.get(AnkiDroidHelper.KEY_ID));
+            long relatedId = Long.parseLong(Objects.requireNonNull(relatedData.get(AnkiDroidHelper.KEY_ID)));
             helper.updateNote(musInterval.modelId, relatedId, relatedData);
             updatedLinks++;
         }
@@ -375,11 +380,11 @@ public abstract class RelatedIntervalSoundField {
         }
         boolean isUnison1 = MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval1);
         boolean isUnison2 = MusInterval.Fields.Interval.VALUE_UNISON.equalsIgnoreCase(interval2);
-        String startNote1 = data1.getOrDefault(startNoteField, "");
-        String direction1 = data1.getOrDefault(directionField, "");
+        String startNote1 = Objects.requireNonNull(data1.getOrDefault(startNoteField, ""));
+        String direction1 = Objects.requireNonNull(data1.getOrDefault(directionField, ""));
         String endNote1 = MusInterval.Fields.StartNote.getEndNote(startNote1, direction1, interval1);
-        String startNote2 = data2.getOrDefault(startNoteField, "");
-        String direction2 = data2.getOrDefault(directionField, "");
+        String startNote2 = Objects.requireNonNull(data2.getOrDefault(startNoteField, ""));
+        String direction2 = Objects.requireNonNull(data2.getOrDefault(directionField, ""));
         data2 = new HashMap<>(data2);
         String direction2Opposite = direction2.equalsIgnoreCase(MusInterval.Fields.Direction.ASC) ?
                 MusInterval.Fields.Direction.DESC : MusInterval.Fields.Direction.ASC;

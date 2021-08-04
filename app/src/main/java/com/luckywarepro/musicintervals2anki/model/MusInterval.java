@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -114,14 +115,14 @@ public class MusInterval {
                             String directionField = modelFields[IDX_DIRECTION];
                             String timingField = modelFields[IDX_TIMING];
                             String intervalField = modelFields[IDX_INTERVAL];
-                            String startNote1 = data1.getOrDefault(startNoteField, "");
-                            String startNote2 = data2.getOrDefault(startNoteField, "");
-                            String direction1 = data1.getOrDefault(directionField, "");
-                            String direction2 = data2.getOrDefault(directionField, "");
-                            String timing1 = data1.getOrDefault(timingField, "");
-                            String timing2 = data2.getOrDefault(timingField, "");
-                            String interval1 = data1.getOrDefault(intervalField, "");
-                            String interval2 = data2.getOrDefault(intervalField, "");
+                            String startNote1 = Objects.requireNonNull(data1.getOrDefault(startNoteField, ""));
+                            String startNote2 = Objects.requireNonNull(data2.getOrDefault(startNoteField, ""));
+                            String direction1 = Objects.requireNonNull(data1.getOrDefault(directionField, ""));
+                            String direction2 = Objects.requireNonNull(data2.getOrDefault(directionField, ""));
+                            String timing1 = Objects.requireNonNull(data1.getOrDefault(timingField, ""));
+                            String timing2 = Objects.requireNonNull(data2.getOrDefault(timingField, ""));
+                            String interval1 = Objects.requireNonNull(data1.getOrDefault(intervalField, ""));
+                            String interval2 = Objects.requireNonNull(data2.getOrDefault(intervalField, ""));
                             boolean regularEquality = match(startNote1, startNote2);
                             boolean harmonicEquality = (interval1.equals("%") || interval1.equalsIgnoreCase(interval2)) &&
                                     (direction1.equalsIgnoreCase(Direction.ASC) && direction2.equalsIgnoreCase(Direction.DESC) ||
@@ -173,8 +174,8 @@ public class MusInterval {
                             String directionField = modelFields[IDX_DIRECTION];
                             String timingField = modelFields[IDX_TIMING];
                             String intervalField = modelFields[IDX_INTERVAL];
-                            String interval1 = data1.getOrDefault(intervalField, "");
-                            String interval2 = data2.getOrDefault(intervalField, "");
+                            String interval1 = Objects.requireNonNull(data1.getOrDefault(intervalField, ""));
+                            String interval2 = Objects.requireNonNull(data2.getOrDefault(intervalField, ""));
                             boolean unisonEquality = interval1.equalsIgnoreCase(Interval.VALUE_UNISON) ||
                                     interval1.equals("%") && interval2.equalsIgnoreCase(Interval.VALUE_UNISON);
                             return unisonEquality || match(data1, data2, startNoteField, directionField, timingField, intervalField);
@@ -200,14 +201,14 @@ public class MusInterval {
 
             private static boolean match(Map<String, String> data1, Map<String, String> data2,
                                          String startNoteField, String directionField, String timingField, String intervalField) {
-                String startNote1 = data1.getOrDefault(startNoteField, "");
-                String startNote2 = data2.getOrDefault(startNoteField, "");
-                String direction1 = data1.getOrDefault(directionField, "");
-                String direction2 = data2.getOrDefault(directionField, "");
-                String timing1 = data1.getOrDefault(timingField, "");
-                String timing2 = data2.getOrDefault(timingField, "");
-                String interval1 = data1.getOrDefault(intervalField, "");
-                String interval2 = data2.getOrDefault(intervalField, "");
+                String startNote1 = Objects.requireNonNull(data1.getOrDefault(startNoteField, ""));
+                String startNote2 = Objects.requireNonNull(data2.getOrDefault(startNoteField, ""));
+                String direction1 = Objects.requireNonNull(data1.getOrDefault(directionField, ""));
+                String direction2 = Objects.requireNonNull(data2.getOrDefault(directionField, ""));
+                String timing1 = Objects.requireNonNull(data1.getOrDefault(timingField, ""));
+                String timing2 = Objects.requireNonNull(data2.getOrDefault(timingField, ""));
+                String interval1 = Objects.requireNonNull(data1.getOrDefault(intervalField, ""));
+                String interval2 = Objects.requireNonNull(data2.getOrDefault(intervalField, ""));
                 boolean regularEquality = direction1.equalsIgnoreCase(direction2);
                 boolean harmonicEquality = (interval1.equals("%") || interval1.equalsIgnoreCase(interval2)) &&
                         (direction1.equalsIgnoreCase(Direction.ASC) && direction2.equalsIgnoreCase(Direction.DESC) ||
@@ -1124,7 +1125,8 @@ public class MusInterval {
                             relatedSoundField.autoFill(newData, true);
                         }
 
-                        helper.updateNote(modelId, Long.parseLong(existingData.get(AnkiDroidHelper.KEY_ID)), newData);
+                        String noteId = Objects.requireNonNull(existingData.get(AnkiDroidHelper.KEY_ID));
+                        helper.updateNote(modelId, Long.parseLong(noteId), newData);
                         MusInterval updatedMi = getMusIntervalFromData(newData);
                         updateAddedNotes(updatedMi, sound);
                         return updatedMi;
@@ -1187,7 +1189,7 @@ public class MusInterval {
     private void updateAddedNotes(MusInterval mi, String originalSound) {
         for (Map.Entry<String, FieldAccessor> ownFieldAccessor : OWN_FIELDS_ACCESSORS.entrySet()) {
             String ownField = ownFieldAccessor.getKey();
-            ArrayList<String> current = addedNotesOwnFields.get(ownField);
+            ArrayList<String> current = Objects.requireNonNull(addedNotesOwnFields.get(ownField));
             FieldAccessor accessor = ownFieldAccessor.getValue();
             current.add(accessor.getFieldValue(mi));
             addedNotesOwnFields.put(ownField, current);
@@ -1227,20 +1229,28 @@ public class MusInterval {
     }
 
     private AddingResult getAddingResult() throws ValidationException {
+        List<String> sounds = Objects.requireNonNull(addedNotesOwnFields.get(Fields.SOUND));
+        List<String> soundsSmaller = Objects.requireNonNull(addedNotesOwnFields.get(Fields.SOUND_SMALLER));
+        List<String> soundsSmallerAlt = Objects.requireNonNull(addedNotesOwnFields.get(Fields.SOUND_SMALLER_ALT));
+        List<String> soundsLarger = Objects.requireNonNull(addedNotesOwnFields.get(Fields.SOUND_LARGER));
+        List<String> soundsLargerAlt = Objects.requireNonNull(addedNotesOwnFields.get(Fields.SOUND_LARGER_ALT));
+        List<String> notes = Objects.requireNonNull(addedNotesOwnFields.get(Builder.KEY_NOTES));
+        List<String> octaves = Objects.requireNonNull(addedNotesOwnFields.get(Builder.KEY_OCTAVES));
+        List<String> intervals = Objects.requireNonNull(addedNotesOwnFields.get(Builder.KEY_INTERVALS));
         Builder builder = new Builder(helper)
                 .deck(deckName)
                 .model(modelName)
                 .model_fields(modelFields)
-                .sounds(addedNotesOwnFields.get(Fields.SOUND).toArray(new String[0]))
-                .sounds_smaller(addedNotesOwnFields.get(Fields.SOUND_SMALLER).toArray(new String[0]))
-                .sounds_smaller_alt(addedNotesOwnFields.get(Fields.SOUND_SMALLER_ALT).toArray(new String[0]))
-                .sounds_larger(addedNotesOwnFields.get(Fields.SOUND_LARGER).toArray(new String[0]))
-                .sounds_larger_alt(addedNotesOwnFields.get(Fields.SOUND_LARGER_ALT).toArray(new String[0]))
-                .notes(addedNotesOwnFields.get(Builder.KEY_NOTES).toArray(new String[0]))
-                .octaves(addedNotesOwnFields.get(Builder.KEY_OCTAVES).toArray(new String[0]))
+                .sounds(sounds.toArray(new String[0]))
+                .sounds_smaller(soundsSmaller.toArray(new String[0]))
+                .sounds_smaller_alt(soundsSmallerAlt.toArray(new String[0]))
+                .sounds_larger(soundsLarger.toArray(new String[0]))
+                .sounds_larger_alt(soundsLargerAlt.toArray(new String[0]))
+                .notes(notes.toArray(new String[0]))
+                .octaves(octaves.toArray(new String[0]))
                 .direction(direction)
                 .timing(timing)
-                .intervals(addedNotesOwnFields.get(Builder.KEY_INTERVALS).toArray(new String[0]))
+                .intervals(intervals.toArray(new String[0]))
                 .tempo(tempo)
                 .instrument(instrument)
                 .first_note_duration_coefficient(firstNoteDurationCoefficient);

@@ -74,6 +74,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -1190,7 +1191,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     Log.e(LOG_TAG, "Could not delete added file");
                 }
             } else {
-                DocumentFile documentFile = DocumentFile.fromSingleUri(MainActivity.this, uri);
+                DocumentFile documentFile = Objects.requireNonNull(
+                        DocumentFile.fromSingleUri(MainActivity.this, uri)
+                );
                 documentFile.delete();
             }
         }
@@ -1512,7 +1515,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         try {
             throw miException;
         } catch (MusInterval.MandatorySelectionEmptyException e) {
-            showMsg(R.string.empty_mandatory_selection, getString(FIELD_LABEL_STRING_IDS_SELECTION.get(e.getField())));
+            int resId = Objects.requireNonNull(FIELD_LABEL_STRING_IDS_SELECTION.get(e.getField()));
+            showMsg(R.string.empty_mandatory_selection, getString(resId));
         } catch (MusInterval.UnexpectedSoundsAmountException e) {
             final int expected = e.getExpectedAmount();
             final int provided = e.getProvidedAmount();
@@ -1637,7 +1641,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         } catch (MusInterval.AddToAnkiException e) {
             showMsg(R.string.add_card_error);
         } catch (MusInterval.MandatoryFieldEmptyException e) {
-            showMsg(R.string.mandatory_field_empty, getString(FIELD_LABEL_STRING_IDS_SINGULAR.get(e.getField())));
+            int resId = Objects.requireNonNull(FIELD_LABEL_STRING_IDS_SINGULAR.get(e.getField()));
+            showMsg(R.string.mandatory_field_empty, getString(resId));
         } catch (MusInterval.SoundAlreadyAddedException e) {
             showMsg(R.string.already_added);
         } catch (MusInterval.AddSoundFileException e) {

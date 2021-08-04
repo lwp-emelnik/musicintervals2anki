@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -63,7 +64,7 @@ public class MappingDialogFragment extends PreferenceDialogFragmentCompat {
                 nAvailableEntries++;
             } else {
                 if (mapping.containsKey(key)) {
-                    String value = mapping.get(key);
+                    String value = Objects.requireNonNull(mapping.get(key));
                     if (!value.isEmpty()) {
                         availableValues.remove(value);
                     }

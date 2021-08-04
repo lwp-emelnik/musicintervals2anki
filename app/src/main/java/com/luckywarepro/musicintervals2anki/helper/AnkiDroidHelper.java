@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.ichi2.anki.api.AddContentApi.READ_WRITE_PERMISSION;
@@ -450,10 +451,12 @@ public class AnkiDroidHelper {
         ArrayList<String> defaultFields = new ArrayList<>();
         for (String field : fields) {
             if (templateData.containsKey(field) && !multipleSelectionFields.contains(field)) {
-                String value = templateData.get(field);
+                String value = Objects.requireNonNull(templateData.get(field));
                 if (!value.isEmpty() && fieldDefaultValues.containsKey(field)) {
                     EqualityChecker defaultEqualityChecker = new FieldEqualityChecker(field, DEFAULT_EQUALITY_CHECKER);
-                    EqualityChecker equalityChecker = equalityCheckers.getOrDefault(field, defaultEqualityChecker);
+                    EqualityChecker equalityChecker = Objects.requireNonNull(
+                            equalityCheckers.getOrDefault(field, defaultEqualityChecker)
+                    );
                     String defaultValue = fieldDefaultValues.get(field);
                     Map<String, String> defaultData = new HashMap<>(templateData);
                     defaultData.put(field, defaultValue);
@@ -482,7 +485,10 @@ public class AnkiDroidHelper {
                 String expression;
                 if (templateData.containsKey(field) && !multipleSelectionFields.contains(field)) {
                     String value = templateData.get(field);
-                    expression = fieldSearchExpressionMakers.getOrDefault(field, DEFAULT_SEARCH_EXPRESSION_MAKER).getExpression(value);
+                    SearchExpressionMaker expressionMaker = Objects.requireNonNull(
+                            fieldSearchExpressionMakers.getOrDefault(field, DEFAULT_SEARCH_EXPRESSION_MAKER)
+                    );
+                    expression = expressionMaker.getExpression(value);
                 } else {
                     expression = "%";
                 }
@@ -544,14 +550,18 @@ public class AnkiDroidHelper {
                     // can be computationally expensive
                     for (Map.Entry<String, String> rowFieldValue : rowData.entrySet()) {
                         String field = rowFieldValue.getKey();
-                        String rowValue = rowData.getOrDefault(field, "");
-                        SearchExpressionMaker expressionMaker = fieldSearchExpressionMakers.getOrDefault(field, DEFAULT_SEARCH_EXPRESSION_MAKER);
+                        String rowValue = Objects.requireNonNull(rowData.getOrDefault(field, ""));
+                        SearchExpressionMaker expressionMaker = Objects.requireNonNull(
+                                fieldSearchExpressionMakers.getOrDefault(field, DEFAULT_SEARCH_EXPRESSION_MAKER)
+                        );
                         if (!expressionMaker.isDefinitive() || multipleSelectionFields.contains(field)) {
                             EqualityChecker defaultEqualityChecker = new FieldEqualityChecker(field, DEFAULT_EQUALITY_CHECKER);
-                            EqualityChecker equalityChecker = equalityCheckers.getOrDefault(field, defaultEqualityChecker);
+                            EqualityChecker equalityChecker = Objects.requireNonNull(
+                                    equalityCheckers.getOrDefault(field, defaultEqualityChecker)
+                            );
                             boolean matching = false;
                             for (Map<String, String> data : dataSet) {
-                                String value = data.getOrDefault(field, "");
+                                String value = Objects.requireNonNull(data.getOrDefault(field, ""));
                                 boolean defaultEquality = false;
                                 if (rowValue.isEmpty() && fieldDefaultValues.containsKey(field)) {
                                     String defaultValue = fieldDefaultValues.get(field);

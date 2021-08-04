@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -85,8 +86,8 @@ public class NotesIntegrity {
         for (int i = 0; i < correctNotesCount; i++) {
             progressIndicator.setMessage(R.string.integrity_processing_relations, i, correctNotesCount);
             final Map<String, String> noteData = correctNotesData.get(i);
-            long noteId = Long.parseLong((noteData.get(AnkiDroidHelper.KEY_ID)));
-            String noteTags = noteData.get(AnkiDroidHelper.KEY_TAGS).toLowerCase();
+            long noteId = Long.parseLong(Objects.requireNonNull(noteData.get(AnkiDroidHelper.KEY_ID)));
+            String noteTags = Objects.requireNonNull(noteData.get(AnkiDroidHelper.KEY_TAGS)).toLowerCase();
             boolean suspicious = false;
             for (RelatedIntervalSoundField relatedSoundField : musInterval.relatedSoundFields) {
                 String relationFieldKey = relatedSoundField.getFieldKey();
@@ -128,15 +129,14 @@ public class NotesIntegrity {
                         + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR
                         + RelatedIntervalSoundField.TAG_POINTING
         ).toLowerCase();
-        boolean suspiciousPointing = processRelation(
-                noteId,
-                noteData,
-                suspiciousPointingTag,
-                noteTags,
+        Set<Map<String, String>> suspiciousPointingData = Objects.requireNonNull(
                 fieldSuspiciousPointing.getOrDefault(fieldKey, new HashSet<Map<String, String>>())
         );
+        boolean suspiciousPointing = processRelation(
+                noteId, noteData, suspiciousPointingTag, noteTags, suspiciousPointingData
+        );
         if (suspiciousPointing) {
-            int current = suspiciousFieldCounts.getOrDefault(fieldKey, 0);
+            int current = Objects.requireNonNull(suspiciousFieldCounts.getOrDefault(fieldKey, 0));
             suspiciousFieldCounts.put(fieldKey, current + 1);
         }
 
@@ -145,12 +145,11 @@ public class NotesIntegrity {
                         + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR
                         + RelatedIntervalSoundField.TAG_POINTED
         ).toLowerCase();
-        boolean suspiciousPointed = processRelation(
-                noteId,
-                noteData,
-                suspiciousPointedTag,
-                noteTags,
+        Set<Map<String, String>> suspiciousPointedData = Objects.requireNonNull(
                 fieldSuspiciousPointed.getOrDefault(fieldKey, new HashSet<Map<String, String>>())
+        );
+        boolean suspiciousPointed = processRelation(
+                noteId, noteData, suspiciousPointedTag, noteTags, suspiciousPointedData
         );
 
         return suspiciousPointing || suspiciousPointed;
@@ -163,8 +162,8 @@ public class NotesIntegrity {
             progressIndicator.setMessage(R.string.integrity_validating, i, notesCount);
             final Map<String, String> noteData = notesData.get(i);
 
-            long noteId = Long.parseLong(noteData.get(AnkiDroidHelper.KEY_ID));
-            String noteTags = noteData.get(AnkiDroidHelper.KEY_TAGS).toLowerCase();
+            long noteId = Long.parseLong(Objects.requireNonNull(noteData.get(AnkiDroidHelper.KEY_ID)));
+            String noteTags = Objects.requireNonNull(noteData.get(AnkiDroidHelper.KEY_TAGS)).toLowerCase();
 
             boolean noteValid = true;
             for (Map.Entry<String, Validator[]> validators : MusInterval.Fields.VALIDATORS.entrySet()) {
@@ -192,7 +191,7 @@ public class NotesIntegrity {
                     );
 
                     if (!isValid) {
-                        int currentCount = corruptedFieldCounts.getOrDefault(fieldKey, 0);
+                        int currentCount = Objects.requireNonNull(corruptedFieldCounts.getOrDefault(fieldKey, 0));
                         corruptedFieldCounts.put(fieldKey, currentCount + 1);
                         if (!hasErrorTag) {
                             final String errorTagAddStr = String.format("%s", errorTag);
@@ -260,17 +259,17 @@ public class NotesIntegrity {
                     continue;
                 }
                 for (Map<String, String> note : notes) {
-                    String noteTags = note.get(AnkiDroidHelper.KEY_TAGS);
+                    String noteTags = Objects.requireNonNull(note.get(AnkiDroidHelper.KEY_TAGS));
                     if (!noteTags.contains(duplicateTagCheckStr)) {
-                        long noteId = Long.parseLong(note.get(AnkiDroidHelper.KEY_ID));
+                        long noteId = Long.parseLong(Objects.requireNonNull(note.get(AnkiDroidHelper.KEY_ID)));
                         helper.addTagToNote(noteId, String.format("%s ", duplicateTag));
                     }
                 }
             } else if (notesCount == 1 && corruptedTag != null) {
                 Map<String, String> note = notes.getFirst();
-                String noteTags = note.get(AnkiDroidHelper.KEY_TAGS);
+                String noteTags = Objects.requireNonNull(note.get(AnkiDroidHelper.KEY_TAGS));
                 if (noteTags.contains(duplicateTagCheckStr)) {
-                    long noteId = Long.parseLong(note.get(AnkiDroidHelper.KEY_ID));
+                    long noteId = Long.parseLong(Objects.requireNonNull(note.get(AnkiDroidHelper.KEY_ID)));
                     helper.updateNoteTags(noteId, noteTags.replace(duplicateTagCheckStr, ""));
                 }
             }
@@ -294,7 +293,9 @@ public class NotesIntegrity {
     }
 
     private void addSuspiciousPointing(Map<String, String> noteData, String fieldKey) {
-        Set<Map<String, String>> fieldPointing = fieldSuspiciousPointing.getOrDefault(fieldKey, new HashSet<Map<String, String>>());
+        Set<Map<String, String>> fieldPointing = Objects.requireNonNull(
+                fieldSuspiciousPointing.getOrDefault(fieldKey, new HashSet<Map<String, String>>())
+        );
         fieldPointing.add(noteData);
         fieldSuspiciousPointing.put(fieldKey, fieldPointing);
     }
