@@ -400,6 +400,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;
+            case R.id.actionAbout:
+                startActivity(new Intent(MainActivity.this, AboutActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
