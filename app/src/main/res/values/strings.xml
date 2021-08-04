@@ -248,4 +248,11 @@
     <string name="files_deletion_entry_created_only">Move to trash files created by MI2A once they processed</string>
     <string name="files_deletion_entry_all">Move to trash both files created by MI2A and input files after they processed</string>
     <string name="files_deletion_entry_always_ask">Always ask</string>
+
+    <!-- AboutActivity labels, fields and buttons -->
+    <string name="description">MusicIntervals2Anki is an open-source app used to create and consolidate flashcards for ear training</string>
+    <string name="version">Version: %s</string>
+    <string name="github">GitHub</string>
+    <string name="copyright">Copyright &#169; 2021 LuckyWare Pro</string>
+    <string name="license">Apache-2.0 License</string>
 </resources>
