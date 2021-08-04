@@ -39,7 +39,7 @@
                 android:id="@+id/labelFilename"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/label_filename" />
+                android:text="@string/filename" />
 
             <LinearLayout
                 android:id="@+id/layoutFilenames"

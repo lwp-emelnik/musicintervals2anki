@@ -394,19 +394,31 @@ public class MusInterval {
             }
         }
 
-        public static final Set<String> ADDING_MANDATORY_SINGULAR_KEYS = new HashSet<String>() {{
-            add(Fields.DIRECTION);
-            add(Fields.TIMING);
-            add(Fields.INSTRUMENT);
-        }};
-        public static final String KEY_NOTES = "notes";
-        public static final String KEY_OCTAVES = "octaves";
-        public static final String KEY_INTERVALS = "intervals";
-        public static final Set<String> ADDING_MANDATORY_SELECTION_KEYS = new HashSet<String>() {{
-            add(KEY_NOTES);
-            add(KEY_OCTAVES);
-            add(KEY_INTERVALS);
-        }};
+        public static final String SOUNDS = "sounds";
+        public static final String SOUNDS_SMALLER = "sounds_smaller";
+        public static final String SOUNDS_SMALLER_ALT = "sounds_smaller_alt";
+        public static final String SOUNDS_LARGER = "sounds_larger";
+        public static final String SOUNDS_LARGER_ALT = "sounds_larger_alt";
+        public static final String NOTES = "notes";
+        public static final String OCTAVES = "octaves";
+        public static final String DIRECTION = "direction";
+        public static final String TIMING = "timing";
+        public static final String INTERVALS = "intervals";
+        public static final String TEMPO = "tempo";
+        public static final String INSTRUMENT = "instrument";
+        public static final String FIRST_NOTE_DURATION_COEFFICIENT = "first_note_duration_coefficient";
+        public static final String VERSION = "version";
+
+        public static final String[] ADDING_MANDATORY_SELECTION_MEMBERS = new String[]{
+                NOTES,
+                OCTAVES,
+                INTERVALS
+        };
+        public static final String[] ADDING_MANDATORY_SINGULAR_MEMBERS = new String[]{
+                DIRECTION,
+                TIMING,
+                INSTRUMENT
+        };
 
         private static final String[] EMPTY_SELECTION = new String[]{"%"};
 
@@ -696,62 +708,105 @@ public class MusInterval {
     public final String firstNoteDurationCoefficient;
     public final String version;
 
-    private interface FieldAccessor {
-        String getFieldValue(MusInterval mi);
+    private interface MemberAccessor {
+        String getValue(MusInterval mi);
     }
 
-    private final static Map<String, FieldAccessor> OWN_FIELDS_ACCESSORS = new HashMap<String, FieldAccessor>() {{
-        put(Fields.SOUND, new FieldAccessor() {
+    private final static Map<String, MemberAccessor> BATCH_MEMBER_ACCESSORS = new HashMap<String, MemberAccessor>() {{
+        put(Builder.SOUNDS, new MemberAccessor() {
             @Override
-            public String getFieldValue(MusInterval mi) {
-                return mi.sounds[0];
+            public String getValue(MusInterval mi) {
+                return extractBatchFieldMemberValue(mi.sounds);
             }
         });
-        put(Fields.SOUND_SMALLER, new FieldAccessor() {
+        put(Builder.SOUNDS_SMALLER, new MemberAccessor() {
             @Override
-            public String getFieldValue(MusInterval mi) {
-                return mi.soundsSmaller[0];
+            public String getValue(MusInterval mi) {
+                return extractBatchFieldMemberValue(mi.soundsSmaller);
             }
         });
-        put(Fields.SOUND_SMALLER_ALT, new FieldAccessor() {
+        put(Builder.SOUNDS_SMALLER_ALT, new MemberAccessor() {
             @Override
-            public String getFieldValue(MusInterval mi) {
-                return mi.soundsSmallerAlt[0];
+            public String getValue(MusInterval mi) {
+                return extractBatchFieldMemberValue(mi.soundsSmallerAlt);
             }
         });
-        put(Fields.SOUND_LARGER, new FieldAccessor() {
+        put(Builder.SOUNDS_LARGER, new MemberAccessor() {
             @Override
-            public String getFieldValue(MusInterval mi) {
-                return mi.soundsLarger[0];
+            public String getValue(MusInterval mi) {
+                return extractBatchFieldMemberValue(mi.soundsLarger);
             }
         });
-        put(Fields.SOUND_LARGER_ALT, new FieldAccessor() {
+        put(Builder.SOUNDS_LARGER_ALT, new MemberAccessor() {
             @Override
-            public String getFieldValue(MusInterval mi) {
-                return mi.soundsLargerAlt[0];
+            public String getValue(MusInterval mi) {
+                return extractBatchFieldMemberValue(mi.soundsLargerAlt);
             }
         });
-        put(Builder.KEY_NOTES, new FieldAccessor() {
+        put(Builder.NOTES, new MemberAccessor() {
             @Override
-            public String getFieldValue(MusInterval mi) {
-                return mi.notes[0];
+            public String getValue(MusInterval mi) {
+                return extractBatchFieldMemberValue(mi.notes);
             }
         });
-        put(Builder.KEY_OCTAVES, new FieldAccessor() {
+        put(Builder.OCTAVES, new MemberAccessor() {
             @Override
-            public String getFieldValue(MusInterval mi) {
-                return mi.octaves[0];
+            public String getValue(MusInterval mi) {
+                return extractBatchFieldMemberValue(mi.octaves);
             }
         });
-        put(Builder.KEY_INTERVALS, new FieldAccessor() {
+        put(Builder.INTERVALS, new MemberAccessor() {
             @Override
-            public String getFieldValue(MusInterval mi) {
-                return mi.intervals[0];
+            public String getValue(MusInterval mi) {
+                return extractBatchFieldMemberValue(mi.intervals);
             }
         });
     }};
 
-    private Map<String, ArrayList<String>> addedNotesOwnFields;
+    private static String extractBatchFieldMemberValue(String[] arr) {
+        return arr != null && arr.length > 0 ? arr[0] : null;
+    }
+
+    private final static Map<String, MemberAccessor> MEMBER_ACCESSORS = new HashMap<String, MemberAccessor>(BATCH_MEMBER_ACCESSORS) {{
+        put(Builder.DIRECTION, new MemberAccessor() {
+            @Override
+            public String getValue(MusInterval mi) {
+                return mi.direction;
+            }
+        });
+        put(Builder.TIMING, new MemberAccessor() {
+            @Override
+            public String getValue(MusInterval mi) {
+                return mi.timing;
+            }
+        });
+        put(Builder.TEMPO, new MemberAccessor() {
+            @Override
+            public String getValue(MusInterval mi) {
+                return mi.tempo;
+            }
+        });
+        put(Builder.INSTRUMENT, new MemberAccessor() {
+            @Override
+            public String getValue(MusInterval mi) {
+                return mi.instrument;
+            }
+        });
+        put(Builder.FIRST_NOTE_DURATION_COEFFICIENT, new MemberAccessor() {
+            @Override
+            public String getValue(MusInterval mi) {
+                return mi.firstNoteDurationCoefficient;
+            }
+        });
+        put(Builder.VERSION, new MemberAccessor() {
+            @Override
+            public String getValue(MusInterval mi) {
+                return mi.version;
+            }
+        });
+    }};
+
+    private Map<String, ArrayList<String>> addedNotesBatchMembers;
     private ArrayList<String> originalSounds;
 
 
@@ -1014,18 +1069,10 @@ public class MusInterval {
             helper.storeDeckReference(deckName, deckId);
         }
 
-        final Map<String, String[]> selectionFieldValues = new HashMap<String, String[]>() {{
-            put(Builder.KEY_NOTES, notes);
-            put(Builder.KEY_OCTAVES, octaves);
-            put(Builder.KEY_INTERVALS, intervals);
-        }};
-        if (!selectionFieldValues.keySet().equals(Builder.ADDING_MANDATORY_SELECTION_KEYS)) {
-            throw new AssertionError();
-        }
-        for (Map.Entry<String, String[]> field : selectionFieldValues.entrySet()) {
-            String[] value = field.getValue();
-            if (value == null || value.length == 0) {
-                throw new MandatorySelectionEmptyException(field.getKey());
+        for (String memberKey : Builder.ADDING_MANDATORY_SELECTION_MEMBERS) {
+            String value = MEMBER_ACCESSORS.get(memberKey).getValue(this);
+            if (value == null) {
+                throw new MandatorySelectionEmptyException(memberKey);
             }
         }
 
@@ -1036,25 +1083,17 @@ public class MusInterval {
             throw new UnexpectedSoundsAmountException(permutationsNumber, providedAmount);
         }
 
-        final Map<String, String> singularFieldValues = new HashMap<String, String>() {{
-            put(Fields.DIRECTION, direction);
-            put(Fields.TIMING, timing);
-            put(Fields.INSTRUMENT, instrument);
-        }};
-        if (!singularFieldValues.keySet().equals(Builder.ADDING_MANDATORY_SINGULAR_KEYS)) {
-            throw new AssertionError();
-        }
-        for (Map.Entry<String, String> field : singularFieldValues.entrySet()) {
-            if (field.getValue().isEmpty()) {
-                throw new MandatoryFieldEmptyException(field.getKey());
+        for (String memberKey : Builder.ADDING_MANDATORY_SINGULAR_MEMBERS) {
+            if (MEMBER_ACCESSORS.get(memberKey).getValue(this).isEmpty()) {
+                throw new MandatoryFieldEmptyException(memberKey);
             }
         }
 
         ArrayList<Map<String, String>> miDataSet = getCollectedDataSet();
 
-        addedNotesOwnFields = new HashMap<>();
-        for (Map.Entry<String, FieldAccessor> ownFieldAccessor : OWN_FIELDS_ACCESSORS.entrySet()) {
-            addedNotesOwnFields.put(ownFieldAccessor.getKey(), new ArrayList<String>());
+        addedNotesBatchMembers = new HashMap<>();
+        for (Map.Entry<String, MemberAccessor> batchMemberAccessor : BATCH_MEMBER_ACCESSORS.entrySet()) {
+            addedNotesBatchMembers.put(batchMemberAccessor.getKey(), new ArrayList<String>());
         }
         originalSounds = new ArrayList<>();
 
@@ -1185,12 +1224,12 @@ public class MusInterval {
     }
 
     private void updateAddedNotes(MusInterval mi, String originalSound) {
-        for (Map.Entry<String, FieldAccessor> ownFieldAccessor : OWN_FIELDS_ACCESSORS.entrySet()) {
-            String ownField = ownFieldAccessor.getKey();
-            ArrayList<String> current = addedNotesOwnFields.get(ownField);
-            FieldAccessor accessor = ownFieldAccessor.getValue();
-            current.add(accessor.getFieldValue(mi));
-            addedNotesOwnFields.put(ownField, current);
+        for (Map.Entry<String, MemberAccessor> batchMemberAccessor : BATCH_MEMBER_ACCESSORS.entrySet()) {
+            String memberKey = batchMemberAccessor.getKey();
+            ArrayList<String> currentValues = addedNotesBatchMembers.get(memberKey);
+            MemberAccessor memberAccessor = batchMemberAccessor.getValue();
+            currentValues.add(memberAccessor.getValue(mi));
+            addedNotesBatchMembers.put(memberKey, currentValues);
         }
         originalSounds.add(originalSound);
     }
@@ -1231,16 +1270,16 @@ public class MusInterval {
                 .deck(deckName)
                 .model(modelName)
                 .model_fields(modelFields)
-                .sounds(addedNotesOwnFields.get(Fields.SOUND).toArray(new String[0]))
-                .sounds_smaller(addedNotesOwnFields.get(Fields.SOUND_SMALLER).toArray(new String[0]))
-                .sounds_smaller_alt(addedNotesOwnFields.get(Fields.SOUND_SMALLER_ALT).toArray(new String[0]))
-                .sounds_larger(addedNotesOwnFields.get(Fields.SOUND_LARGER).toArray(new String[0]))
-                .sounds_larger_alt(addedNotesOwnFields.get(Fields.SOUND_LARGER_ALT).toArray(new String[0]))
-                .notes(addedNotesOwnFields.get(Builder.KEY_NOTES).toArray(new String[0]))
-                .octaves(addedNotesOwnFields.get(Builder.KEY_OCTAVES).toArray(new String[0]))
+                .sounds(addedNotesBatchMembers.get(Builder.SOUNDS).toArray(new String[0]))
+                .sounds_smaller(addedNotesBatchMembers.get(Builder.SOUNDS_SMALLER).toArray(new String[0]))
+                .sounds_smaller_alt(addedNotesBatchMembers.get(Builder.SOUNDS_SMALLER_ALT).toArray(new String[0]))
+                .sounds_larger(addedNotesBatchMembers.get(Builder.SOUNDS_LARGER).toArray(new String[0]))
+                .sounds_larger_alt(addedNotesBatchMembers.get(Builder.SOUNDS_LARGER_ALT).toArray(new String[0]))
+                .notes(addedNotesBatchMembers.get(Builder.NOTES).toArray(new String[0]))
+                .octaves(addedNotesBatchMembers.get(Builder.OCTAVES).toArray(new String[0]))
                 .direction(direction)
                 .timing(timing)
-                .intervals(addedNotesOwnFields.get(Builder.KEY_INTERVALS).toArray(new String[0]))
+                .intervals(addedNotesBatchMembers.get(Builder.INTERVALS).toArray(new String[0]))
                 .tempo(tempo)
                 .instrument(instrument)
                 .first_note_duration_coefficient(firstNoteDurationCoefficient);
