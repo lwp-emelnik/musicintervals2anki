@@ -481,7 +481,6 @@ public class AudioCaptureService extends Service {
         File capturesDir = new File(getCapturesDirectory(this));
         if (!capturesDir.exists() && !capturesDir.mkdirs()) {
             exitWithMsg(R.string.directory_creation_error);
-            return null;
         }
 
         String timestamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss-SSS", Locale.US).format(new Date());
