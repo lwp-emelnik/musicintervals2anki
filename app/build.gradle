@@ -8,8 +8,8 @@ android {
         applicationId "com.luckywarepro.musicintervals2anki"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 29
-        versionName "1.14.0"
+        versionCode 30
+        versionName "1.14.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
