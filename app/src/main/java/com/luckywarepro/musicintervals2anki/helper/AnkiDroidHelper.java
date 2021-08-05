@@ -406,12 +406,12 @@ public class AnkiDroidHelper {
     public static final SearchExpressionMaker DEFAULT_SEARCH_EXPRESSION_MAKER = new SearchExpressionMaker() {
         @Override
         public String getExpression(String value) {
-            return !value.isEmpty() ? value : "%";
+            return !value.isEmpty() ? String.format("%%%s%%", value) : "%";
         }
 
         @Override
         public boolean isDefinitive() {
-            return true;
+            return false;
         }
     };
 
