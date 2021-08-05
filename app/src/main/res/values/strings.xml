@@ -179,7 +179,7 @@
     <string name="unknown_error">Unknown error (try opening AnkiDroid to see what\'s wrong)</string>
     <string name="integrity_check_completed">Integrity check completed (%d notes)</string>
     <string name="integrity_ok">No issues have been found</string>
-    <string name="integrity_field_corrupted">- %s: %d corrupted, (%s)</string>
+    <string name="integrity_field_corrupted">- %s: %d corrupted (%s)</string>
     <string name="integrity_field_suspicious">- %s: %d suspicious</string>
     <string name="InvalidAnkiDatabase_rowValuesAndFieldsCountMismatchException">Invalid Anki Database: row values and fields count mismatch</string>
     <string name="InvalidAnkiDatabase_unknownError">Invalid Anki Database: unknown error</string>

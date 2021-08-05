@@ -9,7 +9,6 @@ import java.util.Locale;
 public class DoubleSearchExpressionMaker implements SearchExpressionMaker {
     @Override
     public String getExpression(String value) {
-        value = value.trim();
         if (value.isEmpty()) {
             return "%";
         }

@@ -7,7 +7,7 @@ package com.luckywarepro.musicintervals2anki.validation;
 public class PositiveDecimalValidator implements FieldValidator {
     @Override
     public boolean isValid(String value) {
-        return value.matches("^\\d*$|^(?=^\\d*\\.\\d*$)(?=^(?!\\.$).*$).*$");
+        return value.matches("^ *(\\d*$|^(?=^\\d*\\.\\d*$)(?=^(?!\\.$).*$).*) *$");
     }
 
     @Override

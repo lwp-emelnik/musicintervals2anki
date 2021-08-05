@@ -166,6 +166,7 @@ public class NotesIntegrity {
             String noteTags = Objects.requireNonNull(noteData.get(AnkiDroidHelper.KEY_TAGS)).toLowerCase();
 
             boolean noteValid = true;
+            outer:
             for (Map.Entry<String, Validator[]> validators : MusInterval.Fields.VALIDATORS.entrySet()) {
                 String fieldKey = validators.getKey();
                 for (Validator validator : validators.getValue()) {
@@ -194,13 +195,15 @@ public class NotesIntegrity {
                         int currentCount = Objects.requireNonNull(corruptedFieldCounts.getOrDefault(fieldKey, 0));
                         corruptedFieldCounts.put(fieldKey, currentCount + 1);
                         if (!hasErrorTag) {
-                            final String errorTagAddStr = String.format("%s", errorTag);
-                            helper.addTagToNote(noteId, noteTags + errorTagAddStr);
+                            final String errorTagAddStr = String.format("%s ", errorTag);
+                            noteTags = noteTags + errorTagAddStr;
+                            helper.addTagToNote(noteId, noteTags);
                         }
                         noteValid = false;
-                        break;
+                        continue outer;
                     } else if (hasErrorTag) {
-                        helper.updateNoteTags(noteId, noteTags.replace(errorTagCheckStr, " "));
+                        noteTags = noteTags.replace(errorTagCheckStr, " ");
+                        helper.updateNoteTags(noteId, noteTags);
                         fixedCorruptedFieldsCount++;
                     }
                 }
