@@ -7639,7 +7639,7 @@ public class MusIntervalTest {
         ArrayList<Map<String, String>> searchDataset = new ArrayList<Map<String, String>>() {{
             add(searchData);
         }};
-        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(searchDataset), any(Set.class), any(Map.class), any(Map.class), any(Map.class));
+        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(searchDataset), any(Set.class), any(Map.class), any(Map.class), any(Map.class), eq(false));
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
