@@ -499,7 +499,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private void refreshPreferences() {
         if (AnkiDroidHelper.isApiUnavailable(this)) {
-            showMsg(R.string.api_unavailable);
             return;
         }
         if (mAnkiDroid.shouldRequestPermission()) {
@@ -522,7 +521,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     void refreshPermutations() {
         if (AnkiDroidHelper.isApiUnavailable(this)) {
-            showMsg(R.string.api_unavailable);
             return;
         }
         if (mAnkiDroid.shouldRequestPermission()) {
@@ -568,12 +566,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private void handleRefreshExisting() {
         if (AnkiDroidHelper.isApiUnavailable(this)) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    showMsg(R.string.api_unavailable);
-                }
-            });
             return;
         }
         if (mAnkiDroid.shouldRequestPermission()) {
