@@ -880,7 +880,7 @@ public class MusInterval {
         intervals = builder.mIntervals;
         tempo = builder.mTempo.trim();
         instrument = builder.mInstrument.trim();
-        firstNoteDurationCoefficient = builder.mFirstNoteDurationCoefficient;
+        firstNoteDurationCoefficient = builder.mFirstNoteDurationCoefficient.trim();
         version = builder.mVersion;
 
         validateFields(builder.mDefaultModel, builder.mFields, builder.mCards, builder.mQfmt, builder.mAfmt, builder.mCss);

@@ -542,7 +542,7 @@ public class AnkiDroidHelper {
 
                     for (int i = 0; i < fields.length; ++i) {
                         String field = fields[i];
-                        String value = rowValues[i];
+                        String value = rowValues[i].trim();
                         rowData.put(field, value);
                     }
 
