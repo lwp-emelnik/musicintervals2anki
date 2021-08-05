@@ -7,7 +7,7 @@ package com.luckywarepro.musicintervals2anki.validation;
 public class EmptyValidator implements FieldValidator {
     @Override
     public boolean isValid(String value) {
-        return !value.isEmpty();
+        return !value.trim().isEmpty();
     }
 
     @Override

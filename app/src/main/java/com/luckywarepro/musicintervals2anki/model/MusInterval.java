@@ -71,7 +71,7 @@ public class MusInterval {
                 }
             }
 
-            private final static String VALIDATION_PATTERN = "[A-Ga-g]#?[1-6]";
+            private final static String VALIDATION_PATTERN = " *[A-Ga-g]#?[1-6] *";
 
             public static int getIndex(String value) {
                 for (int i = 0; i < VALUES.length; i++) {
@@ -249,13 +249,14 @@ public class MusInterval {
 
             private static String getValidationPattern() {
                 StringBuilder pattern = new StringBuilder();
-                pattern.append("(?i)");
+                pattern.append("(?i) *(");
                 for (int i = 0; i < VALUES.length; i++) {
                     if (i != 0) {
                         pattern.append("|");
                     }
                     pattern.append(VALUES[i]);
                 }
+                pattern.append(") *");
                 return pattern.toString();
             }
         }
@@ -335,7 +336,7 @@ public class MusInterval {
         };
 
         private static final FieldValidator VALIDATOR_EMPTY = new EmptyValidator();
-        private static final FieldValidator VALIDATOR_SOUND = new PatternValidator("^$|^\\[sound:.*\\]$");
+        private static final FieldValidator VALIDATOR_SOUND = new PatternValidator("^ *$|^ *\\[sound:.+\\] *$");
         public static final Map<String, Validator[]> VALIDATORS = new HashMap<String, Validator[]>() {{
             put(SOUND, new Validator[]{
                     VALIDATOR_EMPTY,
@@ -359,18 +360,18 @@ public class MusInterval {
             });
             put(DIRECTION, new Validator[]{
                     VALIDATOR_EMPTY,
-                    new PatternValidator(String.format("^$|(?i)%s|%s", Direction.ASC, Direction.DESC))
+                    new PatternValidator(String.format("^ *$|(?i) *(%s|%s) *", Direction.ASC, Direction.DESC))
             });
             put(TIMING, new Validator[]{
                     VALIDATOR_EMPTY,
-                    new PatternValidator(String.format("(?i)%s|%s", Timing.MELODIC, Timing.HARMONIC))
+                    new PatternValidator(String.format("^ *$|(?i) *(%s|%s) *", Timing.MELODIC, Timing.HARMONIC))
             });
             put(INTERVAL, new Validator[]{
                     VALIDATOR_EMPTY,
                     new PatternValidator(Interval.getValidationPattern())
             });
             put(TEMPO, new Validator[]{
-                    new PatternValidator("^[0-9]*$"),
+                    new PatternValidator("^ *[0-9]* *$"),
                     Tempo.RANGE_VALIDATOR
             });
             put(INSTRUMENT, new Validator[]{
