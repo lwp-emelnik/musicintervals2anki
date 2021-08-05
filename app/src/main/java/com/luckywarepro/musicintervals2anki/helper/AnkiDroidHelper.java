@@ -440,6 +440,16 @@ public class AnkiDroidHelper {
                                                      Map<String, SearchExpressionMaker> fieldSearchExpressionMakers,
                                                      Map<String, EqualityChecker> equalityCheckers)
             throws InvalidAnkiDatabase_rowValuesAndFieldsCountMismatchException {
+        return findNotes(modelId, dataSet, multipleSelectionFields, fieldDefaultValues, fieldSearchExpressionMakers, equalityCheckers, true);
+    }
+
+    public LinkedList<Map<String, String>> findNotes(long modelId, ArrayList<Map<String, String>> dataSet,
+                                                     Set<String> multipleSelectionFields,
+                                                     Map<String, String> fieldDefaultValues,
+                                                     Map<String, SearchExpressionMaker> fieldSearchExpressionMakers,
+                                                     Map<String, EqualityChecker> equalityCheckers,
+                                                     boolean trim)
+            throws InvalidAnkiDatabase_rowValuesAndFieldsCountMismatchException {
         if (dataSet.size() == 0) {
             return new LinkedList<>();
         }
@@ -542,7 +552,10 @@ public class AnkiDroidHelper {
 
                     for (int i = 0; i < fields.length; ++i) {
                         String field = fields[i];
-                        String value = rowValues[i].trim();
+                        String value = rowValues[i];
+                        if (trim) {
+                            value = value.trim();
+                        }
                         rowData.put(field, value);
                     }
 
