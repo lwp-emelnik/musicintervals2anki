@@ -7598,4 +7598,73 @@ public class MusIntervalTest {
         assertEquals(2, is.getNotesCount());
         assertEquals(2, is.getSuspiciousNotesCount());
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void checkIntegrity_leadingAndTrailingSpaces_shouldTrim() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
+        final long modelId = new Random().nextLong();
+        final long noteId = new Random().nextLong();
+
+        final AnkiDroidHelper helper = mock(AnkiDroidHelper.class);
+        doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
+        doReturn(SIGNATURE).when(helper).getFieldList(eq(modelId));
+
+        final Map<String, String> noteData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.SOUND, " [sound:dir/file.mp3] ");
+            put(MusInterval.Fields.START_NOTE, String.format(" %s ", defaultStartNote));
+            put(MusInterval.Fields.INTERVAL, String.format(" %s ", intervalMin3));
+            put(MusInterval.Fields.TIMING, String.format(" %s ", MusInterval.Fields.Timing.MELODIC));
+            put(MusInterval.Fields.DIRECTION, String.format(" %s ", MusInterval.Fields.Direction.ASC));
+            put(MusInterval.Fields.TEMPO, "  ");
+            put(MusInterval.Fields.INSTRUMENT, " guitar ");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "  ");
+            put(AnkiDroidHelper.KEY_ID, String.valueOf(noteId));
+            put(AnkiDroidHelper.KEY_TAGS, "");
+        }};
+
+        final Map<String, String> searchData = new HashMap<String, String>() {{
+            put(MusInterval.Fields.START_NOTE, "%%");
+            put(MusInterval.Fields.INTERVAL, "%");
+            put(MusInterval.Fields.TIMING, "");
+            put(MusInterval.Fields.DIRECTION, "");
+            put(MusInterval.Fields.TEMPO, "");
+            put(MusInterval.Fields.INSTRUMENT, "");
+            put(MusInterval.Fields.FIRST_NOTE_DURATION_COEFFICIENT, "");
+        }};
+
+        LinkedList<Map<String, String>> searchResult = new LinkedList<Map<String, String>>() {{
+            add(noteData);
+        }};
+        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(new HashMap<String, String>()), any(Set.class), any(Map.class), any(Map.class), any(Map.class));
+        ArrayList<Map<String, String>> searchDataset = new ArrayList<Map<String, String>>() {{
+            add(searchData);
+        }};
+        doReturn(searchResult).when(helper).findNotes(eq(modelId), eq(searchDataset), any(Set.class), any(Map.class), any(Map.class), any(Map.class));
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Map<String, String> newNoteData = invocation.getArgument(2);
+                for (Map.Entry<String, String> fieldValue : newNoteData.entrySet()) {
+                    noteData.put(fieldValue.getKey(), fieldValue.getValue());
+                }
+                return true;
+            }
+        }).when(helper).updateNote(eq(modelId), eq(noteId), any(Map.class));
+
+        MusInterval mi = new MusInterval.Builder(helper)
+                .model(defaultModelName)
+                .notes(null)
+                .octaves(null)
+                .intervals(null)
+                .build();
+        ProgressIndicator progressIndicator = mock(ProgressIndicator.class);
+        NotesIntegrity.Summary is = new NotesIntegrity(helper, mi, corruptedTag, suspiciousTag, duplicateTag, progressIndicator).check();
+
+        assertEquals(1, is.getNotesCount());
+        assertEquals(0, is.getCorruptedNotesCount());
+        for (Map.Entry<String, String> fieldValue : noteData.entrySet()) {
+            String value = fieldValue.getValue();
+            assertEquals(value, value.trim());
+        }
+    }
 }
