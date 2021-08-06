@@ -1,13 +1,15 @@
 <resources>
     <string name="app_name">MusicIntervals2Anki</string>
     <string name="settings">Settings</string>
+    <string name="help">Help</string>
+    <string name="about">About</string>
 
     <string name="str_yes">Yes</string>
     <string name="str_no">No</string>
 
     <!-- MainActivity labels, fields and buttons -->
     <string name="switch_batch">Enable batch adding</string>
-    <string name="label_filename">Filename</string>
+    <string name="filename">Filename</string>
     <string name="action_select_file">Select file</string>
     <string name="start_note">Start note</string>
     <string name="note_c">C</string>
@@ -56,7 +58,6 @@
     <string name="action_mark">Mark</string>
     <string name="action_mark_n">Mark %d</string>
     <string name="action_add_to_anki">Add to AnkiDroid</string>
-    <string name="open_settings">Settings…</string>
     <string name="action_check_integrity">Check integrity</string>
     <plurals name="select_file">
         <item quantity="one">@string/action_select_file</item>
@@ -66,8 +67,8 @@
         <item quantity="one">Found 1 music interval</item>
         <item quantity="other">Found %d music intervals</item>
     </plurals>
-    <string name="mi_found_one_marked" >\u0020which is marked</string>
-    <string name="mi_found_one_unmarked" >\u0020which is NOT marked</string>
+    <string name="mi_found_one_marked">\u0020which is marked</string>
+    <string name="mi_found_one_unmarked">\u0020which is NOT marked</string>
     <plurals name="mi_found_other_marked">
         <item quantity="one">; 1 of them is marked</item>
         <item quantity="other">; %d of them are marked</item>
@@ -118,8 +119,8 @@
         <item quantity="other">%d music intervals with parameters (%s, %s, %s, %s, %s, %s) already exist in Anki database</item>
     </plurals>
     <plurals name="integrity_corrupted">
-        <item quantity="one">Found one corrupted note and marked it using tag starting \"%s\"</item>
-        <item quantity="other">Found %d corrupted notes and marked them using tag starting \"%s\"</item>
+        <item quantity="one">Found one corrupted note and marked it using tag starting with \"%s\"</item>
+        <item quantity="other">Found %d corrupted notes and marked them using tag starting with \"%s\"</item>
     </plurals>
     <plurals name="integrity_suspicious">
         <item quantity="one">Found one suspicious note (invalid link fields) and marked it using tag starting with \"%s\"</item>
@@ -132,18 +133,6 @@
     <plurals name="integrity_suspicious_relations_fixed">
         <item quantity="one">One relation previously tagged as suspicious has been resolved</item>
         <item quantity="other">%d relations previously tagged as suspicious have been resolved</item>
-    </plurals>
-    <plurals name="integrity_suspicious_fixed">
-        <item quantity="one">One note previously tagged as suspicious has been fixed</item>
-        <item quantity="other">%d notes previously tagged as suspicious have been fixed</item>
-    </plurals>
-    <plurals name="invalid_fields">
-        <item quantity="one">Invalid value of \%s\ field</item>
-        <item quantity="other">Invalid values of \%s\ fields </item>
-    </plurals>
-    <plurals name="empty_mandatory_fields">
-        <item quantity="one">Mandatory field \%s\ is empty</item>
-        <item quantity="other">Mandatory fields \%s\ are empty</item>
     </plurals>
     <plurals name="integrity_links">
         <item quantity="one">Automatically filled one link field</item>
@@ -172,7 +161,7 @@
     <string name="add_card_error">Music interval adding to AnkiDroid failed</string>
     <string name="mandatory_field_empty">Mandatory field \"%s\" is empty</string>
     <string name="already_added">Music interval seems to be already added to AnkiDroid (try to select sound file)</string>
-    <string name="item_replaced">Music interval replaced. Please run "Check media" in AnkiDroid to find and delete the orphaned old sound file</string>
+    <string name="item_replaced">Music interval replaced - please run "Check media" in AnkiDroid to find and delete the orphaned old sound file</string>
     <string name="add_file_error">Failed to add file to AnkiDroid media</string>
     <string name="unknown_adding_error">Failed to add music interval to AnkiDroid</string>
     <string name="additional_filenames">\u0020+ %d more…</string>
@@ -190,14 +179,13 @@
     <string name="unknown_error">Unknown error (try opening AnkiDroid to see what\'s wrong)</string>
     <string name="integrity_check_completed">Integrity check completed (%d notes)</string>
     <string name="integrity_ok">No issues have been found</string>
-    <string name="integrity_field_corrupted">- %s: %d corrupted, (%s)</string>
+    <string name="integrity_field_corrupted">- %s: %d corrupted (%s)</string>
     <string name="integrity_field_suspicious">- %s: %d suspicious</string>
-    <string name="fix_link_confirmation_remember_answer">Remember answer</string>
-    <string name="InvalidAnkiDatabase_fieldAndFieldNameCountMismatch">Invalid Anki Database: field and field name count mismatches</string>
+    <string name="InvalidAnkiDatabase_rowValuesAndFieldsCountMismatchException">Invalid Anki Database: row values and fields count mismatch</string>
     <string name="InvalidAnkiDatabase_unknownError">Invalid Anki Database: unknown error</string>
     <string name="validation_sound">value must represent an AnkiDroid media reference (i. e. \"[sound:example.mp3]\")</string>
     <string name="validation_allowed_values">allowed values: %s</string>
-    <string name="validation_range">value must an integer between %d and %d</string>
+    <string name="validation_range">value must be an integer between %d and %d</string>
     <string name="validation_mandatory">value must be present</string>
     <string name="validation_positive_decimal">value must represent a positive decimal number</string>
     <string name="validation_direction">allowed values: %s for non-unison intervals and an empty string for unison intervals</string>
@@ -228,22 +216,14 @@
     <string name="intersecting_sorting_keys">The selected list of files cannot be processed as it contains both entries with identical names and last modification dates, hence cannot be sorted</string>
     <string name="intersecting_names">Some of the selected files have equal name - only sorting by last modification date is available</string>
     <string name="intersecting_dates">Some of the selected files have equal last modification date - only sorting by name is available</string>
+    <string name="skip">Skip</string>
+    <string name="play_all">Play all</string>
+    <string name="api_unavailable">Anki API unavailable - please make sure AnkiDroid is installed and API usage isn\'t disabled</string>
 
     <!-- SettingsActivity labels, fields and buttons -->
     <string name="deck_preference_title">Deck</string>
     <string name="model_preference_title">Note type</string>
-    <string name="fields_preference_category_title">Fields mapping</string>
-    <string name="sound_field_list_preference_title">Sound</string>
-    <string name="sound_smaller_field_list_preference_title">Smaller interval sound</string>
-    <string name="sound_larger_field_list_preference_title">Larger interval sound</string>
-    <string name="start_note_field_list_preference_title">Start note</string>
-    <string name="direction_field_list_preference_title">Direction</string>
-    <string name="timing_field_list_preference_title">Timing</string>
-    <string name="interval_field_list_preference_title">Interval</string>
-    <string name="tempo_field_list_preference_title">Tempo</string>
-    <string name="instrument_field_list_preference_title">Instrument</string>
-    <string name="first_note_duration_coefficient_field_list_preference_title">First note duration coefficient</string>
-    <string name="version_field_list_preference_title">App version</string>
+    <string name="fields_mapping_preference_title">Fields mapping</string>
     <string name="version_field_switch_preference_title">Version stamp</string>
     <string name="version_field_switch_preference_summary">Log app version for added notes in a separate field</string>
     <string name="tag_duplicates_preference_title">Tag duplicates</string>
@@ -256,4 +236,15 @@
     <string name="files_deletion_entry_created_only">Move to trash files created by MI2A once they processed</string>
     <string name="files_deletion_entry_all">Move to trash both files created by MI2A and input files after they processed</string>
     <string name="files_deletion_entry_always_ask">Always ask</string>
+
+    <!-- AboutActivity labels, fields and buttons -->
+    <string name="description">MusicIntervals2Anki is an open-source app used to create and consolidate flashcards for ear training</string>
+    <string name="version">Version: %s</string>
+    <string name="github">GitHub</string>
+    <string name="copyright">Copyright &#169; 2021 LuckyWare Pro</string>
+    <string name="license">Apache-2.0 License</string>
+
+    <!-- AudioCapturingService messages-->
+    <string name="directory_creation_error">Could not create captures directory</string>
+    <string name="file_creation_error">Could not create file</string>
 </resources>
