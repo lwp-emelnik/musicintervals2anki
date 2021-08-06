@@ -12,9 +12,9 @@ import java.io.File;
  */
 
 public class AudioFile implements ProcessibleFile {
-    private static final String LOG_TAG = "AudioUri";
+    private static final String LOG_TAG = "AudioFile";
 
-    private final String tempAudioFilePath = "/tempOutput.mp3";
+    private final String tempAudioFilePath = "/tempExtractedAudio.mp3";
 
     private final String uriString;
 
