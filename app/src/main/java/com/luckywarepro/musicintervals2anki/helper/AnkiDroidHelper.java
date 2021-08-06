@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -52,8 +51,6 @@ public class AnkiDroidHelper {
     private static final String DECK_REF_DB = "com.ichi2.anki.api.decks";
     private static final String MODEL_REF_DB = "com.ichi2.anki.api.models";
     private static final String FLDS_SEPARATOR = "\u001f";
-
-    private static final String LOG_TAG = "AnkiDroidHelper";
 
     private final Context mContext;
     final ContentResolver mResolver;
@@ -343,26 +340,10 @@ public class AnkiDroidHelper {
     }
 
     // @todo: refactor once new version release of "com.ichi2.anki.api" is available
-    public String addFileToAnkiMedia(String uriString) {
-        Uri uri = Uri.parse(uriString);
-        uri = UriUtil.getContentUri(mContext, uri);
-        uriString = uri.toString();
+    public String addFileToAnkiMedia(ProcessibleFile processibleUri) {
+        Uri uri = UriUtil.getContentUri(mContext, processibleUri.getUri(mContext));
+        String uriString = uri.toString();
         mContext.grantUriPermission(PACKAGE_ANKI, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        String type = mResolver.getType(uri);
-        final String tempAudioFilePath = mContext.getExternalCacheDir() + "/tempOutput.mp3";
-        if (type.startsWith("video")) {
-            Uri extractedAudioUri = AudioUtil.extractFromVideo(mContext, uri, tempAudioFilePath);
-            // @todo: separate concerns
-            mContext.revokeUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            if (extractedAudioUri == null) {
-                return null;
-            } else {
-                uri = extractedAudioUri;
-                mContext.grantUriPermission(PACKAGE_ANKI, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                uriString = uri.toString();
-            }
-        }
-
         ContentValues cv = new ContentValues();
         cv.put("file_uri", uriString);
         final String preferredName = "music_interval_" + (System.currentTimeMillis() / 1000L);
@@ -376,10 +357,7 @@ public class AnkiDroidHelper {
             return null;
         } finally {
             mContext.revokeUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            File tempAudioFile = new File(tempAudioFilePath);
-            if (tempAudioFile.exists() && !tempAudioFile.delete()) {
-                Log.e(LOG_TAG, "Could not delete extracted audio file");
-            }
+            processibleUri.release(mContext);
         }
     }
 
