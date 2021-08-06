@@ -59,8 +59,28 @@ public class NotesIntegrity {
         final String soundField = musInterval.modelFields.get(MusInterval.Fields.SOUND);
 
         progressIndicator.setMessage(R.string.integrity_searching);
-        LinkedList<Map<String, String>> searchResult = musInterval.getExistingNotes();
+        LinkedList<Map<String, String>> searchResult = musInterval.getExistingNotes(false);
         notesCount = searchResult.size();
+
+        Set<String> fieldSet = musInterval.modelFields.keySet();
+        for (Map<String, String> noteData : searchResult) {
+            boolean needsUpdate = false;
+            for (Map.Entry<String, String> fieldValue : noteData.entrySet()) {
+                if (!fieldSet.contains(fieldValue.getKey())) {
+                    continue;
+                }
+                String value = fieldValue.getValue();
+                String valueTrimmed = value.trim();
+                if (!value.equals(valueTrimmed)) {
+                    needsUpdate = true;
+                    noteData.put(fieldValue.getKey(), valueTrimmed);
+                }
+            }
+            if (needsUpdate) {
+                long noteId = Long.parseLong(Objects.requireNonNull(noteData.get(AnkiDroidHelper.KEY_ID)));
+                helper.updateNote(musInterval.modelId, noteId, noteData);
+            }
+        }
 
         ArrayList<Map<String, String>> correctNotesData = checkCorrectness(searchResult);
         corruptedNotesCount = searchResult.size() - correctNotesData.size();

@@ -982,10 +982,14 @@ public class MusInterval {
         return result;
     }
 
+    private LinkedList<Map<String, String>> getExistingNotes(ArrayList<Map<String, String>> dataSet) throws AnkiDroidHelper.InvalidAnkiDatabaseException {
+        return getExistingNotes(dataSet, true);
+    }
+
     /**
      * Get list of existing (similar or equal) notes. Each note consists of main model fields, id field and tags.
      */
-    private LinkedList<Map<String, String>> getExistingNotes(ArrayList<Map<String, String>> dataSet) throws AnkiDroidHelper.InvalidAnkiDatabaseException {
+    private LinkedList<Map<String, String>> getExistingNotes(ArrayList<Map<String, String>> dataSet, boolean trim) throws AnkiDroidHelper.InvalidAnkiDatabaseException {
         if (modelId != null) {
             for (Map<String, String> data : dataSet) {
                 data.remove(modelFields.get(Fields.SOUND));
@@ -1001,7 +1005,8 @@ public class MusInterval {
                     multipleSelectionFields,
                     defaultValues,
                     searchExpressionMakers,
-                    equalityCheckers
+                    equalityCheckers,
+                    trim
             );
         } else {
             return new LinkedList<>();
@@ -1009,7 +1014,11 @@ public class MusInterval {
     }
 
     LinkedList<Map<String, String>> getExistingNotes() throws AnkiDroidHelper.InvalidAnkiDatabaseException {
-        return getExistingNotes(getCollectedDataSet());
+        return getExistingNotes(true);
+    }
+
+    LinkedList<Map<String, String>> getExistingNotes(boolean trim) throws AnkiDroidHelper.InvalidAnkiDatabaseException {
+        return getExistingNotes(getCollectedDataSet(), trim);
     }
 
     private LinkedList<Map<String, String>> getExistingNotes(final Map<String, String> data) throws AnkiDroidHelper.InvalidAnkiDatabaseException {
