@@ -22,6 +22,10 @@ public class AudioFile implements ProcessibleFile {
         this.uriString = uriString;
     }
 
+    public String getUriString() {
+        return uriString;
+    }
+
     @Override
     public Uri getUri(Context context) {
         ContentResolver resolver = context.getContentResolver();
