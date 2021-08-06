@@ -2,6 +2,7 @@ package com.luckywarepro.musicintervals2anki.model;
 
 import com.luckywarepro.musicintervals2anki.R;
 import com.luckywarepro.musicintervals2anki.helper.AnkiDroidHelper;
+import com.luckywarepro.musicintervals2anki.helper.AudioFile;
 import com.luckywarepro.musicintervals2anki.helper.equality.AnyEqualityChecker;
 import com.luckywarepro.musicintervals2anki.helper.equality.DoubleValueEqualityChecker;
 import com.luckywarepro.musicintervals2anki.helper.equality.EqualityChecker;
@@ -1163,7 +1164,8 @@ public class MusInterval {
                         Map<String, String> existingData = existingNotesData.getFirst();
 
                         String sound = miData.get(modelFields.get(Fields.SOUND));
-                        String newSound = helper.addFileToAnkiMedia(sound);
+                        AudioFile audioFile = new AudioFile(sound);
+                        String newSound = helper.addFileToAnkiMedia(audioFile);
                         if (newSound == null || newSound.isEmpty()) {
                             prompter.processException(new AddSoundFileException());
                             return null;
@@ -1216,7 +1218,8 @@ public class MusInterval {
     private MusInterval handleAddToAnki(Map<String, String> data) throws AddSoundFileException,
             AddToAnkiException, AnkiDroidHelper.InvalidAnkiDatabaseException, ValidationException {
         String sound = data.get(modelFields.get(Fields.SOUND));
-        String newSound = helper.addFileToAnkiMedia(sound);
+        AudioFile audioFile = new AudioFile(sound);
+        String newSound = helper.addFileToAnkiMedia(audioFile);
         if (newSound == null || newSound.isEmpty()) {
             throw new AddSoundFileException();
         }

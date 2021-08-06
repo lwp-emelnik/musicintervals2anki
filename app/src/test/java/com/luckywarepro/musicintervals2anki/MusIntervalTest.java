@@ -1,6 +1,7 @@
 package com.luckywarepro.musicintervals2anki;
 
 import com.luckywarepro.musicintervals2anki.helper.AnkiDroidHelper;
+import com.luckywarepro.musicintervals2anki.helper.AudioFile;
 import com.luckywarepro.musicintervals2anki.model.AddingHandler;
 import com.luckywarepro.musicintervals2anki.model.AddingPrompter;
 import com.luckywarepro.musicintervals2anki.model.MusInterval;
@@ -10,8 +11,12 @@ import com.luckywarepro.musicintervals2anki.model.RelatedIntervalSoundField;
 import com.luckywarepro.musicintervals2anki.validation.EmptyValidator;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +34,8 @@ import static org.mockito.Mockito.*;
  */
 
 @SuppressWarnings({"rawtypes", "ConstantConditions"})
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(AudioFile.class)
 public class MusIntervalTest {
 
     final static String defaultDeckName = "Music intervals";
@@ -408,7 +415,7 @@ public class MusIntervalTest {
         doNothing().when(helper).storeDeckReference(defaultDeckName, deckId);
         doReturn(new LinkedList<Map<String, String>>()).when(helper).findNotes(eq(modelId), any(ArrayList.class), any(Set.class), any(Map.class), any(Map.class), any(Map.class));
 
-        doReturn(newSound).when(helper).addFileToAnkiMedia(sound);
+        doReturn(newSound).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(new LinkedList<Map<String, String>>()).when(helper).findNotes(eq(modelId), any(Map.class), any(Set.class), any(Map.class), any(Map.class), any(Map.class));
         doAnswer(new Answer<Long>() {
             @Override
@@ -464,7 +471,7 @@ public class MusIntervalTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void add_NoSuchDeck_DeckShouldBeCreated() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
+    public void add_NoSuchDeck_DeckShouldBeCreated() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException, Exception {
         final long deckId = new Random().nextLong();
         final long modelId = new Random().nextLong();
         final long noteId = new Random().nextLong();
@@ -486,7 +493,9 @@ public class MusIntervalTest {
         doReturn(deckId).when(helper).addNewDeck(defaultDeckName);
         doNothing().when(helper).storeDeckReference(defaultDeckName, deckId);
 
-        doReturn(newSound).when(helper).addFileToAnkiMedia(sound);
+        AudioFile audioFile = mock(AudioFile.class);
+        PowerMockito.whenNew(AudioFile.class).withArguments(sound).thenReturn(audioFile);
+        doReturn(newSound).when(helper).addFileToAnkiMedia(eq(audioFile));
 
         doAnswer(new Answer<Long>() {
             @Override
@@ -538,7 +547,7 @@ public class MusIntervalTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void add_AllFieldsAreSet_NoteShouldBeCreated() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException {
+    public void add_AllFieldsAreSet_NoteShouldBeCreated() throws MusInterval.Exception, AnkiDroidHelper.InvalidAnkiDatabaseException, Exception {
         final long deckId = new Random().nextLong();
         final long modelId = new Random().nextLong();
         final long noteId = new Random().nextLong();
@@ -558,7 +567,9 @@ public class MusIntervalTest {
         // existing deck
         doReturn(deckId).when(helper).findDeckIdByName(defaultDeckName);
 
-        doReturn(newSound).when(helper).addFileToAnkiMedia(sound);
+        AudioFile audioFile = mock(AudioFile.class);
+        PowerMockito.whenNew(AudioFile.class).withArguments(sound).thenReturn(audioFile);
+        doReturn(newSound).when(helper).addFileToAnkiMedia(eq(audioFile));
 
         doAnswer(new Answer<Long>() {
             @Override
@@ -627,7 +638,7 @@ public class MusIntervalTest {
         doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
         doReturn(SIGNATURE).when(helper).getFieldList(eq(modelId));
         doReturn(deckId).when(helper).findDeckIdByName(defaultDeckName);
-        doReturn(newSound).when(helper).addFileToAnkiMedia(sound);
+        doReturn(newSound).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         MusInterval mi = new MusInterval.Builder(helper)
@@ -686,7 +697,7 @@ public class MusIntervalTest {
         doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
         doReturn(SIGNATURE).when(helper).getFieldList(eq(modelId));
         doReturn(deckId).when(helper).findDeckIdByName(defaultDeckName);
-        doReturn(newSound).when(helper).addFileToAnkiMedia(sound);
+        doReturn(newSound).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         MusInterval mi = new MusInterval.Builder(helper)
@@ -742,7 +753,7 @@ public class MusIntervalTest {
         doReturn(modelId).when(helper).findModelIdByName(defaultModelName);
         doReturn(SIGNATURE).when(helper).getFieldList(eq(modelId));
         doReturn(deckId).when(helper).findDeckIdByName(defaultDeckName);
-        doReturn(newSound).when(helper).addFileToAnkiMedia(sound);
+        doReturn(newSound).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         MusInterval mi = new MusInterval.Builder(helper)
@@ -894,7 +905,7 @@ public class MusIntervalTest {
 
                 return newSound2;
             }
-        }).when(helper).addFileToAnkiMedia(sound);
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
 
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
@@ -1429,9 +1440,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final MusInterval[] musIntervals = new MusInterval[MusInterval.Fields.Interval.VALUES.length];
@@ -1555,9 +1566,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final MusInterval[] musIntervals = new MusInterval[MusInterval.Fields.Interval.VALUES.length];
@@ -1676,9 +1687,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final String interval = MusInterval.Fields.Interval.VALUES[2];
@@ -1838,9 +1849,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final String interval = MusInterval.Fields.Interval.VALUES[2];
@@ -2034,9 +2045,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doAnswer(new Answer<Long>() {
             @Override
             public Long answer(InvocationOnMock invocation) {
@@ -2126,9 +2137,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final MusInterval musInterval = new MusInterval.Builder(helper)
@@ -2221,9 +2232,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final MusInterval musInterval = new MusInterval.Builder(helper)
@@ -2317,9 +2328,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final String sound = "/path/to/file.mp3";
@@ -2430,9 +2441,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         final ArrayList<Map<String, String>> addedNotesData = new ArrayList<>();
         doAnswer(new Answer<Long>() {
             private long noteId = 1;
@@ -4133,9 +4144,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final MusInterval musIntervalAsc = new MusInterval.Builder(helper)
@@ -5208,9 +5219,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final MusInterval[] musIntervals = new MusInterval[MusInterval.Fields.Interval.VALUES.length];
@@ -5335,9 +5346,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final String interval = MusInterval.Fields.Interval.VALUES[2];
@@ -5490,9 +5501,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final String interval = MusInterval.Fields.Interval.VALUES[2];
@@ -5695,9 +5706,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final String interval = MusInterval.Fields.Interval.VALUES[2];
@@ -5893,9 +5904,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final String interval = MusInterval.Fields.Interval.VALUES[2];
@@ -6178,9 +6189,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final String interval = MusInterval.Fields.Interval.VALUES[2];
@@ -6357,9 +6368,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final String interval = MusInterval.Fields.Interval.VALUES[2];
@@ -7187,9 +7198,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final MusInterval musIntervalAsc = new MusInterval.Builder(helper)
@@ -7360,9 +7371,9 @@ public class MusIntervalTest {
         doAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                return invocation.getArgument(0);
+                return ((AudioFile) invocation.getArgument(0)).getUriString();
             }
-        }).when(helper).addFileToAnkiMedia(any(String.class));
+        }).when(helper).addFileToAnkiMedia(any(AudioFile.class));
         doReturn(noteId).when(helper).addNote(eq(modelId), eq(deckId), any(Map.class), nullable(Set.class));
 
         final MusInterval musIntervalAsc = new MusInterval.Builder(helper)
