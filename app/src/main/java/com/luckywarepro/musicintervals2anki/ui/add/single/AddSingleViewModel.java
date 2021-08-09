@@ -10,7 +10,7 @@ public class AddSingleViewModel extends ViewModel {
 
     public AddSingleViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is add single fragment");
+        mText.setValue("sample.mp3");
     }
 
     public LiveData<String> getText() {

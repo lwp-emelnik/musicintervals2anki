@@ -23,7 +23,7 @@ public class AddSingleFragment extends Fragment {
         addSingleViewModel =
                 new ViewModelProvider(this).get(AddSingleViewModel.class);
         View root = inflater.inflate(R.layout.fragment_add_single, container, false);
-        final TextView textView = root.findViewById(R.id.text_add_single);
+        final TextView textView = root.findViewById(R.id.textFilename);
         addSingleViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
