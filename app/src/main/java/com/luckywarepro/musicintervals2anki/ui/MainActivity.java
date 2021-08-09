@@ -57,6 +57,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 import com.luckywarepro.musicintervals2anki.BuildConfig;
 import com.luckywarepro.musicintervals2anki.R;
 import com.luckywarepro.musicintervals2anki.helper.AnkiDroidHelper;
@@ -109,7 +110,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     static final String REF_DB_AFTER_CAPTURING = "afterCapturing";
     static final String REF_DB_IS_CAPTURING = "isCapturing";
     static final String REF_DB_AFTER_ADDING = "afterAdding";
-    private static final String REF_DB_SWITCH_BATCH = "switchBatch";
     private static final String REF_DB_CHECK_NOTE_ANY = "checkNoteAny";
     private static final String REF_DB_CHECK_OCTAVE_ANY = "checkOctaveAny";
     private static final String REF_DB_RADIO_GROUP_DIRECTION = "radioGroupDirection";
@@ -169,8 +169,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private EditText inputTempo;
     private AutoCompleteTextView inputInstrument;
     private EditText inputFirstNoteDurationCoefficient;
-    private TextView textExisting;
+    private TextView labelExisting;
     private Button actionMarkExisting;
+
+    private BottomNavigationView navView;
 
     private Toast toast;
     private String lastToastText;
@@ -306,10 +308,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbarMain = findViewById(R.id.toolbar_main);
+        Toolbar toolbarMain = findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbarMain);
 
-        BottomNavigationView navView = findViewById(R.id.nav_view);
+        navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
@@ -343,12 +345,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputTempo = findViewById(R.id.inputTempo);
         inputInstrument = findViewById(R.id.inputInstrument);
         inputFirstNoteDurationCoefficient = findViewById(R.id.inputFirstNoteDurationCoefficient);
-        textExisting = findViewById(R.id.labelExisting);
+        labelExisting = findViewById(R.id.labelExisting);
         actionMarkExisting = findViewById(R.id.actionMarkExisting);
 
         restoreUiState();
 
-        boolean enableMultiple = false; // @fixme
+        boolean enableMultiple = false;
         final OnFieldCheckChangeListener onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny, enableMultiple);
         checkNoteAny.setOnCheckedChangeListener(onNoteCheckChangeListener);
         for (CheckBox checkNote : checkNotes) {
@@ -369,14 +371,16 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputTempo.addTextChangedListener(new FieldInputTextWatcher(this));
         inputInstrument.addTextChangedListener(new FieldInputTextWatcher(this));
         inputFirstNoteDurationCoefficient.addTextChangedListener(new FieldInputTextWatcher(this));
-//        switchBatch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-//                onNoteCheckChangeListener.setEnableMultiple(b);
-//                onOctaveCheckChangeListener.setEnableMultiple(b);
-//                onIntervalCheckChangeListener.setEnableMultiple(b);
-//            }
-//        });
+        navView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                boolean enableMultiple = item.getItemId() != R.id.navigation_add_single;
+                onNoteCheckChangeListener.setEnableMultiple(enableMultiple);
+                onOctaveCheckChangeListener.setEnableMultiple(enableMultiple);
+                onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
+                return true;
+            }
+        });
 
         handler = new Handler();
 
@@ -618,7 +622,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    MainActivity.this.textExisting.setText(_textExisting);
+                    labelExisting.setText(_textExisting);
                     actionMarkExisting.setText(getString(R.string.action_mark_n, unmarkedCount));
                     actionMarkExisting.setEnabled(unmarkedCount > 0);
                 }
