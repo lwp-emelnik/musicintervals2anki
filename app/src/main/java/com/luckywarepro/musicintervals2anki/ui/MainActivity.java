@@ -348,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         restoreUiState();
 
-        boolean enableMultiple = true; // @fixme
+        boolean enableMultiple = false; // @fixme
         final OnFieldCheckChangeListener onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny, enableMultiple);
         checkNoteAny.setOnCheckedChangeListener(onNoteCheckChangeListener);
         for (CheckBox checkNote : checkNotes) {
