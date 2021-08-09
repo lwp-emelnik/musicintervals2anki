@@ -34,7 +34,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -47,13 +46,17 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.luckywarepro.musicintervals2anki.BuildConfig;
 import com.luckywarepro.musicintervals2anki.R;
 import com.luckywarepro.musicintervals2anki.helper.AnkiDroidHelper;
@@ -151,7 +154,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private static final String LOG_TAG = "MainActivity";
 
-    private SwitchCompat switchBatch;
     private TextView textFilename;
     Button actionPlay;
     private Button actionCaptureAudio;
@@ -167,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private EditText inputTempo;
     private AutoCompleteTextView inputInstrument;
     private EditText inputFirstNoteDurationCoefficient;
-    private TextView labelExisting;
+    private TextView textExisting;
     private Button actionMarkExisting;
 
     private Toast toast;
@@ -304,10 +306,19 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbarMain = findViewById(R.id.toolbarMain);
+        Toolbar toolbarMain = findViewById(R.id.toolbar_main);
         setSupportActionBar(toolbarMain);
 
-        switchBatch = findViewById(R.id.switchBatch);
+        BottomNavigationView navView = findViewById(R.id.nav_view);
+        // Passing each menu ID as a set of Ids because each
+        // menu should be considered as top level destinations.
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.navigation_add_single, R.id.navigation_add_batch, R.id.navigation_search)
+                .build();
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        NavigationUI.setupWithNavController(navView, navController);
+
         textFilename = findViewById(R.id.textFilename);
         actionPlay = findViewById(R.id.actionPlay);
         actionCaptureAudio = findViewById(R.id.actionCaptureAudio);
@@ -332,12 +343,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputTempo = findViewById(R.id.inputTempo);
         inputInstrument = findViewById(R.id.inputInstrument);
         inputFirstNoteDurationCoefficient = findViewById(R.id.inputFirstNoteDurationCoefficient);
-        labelExisting = findViewById(R.id.labelExisting);
+        textExisting = findViewById(R.id.labelExisting);
         actionMarkExisting = findViewById(R.id.actionMarkExisting);
 
         restoreUiState();
 
-        boolean enableMultiple = switchBatch.isChecked();
+        boolean enableMultiple = true; // @fixme
         final OnFieldCheckChangeListener onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny, enableMultiple);
         checkNoteAny.setOnCheckedChangeListener(onNoteCheckChangeListener);
         for (CheckBox checkNote : checkNotes) {
@@ -358,14 +369,14 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputTempo.addTextChangedListener(new FieldInputTextWatcher(this));
         inputInstrument.addTextChangedListener(new FieldInputTextWatcher(this));
         inputFirstNoteDurationCoefficient.addTextChangedListener(new FieldInputTextWatcher(this));
-        switchBatch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                onNoteCheckChangeListener.setEnableMultiple(b);
-                onOctaveCheckChangeListener.setEnableMultiple(b);
-                onIntervalCheckChangeListener.setEnableMultiple(b);
-            }
-        });
+//        switchBatch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+//                onNoteCheckChangeListener.setEnableMultiple(b);
+//                onOctaveCheckChangeListener.setEnableMultiple(b);
+//                onIntervalCheckChangeListener.setEnableMultiple(b);
+//            }
+//        });
 
         handler = new Handler();
 
@@ -607,7 +618,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    labelExisting.setText(_textExisting);
+                    MainActivity.this.textExisting.setText(_textExisting);
                     actionMarkExisting.setText(getString(R.string.action_mark_n, unmarkedCount));
                     actionMarkExisting.setEnabled(unmarkedCount > 0);
                 }
@@ -1270,7 +1281,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onPause() {
         final SharedPreferences.Editor uiDbEditor = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE).edit();
-        uiDbEditor.putBoolean(REF_DB_SWITCH_BATCH, switchBatch.isChecked());
         storeFilenames(this, filenames);
         uiDbEditor.putBoolean(REF_DB_AFTER_SELECTING, afterSelecting);
         uiDbEditor.putBoolean(REF_DB_AFTER_CAPTURING, afterCapturing);
@@ -1316,7 +1326,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     protected void restoreUiState() {
         final SharedPreferences uiDb = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE);
-        switchBatch.setChecked(uiDb.getBoolean(REF_DB_SWITCH_BATCH, false));
         filenames = getStoredFilenames(this);
         refreshFilenames();
         afterSelecting = uiDb.getBoolean(REF_DB_AFTER_SELECTING, false);

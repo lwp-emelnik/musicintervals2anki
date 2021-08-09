@@ -248,7 +248,6 @@
     <string name="directory_creation_error">Could not create captures directory</string>
     <string name="file_creation_error">Could not create file</string>
 
-    <string name="title_activity_main2">MainActivity2</string>
     <string name="title_add_single">Add single</string>
     <string name="title_add_batch">Add batch</string>
     <string name="title_search">Search</string>
