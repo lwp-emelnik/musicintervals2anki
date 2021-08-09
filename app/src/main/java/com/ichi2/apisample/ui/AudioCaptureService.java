@@ -74,6 +74,9 @@ public class AudioCaptureService extends Service {
     private final static int BYTES_PER_SAMPLE = 2;
     private final static int BUFFER_SIZE_IN_BYTES = NUM_SAMPLES_PER_READ * BYTES_PER_SAMPLE;
 
+    private final static int TONE_VOLUME = 25;
+    private final static int TONE_DURATION = 150;
+
     private MediaProjection projection;
     private AudioRecord record;
 
@@ -210,7 +213,7 @@ public class AudioCaptureService extends Service {
                         .setUsage(AudioAttributes.USAGE_MEDIA)
                         .build()
         );
-        toneGenerator = new ToneGenerator(AudioManager.STREAM_SYSTEM, 25);
+        toneGenerator = new ToneGenerator(AudioManager.STREAM_SYSTEM, TONE_VOLUME);
 
         TouchableButton actionPlayLatest = overlayView.findViewById(R.id.actionPlayLatest);
         actionPlayLatest.setOnClickListener(new View.OnClickListener() {
@@ -302,7 +305,7 @@ public class AudioCaptureService extends Service {
         actionRecord.setTextColor(Color.WHITE);
         actionRecord.setText(R.string.stop);
         textTop.setTypeface(null, Typeface.BOLD);
-        toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 150);
+        toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, TONE_DURATION);
     }
 
     private void tearDown() {
