@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_add_single">
+
+    <fragment
+        android:id="@+id/navigation_add_single"
+        android:name="com.luckywarepro.musicintervals2anki.ui.add.single.AddSingleFragment"
+        android:label="@string/title_add_single"
+        tools:layout="@layout/fragment_add_single" />
+
+    <fragment
+        android:id="@+id/navigation_add_batch"
+        android:name="com.luckywarepro.musicintervals2anki.ui.add.batch.AddBatchFragment"
+        android:label="@string/title_add_batch"
+        tools:layout="@layout/fragment_add_batch" />
+
+    <fragment
+        android:id="@+id/navigation_search"
+        android:name="com.luckywarepro.musicintervals2anki.ui.search.SearchFragment"
+        android:label="@string/title_search"
+        tools:layout="@layout/fragment_search" />
+</navigation>
