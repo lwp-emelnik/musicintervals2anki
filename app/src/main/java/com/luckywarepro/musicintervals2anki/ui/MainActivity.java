@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private static final String REF_DB_NOTE_KEYS = "noteKeys";
     private static final String REF_DB_OCTAVE_KEYS = "octaveKeys";
     private static final String REF_DB_INTERVAL_KEYS = "intervalKeys";
-    private static final String REF_DB_SELECTED_NAVIGATION_ITEM = "selectedNavigationItem";
+    private static final String REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM = "navigationBottomSelectedItem";
     private static final String DB_STRING_ARRAY_SEPARATOR = ",";
 
     private final static Map<String, Integer> FIELD_LABEL_STRING_IDS_SINGULAR = new HashMap<String, Integer>() {{
@@ -169,7 +169,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private TextView labelExisting;
     private Button actionMarkExisting;
 
-    private BottomNavigationView navView;
+    private View[] anyOptions;
+
+    private BottomNavigationView navigationBottom;
 
     private Toast toast;
     private String lastToastText;
@@ -338,7 +340,14 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputFirstNoteDurationCoefficient = findViewById(R.id.inputFirstNoteDurationCoefficient);
         labelExisting = findViewById(R.id.labelExisting);
         actionMarkExisting = findViewById(R.id.actionMarkExisting);
-        navView = findViewById(R.id.nav_view);
+        anyOptions = new View[]{
+                checkNoteAny,
+                checkOctaveAny,
+                findViewById(R.id.radioDirectionAny),
+                findViewById(R.id.radioTimingAny),
+                checkIntervalAny
+        };
+        navigationBottom = findViewById(R.id.navigationBottom);
 
         boolean enableMultiple = false;
         onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny, enableMultiple);
@@ -364,10 +373,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputTempo.addTextChangedListener(new FieldInputTextWatcher(this));
         inputInstrument.addTextChangedListener(new FieldInputTextWatcher(this));
         inputFirstNoteDurationCoefficient.addTextChangedListener(new FieldInputTextWatcher(this));
-        navView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+        navigationBottom.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                setBatchInputEnabled(item.getItemId() != R.id.navigation_add);
+                handleNavigationItemSelected(item.getItemId());
                 return true;
             }
         });
@@ -384,10 +393,16 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         mAnkiDroid = new AnkiDroidHelper(this);
     }
 
-    private void setBatchInputEnabled(boolean enabled) {
-        onNoteCheckChangeListener.setEnableMultiple(enabled);
-        onOctaveCheckChangeListener.setEnableMultiple(enabled);
-        onIntervalCheckChangeListener.setEnableMultiple(enabled);
+    private void handleNavigationItemSelected(int itemId) {
+        boolean selectedSearch = itemId == R.id.navigation_search;
+        int anyOptionsVisibility = selectedSearch ? View.VISIBLE : View.GONE;
+        for (View view : anyOptions) {
+            view.setVisibility(anyOptionsVisibility);
+        }
+        boolean enableMultiple = selectedSearch || itemId == R.id.navigation_add_batch;
+        onNoteCheckChangeListener.setEnableMultiple(enableMultiple);
+        onOctaveCheckChangeListener.setEnableMultiple(enableMultiple);
+        onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
     }
 
     @Override
@@ -1311,7 +1326,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         uiDbEditor.putString(REF_DB_NOTE_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, noteKeys));
         uiDbEditor.putString(REF_DB_OCTAVE_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, octaveKeys));
         uiDbEditor.putString(REF_DB_INTERVAL_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, intervalKeys));
-        uiDbEditor.putInt(REF_DB_SELECTED_NAVIGATION_ITEM, navView.getSelectedItemId());
+        uiDbEditor.putInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, navigationBottom.getSelectedItemId());
         uiDbEditor.apply();
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
@@ -1358,9 +1373,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         noteKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_NOTE_KEYS, ""));
         octaveKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_OCTAVE_KEYS, ""));
         intervalKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_INTERVAL_KEYS, ""));
-        int navItemId = uiDb.getInt(REF_DB_SELECTED_NAVIGATION_ITEM, R.id.navigation_add);
-        setBatchInputEnabled(navItemId != R.id.navigation_add);
-        navView.setSelectedItemId(navItemId);
+        int navigationItemId = uiDb.getInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, R.id.navigation_add);
+        handleNavigationItemSelected(navigationItemId);
+        navigationBottom.setSelectedItemId(navigationItemId);
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
