@@ -3,12 +3,12 @@
 
     <item
         android:id="@+id/navigation_add"
-        android:icon="@drawable/ic_add"
+        android:icon="@drawable/ic_tab_add"
         android:title="@string/title_add" />
 
     <item
         android:id="@+id/navigation_add_batch"
-        android:icon="@drawable/ic_add_batch"
+        android:icon="@drawable/ic_tab_add_batch"
         android:title="@string/title_add_batch" />
 
     <item

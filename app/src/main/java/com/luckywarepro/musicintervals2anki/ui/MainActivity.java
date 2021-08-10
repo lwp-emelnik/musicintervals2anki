@@ -151,6 +151,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private static final String LOG_TAG = "MainActivity";
 
+    private MenuItem menuItemAdd;
+    private MenuItem menuItemMark;
+
     private TextView textFilename;
     Button actionPlay;
     private Button actionCaptureAudio;
@@ -167,7 +170,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private AutoCompleteTextView inputInstrument;
     private EditText inputFirstNoteDurationCoefficient;
     private TextView labelExisting;
-    private Button actionMarkExisting;
 
     private View[] anyOptions;
 
@@ -339,7 +341,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputInstrument = findViewById(R.id.inputInstrument);
         inputFirstNoteDurationCoefficient = findViewById(R.id.inputFirstNoteDurationCoefficient);
         labelExisting = findViewById(R.id.labelExisting);
-        actionMarkExisting = findViewById(R.id.actionMarkExisting);
         anyOptions = new View[]{
                 checkNoteAny,
                 checkOctaveAny,
@@ -383,23 +384,25 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         handler = new Handler();
 
-        configureClearAllButton();
         configureCaptureAudioButton();
         configureSelectFileButton();
-        configureMarkExistingButton();
-        configureAddToAnkiButton();
-        configureCheckIntegrityButton();
 
         mAnkiDroid = new AnkiDroidHelper(this);
     }
 
     private void handleNavigationItemSelected(int itemId) {
+        boolean selectedAdd = itemId == R.id.navigation_add;
+        boolean selectedAddBatch = itemId == R.id.navigation_add_batch;
         boolean selectedSearch = itemId == R.id.navigation_search;
+
+        menuItemAdd.setVisible(selectedAdd || selectedAddBatch);
+
         int anyOptionsVisibility = selectedSearch ? View.VISIBLE : View.GONE;
         for (View view : anyOptions) {
             view.setVisibility(anyOptionsVisibility);
         }
-        boolean enableMultiple = selectedSearch || itemId == R.id.navigation_add_batch;
+
+        boolean enableMultiple = selectedSearch || selectedAddBatch;
         onNoteCheckChangeListener.setEnableMultiple(enableMultiple);
         onOctaveCheckChangeListener.setEnableMultiple(enableMultiple);
         onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
@@ -408,13 +411,128 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        menuItemAdd = menu.findItem(R.id.actionAddToAnki);
+        menuItemMark = menu.findItem(R.id.actionMarkExisting);
+        handleNavigationItemSelected(navigationBottom.getSelectedItemId()); // @fixme
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        if (itemId == R.id.actionSettings) {
+        if (itemId == R.id.actionAddToAnki) {
+            if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
+                showMsg(R.string.api_unavailable);
+                return true;
+            }
+            if (mAnkiDroid.shouldRequestPermission()) {
+                mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
+                return true;
+            }
+            if (isCapturing) {
+                closeCapturing();
+            }
+
+            progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setTitle(R.string.batch_adding_title);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        getMusInterval().addToAnki(MainActivity.this, MainActivity.this);
+                    } catch (final Throwable t) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressDialog.dismiss();
+                                handleError(t);
+                            }
+                        });
+
+                    }
+                }
+            }).start();
+            return true;
+        } else if (itemId == R.id.actionClearAll) {
+            if (isCapturing) {
+                closeCapturing();
+            }
+            filenames = new String[]{};
+            afterAdding = false;
+            mismatchingSorting = false;
+            intersectingNames = false;
+            sortByName = false;
+            intersectingDates = false;
+            sortByDate = false;
+            afterSelecting = false;
+            afterCapturing = false;
+            resetPlayButton();
+            textFilename.setText("");
+            checkNoteAny.setChecked(true);
+            checkOctaveAny.setChecked(true);
+            radioGroupDirection.check(findViewById(R.id.radioDirectionAny).getId());
+            radioGroupTiming.check(findViewById(R.id.radioTimingAny).getId());
+            checkIntervalAny.setChecked(true);
+            inputTempo.setText("");
+            inputInstrument.setText("");
+            inputFirstNoteDurationCoefficient.setText("");
+            return true;
+        } else if (itemId == R.id.actionMarkExisting) {
+            if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
+                showMsg(R.string.api_unavailable);
+                return true;
+            }
+            if (mAnkiDroid.shouldRequestPermission()) {
+                mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
+                return true;
+            }
+            try {
+                final int count = getMusInterval().markExistingNotes();
+                showQuantityMsg(R.plurals.mi_marked_result, count, count);
+                refreshExisting();
+            } catch (Throwable e) {
+                handleError(e);
+            }
+            return true;
+        } else if (itemId == R.id.actionCheckIntegrity) {
+            if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
+                showMsg(R.string.api_unavailable);
+                return true;
+            }
+            if (mAnkiDroid.shouldRequestPermission()) {
+                mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
+                return true;
+            }
+            if (isCapturing) {
+                closeCapturing();
+            }
+            try {
+                MusInterval mi = getMusInterval();
+
+                final String corruptedTag = TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_CORRUPTED;
+                final String suspiciousTag = TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_SUSPICIOUS;
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                boolean tagDuplicates = preferences.getBoolean(SettingsFragment.KEY_TAG_DUPLICATES_SWITCH, SettingsFragment.DEFAULT_TAG_DUPLICATES_SWITCH);
+                final String duplicateTag = !tagDuplicates ? null : TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_DUPLICATE;
+
+                final NotesIntegrity integrity = new NotesIntegrity(mAnkiDroid, mi, corruptedTag, suspiciousTag, duplicateTag, MainActivity.this);
+
+                progressDialog = new ProgressDialog(MainActivity.this);
+                progressDialog.setTitle(R.string.integrity_progress_title);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+
+                new Thread(new IntegrityCheckWorker(integrity, MainActivity.this, progressDialog)).start();
+            } catch (Throwable e) {
+                handleError(e);
+            }
+            return true;
+        } else if (itemId == R.id.actionSettings) {
             if (AnkiDroidHelper.isApiUnavailable(this)) {
                 showMsg(R.string.api_unavailable);
                 return true;
@@ -634,8 +752,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 @Override
                 public void run() {
                     labelExisting.setText(_textExisting);
-                    actionMarkExisting.setText(getString(R.string.action_mark_n, unmarkedCount));
-                    actionMarkExisting.setEnabled(unmarkedCount > 0);
+                    menuItemMark.setTitle(getString(R.string.action_mark_n, unmarkedCount));
+                    menuItemMark.setEnabled(unmarkedCount > 0);
                 }
             });
         }
@@ -767,37 +885,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 startNote,
                 interval
         );
-    }
-
-    private void configureClearAllButton() {
-        final Button actionClearAll = findViewById(R.id.actionClearAll);
-        actionClearAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isCapturing) {
-                    closeCapturing();
-                }
-                filenames = new String[]{};
-                afterAdding = false;
-                mismatchingSorting = false;
-                intersectingNames = false;
-                sortByName = false;
-                intersectingDates = false;
-                sortByDate = false;
-                afterSelecting = false;
-                afterCapturing = false;
-                resetPlayButton();
-                textFilename.setText("");
-                checkNoteAny.setChecked(true);
-                checkOctaveAny.setChecked(true);
-                radioGroupDirection.check(findViewById(R.id.radioDirectionAny).getId());
-                radioGroupTiming.check(findViewById(R.id.radioTimingAny).getId());
-                checkIntervalAny.setChecked(true);
-                inputTempo.setText("");
-                inputInstrument.setText("");
-                inputFirstNoteDurationCoefficient.setText("");
-            }
-        });
     }
 
     private void resetPlayButton() {
@@ -1046,73 +1133,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 .show();
     }
 
-    private void configureMarkExistingButton() {
-        actionMarkExisting.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
-                    showMsg(R.string.api_unavailable);
-                    return;
-                }
-                if (mAnkiDroid.shouldRequestPermission()) {
-                    mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
-                    return;
-                }
-                try {
-                    final int count = getMusInterval().markExistingNotes();
-                    showQuantityMsg(R.plurals.mi_marked_result, count, count);
-                    refreshExisting();
-                } catch (Throwable e) {
-                    handleError(e);
-                }
-            }
-        });
-    }
-
-    private void configureAddToAnkiButton() {
-        final Button actionAddToAnki = findViewById(R.id.actionAddToAnki);
-        actionAddToAnki.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
-                    showMsg(R.string.api_unavailable);
-                    return;
-                }
-                if (mAnkiDroid.shouldRequestPermission()) {
-                    mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
-                    return;
-                }
-                if (isCapturing) {
-                    closeCapturing();
-                }
-
-                progressDialog = new ProgressDialog(MainActivity.this);
-                progressDialog.setTitle(R.string.batch_adding_title);
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                progressDialog.setCancelable(false);
-                progressDialog.show();
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            getMusInterval().addToAnki(MainActivity.this, MainActivity.this);
-                        } catch (final Throwable t) {
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressDialog.dismiss();
-                                    handleError(t);
-                                }
-                            });
-
-                        }
-                    }
-                }).start();
-            }
-        });
-    }
-
     @Override
     public void promptAddDuplicate(final MusInterval[] existingMis, final AddingHandler handler) {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
@@ -1242,47 +1262,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         });
     }
 
-    private void configureCheckIntegrityButton() {
-        final Button actionCheckIntegrity = findViewById(R.id.actionCheckIntegrity);
-        actionCheckIntegrity.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
-                    showMsg(R.string.api_unavailable);
-                    return;
-                }
-                if (mAnkiDroid.shouldRequestPermission()) {
-                    mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
-                    return;
-                }
-                if (isCapturing) {
-                    closeCapturing();
-                }
-                try {
-                    MusInterval mi = getMusInterval();
-
-                    final String corruptedTag = TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_CORRUPTED;
-                    final String suspiciousTag = TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_SUSPICIOUS;
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                    boolean tagDuplicates = preferences.getBoolean(SettingsFragment.KEY_TAG_DUPLICATES_SWITCH, SettingsFragment.DEFAULT_TAG_DUPLICATES_SWITCH);
-                    final String duplicateTag = !tagDuplicates ? null : TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_DUPLICATE;
-
-                    final NotesIntegrity integrity = new NotesIntegrity(mAnkiDroid, mi, corruptedTag, suspiciousTag, duplicateTag, MainActivity.this);
-
-                    progressDialog = new ProgressDialog(MainActivity.this);
-                    progressDialog.setTitle(R.string.integrity_progress_title);
-                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    progressDialog.setCancelable(false);
-                    progressDialog.show();
-
-                    new Thread(new IntegrityCheckWorker(integrity, MainActivity.this, progressDialog)).start();
-                } catch (Throwable e) {
-                    handleError(e);
-                }
-            }
-        });
-    }
-
     @Override
     public void setMessage(final int resId, final Object ...formatArgs) {
         handler.post(new Runnable() {
@@ -1373,9 +1352,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         noteKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_NOTE_KEYS, ""));
         octaveKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_OCTAVE_KEYS, ""));
         intervalKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_INTERVAL_KEYS, ""));
-        int navigationItemId = uiDb.getInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, R.id.navigation_add);
-        handleNavigationItemSelected(navigationItemId);
-        navigationBottom.setSelectedItemId(navigationItemId);
+        navigationBottom.setSelectedItemId(uiDb.getInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, R.id.navigation_add));
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
