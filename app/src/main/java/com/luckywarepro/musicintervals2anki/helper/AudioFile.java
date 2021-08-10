@@ -31,7 +31,7 @@ public class AudioFile implements ProcessibleFile {
         ContentResolver resolver = context.getContentResolver();
         Uri uri = Uri.parse(uriString);
         String type = resolver.getType(uri);
-        if (type.startsWith("video")) {
+        if (type != null && type.startsWith("video")) {
             return AudioUtil.extractFromVideo(context, uri, context.getExternalCacheDir() + tempAudioFilePath);
         }
         return uri;
