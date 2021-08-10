@@ -113,6 +113,7 @@
                     android:layout_width="0dp"
                     android:layout_height="128dp"
                     android:background="#ffffffff"
+                    android:text="@string/note_c"
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/toggleNoteD"
@@ -125,6 +126,7 @@
                     android:layout_width="0dp"
                     android:layout_height="128dp"
                     android:background="#ffffffff"
+                    android:text="@string/note_d"
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/toggleNoteE"
@@ -149,6 +151,7 @@
                     android:layout_width="0dp"
                     android:layout_height="128dp"
                     android:background="#ffffffff"
+                    android:text="@string/note_f"
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/toggleNoteG"
@@ -161,6 +164,7 @@
                     android:layout_width="0dp"
                     android:layout_height="128dp"
                     android:background="#ffffffff"
+                    android:text="@string/note_g"
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/toggleNoteA"
@@ -173,6 +177,7 @@
                     android:layout_width="0dp"
                     android:layout_height="128dp"
                     android:background="#ffffffff"
+                    android:text="@string/note_a"
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/toggleNoteB"
@@ -185,6 +190,7 @@
                     android:layout_width="0dp"
                     android:layout_height="128dp"
                     android:background="#ffffffff"
+                    android:text="@string/note_b"
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toEndOf="parent"
@@ -206,6 +212,7 @@
                     android:layout_width="0dp"
                     android:layout_height="76dp"
                     android:background="#ff000000"
+                    android:text="@string/note_c_sharp"
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/space2"
@@ -227,6 +234,7 @@
                     android:layout_width="0dp"
                     android:layout_height="76dp"
                     android:background="#ff000000"
+                    android:text="@string/note_d_sharp"
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/space3"
@@ -248,6 +256,7 @@
                     android:layout_width="0dp"
                     android:layout_height="76dp"
                     android:background="#ff000000"
+                    android:text="@string/note_f_sharp"
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/space4"
@@ -269,6 +278,7 @@
                     android:layout_width="0dp"
                     android:layout_height="76dp"
                     android:background="#ff000000"
+                    android:text="@string/note_g_sharp"
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/space5"
@@ -290,6 +300,7 @@
                     android:layout_width="0dp"
                     android:layout_height="76dp"
                     android:background="#ff000000"
+                    android:text="@string/note_a_sharp"
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/space6"
@@ -308,104 +319,11 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <LinearLayout
+            <CheckBox
+                android:id="@+id/checkNoteAny"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <CheckBox
-                        android:id="@+id/checkNoteCSharp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:text="@string/note_c_sharp" />
-
-                    <CheckBox
-                        android:id="@+id/checkNoteDSharp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/note_d_sharp" />
-
-                    <CheckBox
-                        android:id="@+id/checkNoteFSharp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:text="@string/note_f_sharp" />
-
-                    <CheckBox
-                        android:id="@+id/checkNoteGSharp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/note_g_sharp" />
-
-                    <CheckBox
-                        android:id="@+id/checkNoteASharp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/note_a_sharp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <CheckBox
-                        android:id="@+id/checkNoteC"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/note_c" />
-
-                    <CheckBox
-                        android:id="@+id/checkNoteD"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/note_d" />
-
-                    <CheckBox
-                        android:id="@+id/checkNoteE"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/note_e" />
-
-                    <CheckBox
-                        android:id="@+id/checkNoteF"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/note_f" />
-
-                    <CheckBox
-                        android:id="@+id/checkNoteG"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/note_g" />
-
-                    <CheckBox
-                        android:id="@+id/checkNoteA"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/note_a" />
-
-                    <CheckBox
-                        android:id="@+id/checkNoteB"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/note_b" />
-                </LinearLayout>
-
-                <CheckBox
-                    android:id="@+id/checkNoteAny"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/any" />
-
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:text="@string/any" />
 
             <TextView
                 android:id="@+id/labelOctave"

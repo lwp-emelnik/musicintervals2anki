@@ -35,6 +35,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -158,14 +159,14 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private View viewGroupFilename;
     private TextView textFilename;
     Button actionPlay;
-    private CheckBox checkNoteAny;
-    private CheckBox[] checkNotes;
-    private CheckBox checkOctaveAny;
-    private CheckBox[] checkOctaves;
+    private CompoundButton checkNoteAny;
+    private CompoundButton[] checkNotes;
+    private CompoundButton checkOctaveAny;
+    private CompoundButton[] checkOctaves;
     private RadioGroup radioGroupDirection;
     private RadioGroup radioGroupTiming;
-    private CheckBox checkIntervalAny;
-    private CheckBox[] checkIntervals;
+    private CompoundButton checkIntervalAny;
+    private CompoundButton[] checkIntervals;
     private EditText inputTempo;
     private AutoCompleteTextView inputInstrument;
     private EditText inputFirstNoteDurationCoefficient;
@@ -183,13 +184,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     Handler handler;
 
     private final static int[] CHECK_NOTE_IDS = new int[]{
-            R.id.checkNoteC, R.id.checkNoteCSharp,
-            R.id.checkNoteD, R.id.checkNoteDSharp,
-            R.id.checkNoteE,
-            R.id.checkNoteF, R.id.checkNoteFSharp,
-            R.id.checkNoteG, R.id.checkNoteGSharp,
-            R.id.checkNoteA, R.id.checkNoteASharp,
-            R.id.checkNoteB
+            R.id.toggleNoteC, R.id.toggleNoteCSharp,
+            R.id.toggleNoteD, R.id.toggleNoteDSharp,
+            R.id.toggleNoteE,
+            R.id.toggleNoteF, R.id.toggleNoteFSharp,
+            R.id.toggleNoteG, R.id.toggleNoteGSharp,
+            R.id.toggleNoteA, R.id.toggleNoteASharp,
+            R.id.toggleNoteB
     };
     private final static int[] CHECK_OCTAVE_IDS = new int[]{
             R.id.checkOctave1,
@@ -324,19 +325,19 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         textFilename = findViewById(R.id.textFilename);
         actionPlay = findViewById(R.id.actionPlay);
         checkNoteAny = findViewById(R.id.checkNoteAny);
-        checkNotes = new CheckBox[CHECK_NOTE_IDS.length];
+        checkNotes = new CompoundButton[CHECK_NOTE_IDS.length];
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
             checkNotes[i] = findViewById(CHECK_NOTE_IDS[i]);
         }
         checkOctaveAny = findViewById(R.id.checkOctaveAny);
-        checkOctaves = new CheckBox[CHECK_OCTAVE_IDS.length];
+        checkOctaves = new CompoundButton[CHECK_OCTAVE_IDS.length];
         for (int i = 0; i < CHECK_OCTAVE_IDS.length; i++) {
             checkOctaves[i] = findViewById(CHECK_OCTAVE_IDS[i]);
         }
         radioGroupDirection = findViewById(R.id.radioGroupDirection);
         radioGroupTiming = findViewById(R.id.radioGroupTiming);
         checkIntervalAny = findViewById(R.id.checkIntervalAny);
-        checkIntervals = new CheckBox[CHECK_INTERVAL_IDS.length];
+        checkIntervals = new CompoundButton[CHECK_INTERVAL_IDS.length];
         for (int i = 0; i < CHECK_INTERVAL_IDS.length; i++) {
             checkIntervals[i] = findViewById(CHECK_INTERVAL_IDS[i]);
         }
@@ -353,25 +354,24 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         };
         navigationBottom = findViewById(R.id.navigationBottom);
 
-        boolean enableMultiple = false;
-        onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny, enableMultiple);
-        onOctaveCheckChangeListener = new OnFieldCheckChangeListener(this, checkOctaves, checkOctaveAny, enableMultiple);
-        onIntervalCheckChangeListener = new OnFieldCheckChangeListener(this, checkIntervals, checkIntervalAny, enableMultiple);
+        onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny);
+        onOctaveCheckChangeListener = new OnFieldCheckChangeListener(this, checkOctaves, checkOctaveAny);
+        onIntervalCheckChangeListener = new OnFieldCheckChangeListener(this, checkIntervals, checkIntervalAny);
 
         restoreUiState();
 
         checkNoteAny.setOnCheckedChangeListener(onNoteCheckChangeListener);
-        for (CheckBox checkNote : checkNotes) {
+        for (CompoundButton checkNote : checkNotes) {
             checkNote.setOnCheckedChangeListener(onNoteCheckChangeListener);
         }
         checkOctaveAny.setOnCheckedChangeListener(onOctaveCheckChangeListener);
-        for (CheckBox checkOctave : checkOctaves) {
+        for (CompoundButton checkOctave : checkOctaves) {
             checkOctave.setOnCheckedChangeListener(onOctaveCheckChangeListener);
         }
         radioGroupDirection.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
         radioGroupTiming.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
         checkIntervalAny.setOnCheckedChangeListener(onIntervalCheckChangeListener);
-        for (CheckBox checkInterval : checkIntervals) {
+        for (CompoundButton checkInterval : checkIntervals) {
             checkInterval.setOnCheckedChangeListener(onIntervalCheckChangeListener);
         }
         inputTempo.addTextChangedListener(new FieldInputTextWatcher(this));
@@ -1488,13 +1488,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
-    private static String[] getCheckedValues(CheckBox[] checkBoxes) {
+    private static String[] getCheckedValues(CompoundButton[] checkBoxes) {
         return getCheckedValues(checkBoxes, null);
     }
 
-    private static String[] getCheckedValues(CheckBox[] checkBoxes, Map<Integer, String> checkIdValues) {
+    private static String[] getCheckedValues(CompoundButton[] checkBoxes, Map<Integer, String> checkIdValues) {
         ArrayList<String> valuesList = new ArrayList<>();
-        for (CheckBox checkBox : checkBoxes) {
+        for (CompoundButton checkBox : checkBoxes) {
             if (checkBox.isChecked()) {
                 String value = checkBox.getText().toString();
                 if (checkIdValues != null) {
