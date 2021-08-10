@@ -26,6 +26,7 @@
         android:background="?android:attr/colorPrimary"
         app:itemIconTint="?attr/colorControlNormal"
         app:itemTextColor="?attr/colorControlNormal"
+        app:labelVisibilityMode="selected"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
