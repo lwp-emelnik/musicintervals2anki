@@ -197,7 +197,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     app:layout_constraintEnd_toStartOf="@+id/toggleNoteCSharp"
-                    app:layout_constraintHorizontal_weight="25"
+                    app:layout_constraintHorizontal_weight="20"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -209,7 +209,7 @@
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/space2"
-                    app:layout_constraintHorizontal_weight="20"
+                    app:layout_constraintHorizontal_weight="30"
                     app:layout_constraintStart_toEndOf="@+id/space1"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -218,7 +218,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     app:layout_constraintEnd_toStartOf="@+id/toggleNoteDSharp"
-                    app:layout_constraintHorizontal_weight="30"
+                    app:layout_constraintHorizontal_weight="20"
                     app:layout_constraintStart_toEndOf="@+id/toggleNoteCSharp"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -230,7 +230,7 @@
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/space3"
-                    app:layout_constraintHorizontal_weight="20"
+                    app:layout_constraintHorizontal_weight="30"
                     app:layout_constraintStart_toEndOf="@+id/space2"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -239,7 +239,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     app:layout_constraintEnd_toStartOf="@+id/toggleNoteFSharp"
-                    app:layout_constraintHorizontal_weight="50"
+                    app:layout_constraintHorizontal_weight="40"
                     app:layout_constraintStart_toEndOf="@+id/toggleNoteDSharp"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -251,7 +251,7 @@
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/space4"
-                    app:layout_constraintHorizontal_weight="20"
+                    app:layout_constraintHorizontal_weight="30"
                     app:layout_constraintStart_toEndOf="@+id/space3"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -260,7 +260,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     app:layout_constraintEnd_toStartOf="@+id/toggleNoteGSharp"
-                    app:layout_constraintHorizontal_weight="25"
+                    app:layout_constraintHorizontal_weight="15"
                     app:layout_constraintStart_toEndOf="@+id/toggleNoteFSharp"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -272,7 +272,7 @@
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/space5"
-                    app:layout_constraintHorizontal_weight="20"
+                    app:layout_constraintHorizontal_weight="30"
                     app:layout_constraintStart_toEndOf="@+id/space4"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -281,7 +281,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     app:layout_constraintEnd_toStartOf="@+id/toggleNoteASharp"
-                    app:layout_constraintHorizontal_weight="25"
+                    app:layout_constraintHorizontal_weight="15"
                     app:layout_constraintStart_toEndOf="@+id/toggleNoteGSharp"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -293,7 +293,7 @@
                     android:textOff=""
                     android:textOn=""
                     app:layout_constraintEnd_toStartOf="@+id/space6"
-                    app:layout_constraintHorizontal_weight="20"
+                    app:layout_constraintHorizontal_weight="30"
                     app:layout_constraintStart_toEndOf="@+id/space5"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -302,7 +302,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_weight="25"
+                    app:layout_constraintHorizontal_weight="20"
                     app:layout_constraintStart_toEndOf="@+id/toggleNoteASharp"
                     app:layout_constraintTop_toTopOf="parent" />
 
