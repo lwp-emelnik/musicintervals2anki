@@ -34,7 +34,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -47,13 +46,14 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 import com.luckywarepro.musicintervals2anki.BuildConfig;
 import com.luckywarepro.musicintervals2anki.R;
 import com.luckywarepro.musicintervals2anki.helper.AnkiDroidHelper;
@@ -106,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     static final String REF_DB_AFTER_CAPTURING = "afterCapturing";
     static final String REF_DB_IS_CAPTURING = "isCapturing";
     static final String REF_DB_AFTER_ADDING = "afterAdding";
-    private static final String REF_DB_SWITCH_BATCH = "switchBatch";
     private static final String REF_DB_CHECK_NOTE_ANY = "checkNoteAny";
     private static final String REF_DB_CHECK_OCTAVE_ANY = "checkOctaveAny";
     private static final String REF_DB_RADIO_GROUP_DIRECTION = "radioGroupDirection";
@@ -119,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private static final String REF_DB_NOTE_KEYS = "noteKeys";
     private static final String REF_DB_OCTAVE_KEYS = "octaveKeys";
     private static final String REF_DB_INTERVAL_KEYS = "intervalKeys";
+    private static final String REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM = "navigationBottomSelectedItem";
     private static final String DB_STRING_ARRAY_SEPARATOR = ",";
 
     private final static Map<String, Integer> FIELD_LABEL_STRING_IDS_SINGULAR = new HashMap<String, Integer>() {{
@@ -151,7 +151,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private static final String LOG_TAG = "MainActivity";
 
-    private SwitchCompat switchBatch;
     private TextView textFilename;
     Button actionPlay;
     private Button actionCaptureAudio;
@@ -169,6 +168,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private EditText inputFirstNoteDurationCoefficient;
     private TextView labelExisting;
     private Button actionMarkExisting;
+
+    private View[] anyOptions;
+
+    private BottomNavigationView navigationBottom;
 
     private Toast toast;
     private String lastToastText;
@@ -299,6 +302,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         });
     }};
 
+    private OnFieldCheckChangeListener onNoteCheckChangeListener;
+    private OnFieldCheckChangeListener onOctaveCheckChangeListener;
+    private OnFieldCheckChangeListener onIntervalCheckChangeListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -307,7 +314,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         Toolbar toolbarMain = findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbarMain);
 
-        switchBatch = findViewById(R.id.switchBatch);
         textFilename = findViewById(R.id.textFilename);
         actionPlay = findViewById(R.id.actionPlay);
         actionCaptureAudio = findViewById(R.id.actionCaptureAudio);
@@ -334,23 +340,32 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputFirstNoteDurationCoefficient = findViewById(R.id.inputFirstNoteDurationCoefficient);
         labelExisting = findViewById(R.id.labelExisting);
         actionMarkExisting = findViewById(R.id.actionMarkExisting);
+        anyOptions = new View[]{
+                checkNoteAny,
+                checkOctaveAny,
+                findViewById(R.id.radioDirectionAny),
+                findViewById(R.id.radioTimingAny),
+                checkIntervalAny
+        };
+        navigationBottom = findViewById(R.id.navigationBottom);
+
+        boolean enableMultiple = false;
+        onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny, enableMultiple);
+        onOctaveCheckChangeListener = new OnFieldCheckChangeListener(this, checkOctaves, checkOctaveAny, enableMultiple);
+        onIntervalCheckChangeListener = new OnFieldCheckChangeListener(this, checkIntervals, checkIntervalAny, enableMultiple);
 
         restoreUiState();
 
-        boolean enableMultiple = switchBatch.isChecked();
-        final OnFieldCheckChangeListener onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny, enableMultiple);
         checkNoteAny.setOnCheckedChangeListener(onNoteCheckChangeListener);
         for (CheckBox checkNote : checkNotes) {
             checkNote.setOnCheckedChangeListener(onNoteCheckChangeListener);
         }
-        final OnFieldCheckChangeListener onOctaveCheckChangeListener = new OnFieldCheckChangeListener(this, checkOctaves, checkOctaveAny, enableMultiple);
         checkOctaveAny.setOnCheckedChangeListener(onOctaveCheckChangeListener);
         for (CheckBox checkOctave : checkOctaves) {
             checkOctave.setOnCheckedChangeListener(onOctaveCheckChangeListener);
         }
         radioGroupDirection.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
         radioGroupTiming.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
-        final OnFieldCheckChangeListener onIntervalCheckChangeListener = new OnFieldCheckChangeListener(this, checkIntervals, checkIntervalAny, enableMultiple);
         checkIntervalAny.setOnCheckedChangeListener(onIntervalCheckChangeListener);
         for (CheckBox checkInterval : checkIntervals) {
             checkInterval.setOnCheckedChangeListener(onIntervalCheckChangeListener);
@@ -358,12 +373,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputTempo.addTextChangedListener(new FieldInputTextWatcher(this));
         inputInstrument.addTextChangedListener(new FieldInputTextWatcher(this));
         inputFirstNoteDurationCoefficient.addTextChangedListener(new FieldInputTextWatcher(this));
-        switchBatch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        navigationBottom.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                onNoteCheckChangeListener.setEnableMultiple(b);
-                onOctaveCheckChangeListener.setEnableMultiple(b);
-                onIntervalCheckChangeListener.setEnableMultiple(b);
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                handleNavigationItemSelected(item.getItemId());
+                return true;
             }
         });
 
@@ -377,6 +391,18 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         configureCheckIntegrityButton();
 
         mAnkiDroid = new AnkiDroidHelper(this);
+    }
+
+    private void handleNavigationItemSelected(int itemId) {
+        boolean selectedSearch = itemId == R.id.navigation_search;
+        int anyOptionsVisibility = selectedSearch ? View.VISIBLE : View.GONE;
+        for (View view : anyOptions) {
+            view.setVisibility(anyOptionsVisibility);
+        }
+        boolean enableMultiple = selectedSearch || itemId == R.id.navigation_add_batch;
+        onNoteCheckChangeListener.setEnableMultiple(enableMultiple);
+        onOctaveCheckChangeListener.setEnableMultiple(enableMultiple);
+        onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
     }
 
     @Override
@@ -1270,7 +1296,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onPause() {
         final SharedPreferences.Editor uiDbEditor = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE).edit();
-        uiDbEditor.putBoolean(REF_DB_SWITCH_BATCH, switchBatch.isChecked());
         storeFilenames(this, filenames);
         uiDbEditor.putBoolean(REF_DB_AFTER_SELECTING, afterSelecting);
         uiDbEditor.putBoolean(REF_DB_AFTER_CAPTURING, afterCapturing);
@@ -1301,6 +1326,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         uiDbEditor.putString(REF_DB_NOTE_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, noteKeys));
         uiDbEditor.putString(REF_DB_OCTAVE_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, octaveKeys));
         uiDbEditor.putString(REF_DB_INTERVAL_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, intervalKeys));
+        uiDbEditor.putInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, navigationBottom.getSelectedItemId());
         uiDbEditor.apply();
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
@@ -1316,7 +1342,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     protected void restoreUiState() {
         final SharedPreferences uiDb = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE);
-        switchBatch.setChecked(uiDb.getBoolean(REF_DB_SWITCH_BATCH, false));
         filenames = getStoredFilenames(this);
         refreshFilenames();
         afterSelecting = uiDb.getBoolean(REF_DB_AFTER_SELECTING, false);
@@ -1348,6 +1373,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         noteKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_NOTE_KEYS, ""));
         octaveKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_OCTAVE_KEYS, ""));
         intervalKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_INTERVAL_KEYS, ""));
+        int navigationItemId = uiDb.getInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, R.id.navigation_add);
+        handleNavigationItemSelected(navigationItemId);
+        navigationBottom.setSelectedItemId(navigationItemId);
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
