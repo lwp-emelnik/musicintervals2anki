@@ -104,6 +104,210 @@
                 android:layout_height="wrap_content"
                 android:text="@string/start_note" />
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteC"
+                    android:layout_width="0dp"
+                    android:layout_height="128dp"
+                    android:background="#ffffffff"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteD"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteD"
+                    android:layout_width="0dp"
+                    android:layout_height="128dp"
+                    android:background="#ffffffff"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteE"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/toggleNoteC"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteE"
+                    android:layout_width="0dp"
+                    android:layout_height="128dp"
+                    android:background="#ffffffff"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteF"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/toggleNoteD"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteF"
+                    android:layout_width="0dp"
+                    android:layout_height="128dp"
+                    android:background="#ffffffff"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteG"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/toggleNoteE"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteG"
+                    android:layout_width="0dp"
+                    android:layout_height="128dp"
+                    android:background="#ffffffff"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteA"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/toggleNoteF"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteA"
+                    android:layout_width="0dp"
+                    android:layout_height="128dp"
+                    android:background="#ffffffff"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteB"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/toggleNoteG"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteB"
+                    android:layout_width="0dp"
+                    android:layout_height="128dp"
+                    android:background="#ffffffff"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/toggleNoteA"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Space
+                    android:id="@+id/space1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteCSharp"
+                    app:layout_constraintHorizontal_weight="25"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteCSharp"
+                    android:layout_width="0dp"
+                    android:layout_height="76dp"
+                    android:background="#ff000000"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toStartOf="@+id/space2"
+                    app:layout_constraintHorizontal_weight="20"
+                    app:layout_constraintStart_toEndOf="@+id/space1"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Space
+                    android:id="@+id/space2"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteDSharp"
+                    app:layout_constraintHorizontal_weight="30"
+                    app:layout_constraintStart_toEndOf="@+id/toggleNoteCSharp"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteDSharp"
+                    android:layout_width="0dp"
+                    android:layout_height="76dp"
+                    android:background="#ff000000"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toStartOf="@+id/space3"
+                    app:layout_constraintHorizontal_weight="20"
+                    app:layout_constraintStart_toEndOf="@+id/space2"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Space
+                    android:id="@+id/space3"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteFSharp"
+                    app:layout_constraintHorizontal_weight="50"
+                    app:layout_constraintStart_toEndOf="@+id/toggleNoteDSharp"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteFSharp"
+                    android:layout_width="0dp"
+                    android:layout_height="76dp"
+                    android:background="#ff000000"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toStartOf="@+id/space4"
+                    app:layout_constraintHorizontal_weight="20"
+                    app:layout_constraintStart_toEndOf="@+id/space3"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Space
+                    android:id="@+id/space4"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteGSharp"
+                    app:layout_constraintHorizontal_weight="25"
+                    app:layout_constraintStart_toEndOf="@+id/toggleNoteFSharp"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteGSharp"
+                    android:layout_width="0dp"
+                    android:layout_height="76dp"
+                    android:background="#ff000000"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toStartOf="@+id/space5"
+                    app:layout_constraintHorizontal_weight="20"
+                    app:layout_constraintStart_toEndOf="@+id/space4"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Space
+                    android:id="@+id/space5"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteASharp"
+                    app:layout_constraintHorizontal_weight="25"
+                    app:layout_constraintStart_toEndOf="@+id/toggleNoteGSharp"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ToggleButton
+                    android:id="@+id/toggleNoteASharp"
+                    android:layout_width="0dp"
+                    android:layout_height="76dp"
+                    android:background="#ff000000"
+                    android:textOff=""
+                    android:textOn=""
+                    app:layout_constraintEnd_toStartOf="@+id/space6"
+                    app:layout_constraintHorizontal_weight="20"
+                    app:layout_constraintStart_toEndOf="@+id/space5"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Space
+                    android:id="@+id/space6"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_weight="25"
+                    app:layout_constraintStart_toEndOf="@+id/toggleNoteASharp"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
