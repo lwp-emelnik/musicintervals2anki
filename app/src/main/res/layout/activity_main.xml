@@ -39,6 +39,7 @@
         android:background="?attr/colorBackgroundFloating"
         android:gravity="center"
         android:paddingVertical="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         app:layout_constraintBottom_toTopOf="@id/navigationBottom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
