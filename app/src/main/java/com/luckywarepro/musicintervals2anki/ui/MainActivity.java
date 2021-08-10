@@ -367,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         navView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                setBatchInputEnabled(item.getItemId() != R.id.navigation_add_single);
+                setBatchInputEnabled(item.getItemId() != R.id.navigation_add);
                 return true;
             }
         });
@@ -1358,8 +1358,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         noteKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_NOTE_KEYS, ""));
         octaveKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_OCTAVE_KEYS, ""));
         intervalKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_INTERVAL_KEYS, ""));
-        int navItemId = uiDb.getInt(REF_DB_SELECTED_NAVIGATION_ITEM, R.id.navigation_add_single);
-        setBatchInputEnabled(navItemId != R.id.navigation_add_single);
+        int navItemId = uiDb.getInt(REF_DB_SELECTED_NAVIGATION_ITEM, R.id.navigation_add);
+        setBatchInputEnabled(navItemId != R.id.navigation_add);
         navView.setSelectedItemId(navItemId);
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
