@@ -391,11 +391,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void handleNavigationItemSelected(int itemId) {
-        boolean selectedAdd = itemId == R.id.navigation_add;
+        boolean selectedAddSingle = itemId == R.id.navigation_add_single;
         boolean selectedAddBatch = itemId == R.id.navigation_add_batch;
         boolean selectedSearch = itemId == R.id.navigation_search;
 
-        menuItemAdd.setVisible(selectedAdd || selectedAddBatch);
+        boolean selectedAdd = selectedAddSingle || selectedAddBatch;
+        menuItemAdd.setVisible(selectedAdd);
 
         int anyOptionsVisibility = selectedSearch ? View.VISIBLE : View.GONE;
         for (View view : anyOptions) {
@@ -1352,7 +1353,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         noteKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_NOTE_KEYS, ""));
         octaveKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_OCTAVE_KEYS, ""));
         intervalKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_INTERVAL_KEYS, ""));
-        navigationBottom.setSelectedItemId(uiDb.getInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, R.id.navigation_add));
+        navigationBottom.setSelectedItemId(uiDb.getInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, R.id.navigation_add_single));
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }

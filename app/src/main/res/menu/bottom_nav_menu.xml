@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_add"
-        android:icon="@drawable/ic_tab_add"
-        android:title="@string/title_add" />
+        android:id="@+id/navigation_add_single"
+        android:icon="@drawable/ic_tab_add_single"
+        android:title="@string/title_add_single" />
 
     <item
         android:id="@+id/navigation_add_batch"
