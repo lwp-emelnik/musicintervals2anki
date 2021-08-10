@@ -59,7 +59,7 @@
             android:padding="16dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/layoutFilename"
+                android:id="@+id/viewGroupFilename"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 

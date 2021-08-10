@@ -155,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private MenuItem menuItemAdd;
     private MenuItem menuItemMark;
 
+    private View viewGroupFilename;
     private TextView textFilename;
     Button actionPlay;
     private CheckBox checkNoteAny;
@@ -319,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         registerForContextMenu(actionAttach);
         actionAttach.setOnClickListener(this::openContextMenu);
 
+        viewGroupFilename = findViewById(R.id.viewGroupFilename);
         textFilename = findViewById(R.id.textFilename);
         actionPlay = findViewById(R.id.actionPlay);
         checkNoteAny = findViewById(R.id.checkNoteAny);
@@ -426,8 +428,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         boolean selectedAdd = selectedAddSingle || selectedAddBatch;
         menuItemAdd.setVisible(selectedAdd);
+        viewGroupFilename.setVisibility(getVisibility(selectedAdd));
 
-        int anyOptionsVisibility = selectedSearch ? View.VISIBLE : View.GONE;
+        int anyOptionsVisibility = getVisibility(selectedSearch);
         for (View view : anyOptions) {
             view.setVisibility(anyOptionsVisibility);
         }
@@ -436,6 +439,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         onNoteCheckChangeListener.setEnableMultiple(enableMultiple);
         onOctaveCheckChangeListener.setEnableMultiple(enableMultiple);
         onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
+    }
+
+    private int getVisibility(boolean condition) {
+        return condition ? View.VISIBLE : View.GONE;
     }
 
     @Override
