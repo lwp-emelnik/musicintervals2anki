@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -156,8 +157,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private TextView textFilename;
     Button actionPlay;
-    private Button actionCaptureAudio;
-    private Button actionSelectFile;
     private CheckBox checkNoteAny;
     private CheckBox[] checkNotes;
     private CheckBox checkOctaveAny;
@@ -316,10 +315,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         Toolbar toolbarMain = findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbarMain);
 
+        Button actionAttach = findViewById(R.id.actionAttach);
+        registerForContextMenu(actionAttach);
+        actionAttach.setOnClickListener(this::openContextMenu);
+
         textFilename = findViewById(R.id.textFilename);
         actionPlay = findViewById(R.id.actionPlay);
-        actionCaptureAudio = findViewById(R.id.actionCaptureAudio);
-        actionSelectFile = findViewById(R.id.actionSelectFile);
         checkNoteAny = findViewById(R.id.checkNoteAny);
         checkNotes = new CheckBox[CHECK_NOTE_IDS.length];
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
@@ -384,10 +385,38 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         handler = new Handler();
 
-        configureCaptureAudioButton();
-        configureSelectFileButton();
-
         mAnkiDroid = new AnkiDroidHelper(this);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.setHeaderTitle(R.string.attach_audio);
+        menu.add(Menu.NONE, Menu.NONE, Menu.NONE, R.string.select_from_filesystem).setOnMenuItemClickListener(menuItem -> {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                                Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_OPEN_CHOOSER
+                );
+                return true;
+            }
+            if (isCapturing) {
+                closeCapturing();
+            }
+            handleSelectFile();
+            return true;
+        });
+        menu.add(Menu.NONE, Menu.NONE, Menu.NONE, R.string.capture_audio).setOnMenuItemClickListener(menuItem -> {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                showMsg(R.string.recording_unsupported);
+                return true;
+            }
+            if (isCapturing) {
+                closeCapturing();
+            }
+            handleCaptureAudio();
+            return true;
+        });
     }
 
     private void handleNavigationItemSelected(int itemId) {
@@ -678,15 +707,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         } catch (Throwable e) {
             // probably best to ignore exceptions here as this function is called silently
         } finally {
-            Resources res = getResources();
-            String selectFileText;
             if (permutationsNumber <= 1) {
                 permutationsNumber = 1;
-                selectFileText = res.getQuantityString(R.plurals.select_file, permutationsNumber);
-            } else {
-                selectFileText = res.getQuantityString(R.plurals.select_file, permutationsNumber, permutationsNumber);
             }
-            actionSelectFile.setText(selectFileText);
             this.permutationsNumber = permutationsNumber;
         }
     }
@@ -894,22 +917,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         actionPlay.setEnabled(false);
     }
 
-    private void configureCaptureAudioButton() {
-        actionCaptureAudio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                    showMsg(R.string.recording_unsupported);
-                    return;
-                }
-                if (isCapturing) {
-                    closeCapturing();
-                }
-                handleCaptureAudio();
-            }
-        });
-    }
-
     private final ActivityResultLauncher<Intent> overlayPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
@@ -1017,26 +1024,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         capturingLauncher.launch(intent);
     }
 
-    private void configureSelectFileButton() {
-        final Button actionSelectFile = findViewById(R.id.actionSelectFile);
-        actionSelectFile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{
-                                    Manifest.permission.READ_EXTERNAL_STORAGE},
-                            PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_OPEN_CHOOSER
-                    );
-                    return;
-                }
-                if (isCapturing) {
-                    closeCapturing();
-                }
-                handleSelectFile();
-            }
-        });
-    }
-
     private void handleSelectFile() {
         if (permutationsNumber == null || permutationsNumber <= 1) {
             openChooser();
@@ -1091,7 +1078,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                 .putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"audio/*", "video/*"});
 
-        Intent chooser = Intent.createChooser(target, actionSelectFile.getText().toString());
+        Intent chooser = Intent.createChooser(target, null);
 
         fileChooserLauncher.launch(chooser);
     }
