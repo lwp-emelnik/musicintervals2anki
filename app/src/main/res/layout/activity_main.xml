@@ -106,241 +106,292 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="256dp">
 
-                <ToggleButton
-                    android:id="@+id/toggleNoteC"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="0dp"
-                    android:layout_height="128dp"
-                    android:background="@drawable/key_white"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ff000000"
-                    android:textOff=""
-                    android:textOn="@string/note_c"
-                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteD"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ToggleButton
-                    android:id="@+id/toggleNoteD"
-                    android:layout_width="0dp"
-                    android:layout_height="128dp"
-                    android:background="@drawable/key_white"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ff000000"
-                    android:textOff=""
-                    android:textOn="@string/note_d"
-                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteE"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/toggleNoteC"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ToggleButton
-                    android:id="@+id/toggleNoteE"
-                    android:layout_width="0dp"
-                    android:layout_height="128dp"
-                    android:background="@drawable/key_white"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ff000000"
-                    android:textOff=""
-                    android:textOn="@string/note_e"
-                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteF"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/toggleNoteD"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ToggleButton
-                    android:id="@+id/toggleNoteF"
-                    android:layout_width="0dp"
-                    android:layout_height="128dp"
-                    android:background="@drawable/key_white"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ff000000"
-                    android:textOff=""
-                    android:textOn="@string/note_f"
-                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteG"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/toggleNoteE"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ToggleButton
-                    android:id="@+id/toggleNoteG"
-                    android:layout_width="0dp"
-                    android:layout_height="128dp"
-                    android:background="@drawable/key_white"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ff000000"
-                    android:textOff=""
-                    android:textOn="@string/note_g"
-                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteA"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/toggleNoteF"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ToggleButton
-                    android:id="@+id/toggleNoteA"
-                    android:layout_width="0dp"
-                    android:layout_height="128dp"
-                    android:background="@drawable/key_white"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ff000000"
-                    android:textOff=""
-                    android:textOn="@string/note_a"
-                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteB"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/toggleNoteG"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ToggleButton
-                    android:id="@+id/toggleNoteB"
-                    android:layout_width="0dp"
-                    android:layout_height="128dp"
-                    android:background="@drawable/key_white"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ff000000"
-                    android:textOff=""
-                    android:textOn="@string/note_b"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/toggleNoteA"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <Space
-                    android:id="@+id/space1"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteCSharp"
-                    app:layout_constraintHorizontal_weight="20"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <ToggleButton
-                    android:id="@+id/toggleNoteCSharp"
-                    android:layout_width="0dp"
-                    android:layout_height="76dp"
-                    android:background="#ff000000"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ffffffff"
-                    android:textOff=""
-                    android:textOn="@string/note_c_sharp"
-                    app:layout_constraintEnd_toStartOf="@+id/space2"
-                    app:layout_constraintHorizontal_weight="30"
-                    app:layout_constraintStart_toEndOf="@+id/space1"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <ToggleButton
+                        android:id="@+id/toggleNoteC"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_white"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ff000000"
+                        android:textOff=""
+                        android:textOn="@string/note_c"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteD"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <Space
-                    android:id="@+id/space2"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteDSharp"
-                    app:layout_constraintHorizontal_weight="20"
-                    app:layout_constraintStart_toEndOf="@+id/toggleNoteCSharp"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <ToggleButton
+                        android:id="@+id/toggleNoteD"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_white"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ff000000"
+                        android:textOff=""
+                        android:textOn="@string/note_d"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteE"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toEndOf="@+id/toggleNoteC"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
-                    android:id="@+id/toggleNoteDSharp"
-                    android:layout_width="0dp"
-                    android:layout_height="76dp"
-                    android:background="#ff000000"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ffffffff"
-                    android:textOff=""
-                    android:textOn="@string/note_d_sharp"
-                    app:layout_constraintEnd_toStartOf="@+id/space3"
-                    app:layout_constraintHorizontal_weight="30"
-                    app:layout_constraintStart_toEndOf="@+id/space2"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <ToggleButton
+                        android:id="@+id/toggleNoteE"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_white"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ff000000"
+                        android:textOff=""
+                        android:textOn="@string/note_e"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteF"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toEndOf="@+id/toggleNoteD"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <Space
-                    android:id="@+id/space3"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteFSharp"
-                    app:layout_constraintHorizontal_weight="40"
-                    app:layout_constraintStart_toEndOf="@+id/toggleNoteDSharp"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <ToggleButton
+                        android:id="@+id/toggleNoteF"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_white"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ff000000"
+                        android:textOff=""
+                        android:textOn="@string/note_f"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteG"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toEndOf="@+id/toggleNoteE"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
-                    android:id="@+id/toggleNoteFSharp"
-                    android:layout_width="0dp"
-                    android:layout_height="76dp"
-                    android:background="#ff000000"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ffffffff"
-                    android:textOff=""
-                    android:textOn="@string/note_f_sharp"
-                    app:layout_constraintEnd_toStartOf="@+id/space4"
-                    app:layout_constraintHorizontal_weight="30"
-                    app:layout_constraintStart_toEndOf="@+id/space3"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <ToggleButton
+                        android:id="@+id/toggleNoteG"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_white"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ff000000"
+                        android:textOff=""
+                        android:textOn="@string/note_g"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteA"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toEndOf="@+id/toggleNoteF"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <Space
-                    android:id="@+id/space4"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteGSharp"
-                    app:layout_constraintHorizontal_weight="15"
-                    app:layout_constraintStart_toEndOf="@+id/toggleNoteFSharp"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <ToggleButton
+                        android:id="@+id/toggleNoteA"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_white"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ff000000"
+                        android:textOff=""
+                        android:textOn="@string/note_a"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteB"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toEndOf="@+id/toggleNoteG"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
-                    android:id="@+id/toggleNoteGSharp"
-                    android:layout_width="0dp"
-                    android:layout_height="76dp"
-                    android:background="#ff000000"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ffffffff"
-                    android:textOff=""
-                    android:textOn="@string/note_g_sharp"
-                    app:layout_constraintEnd_toStartOf="@+id/space5"
-                    app:layout_constraintHorizontal_weight="30"
-                    app:layout_constraintStart_toEndOf="@+id/space4"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <ToggleButton
+                        android:id="@+id/toggleNoteB"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_white"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ff000000"
+                        android:textOff=""
+                        android:textOn="@string/note_b"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toEndOf="@+id/toggleNoteA"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <Space
-                    android:id="@+id/space5"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    app:layout_constraintEnd_toStartOf="@+id/toggleNoteASharp"
-                    app:layout_constraintHorizontal_weight="15"
-                    app:layout_constraintStart_toEndOf="@+id/toggleNoteGSharp"
-                    app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <ToggleButton
-                    android:id="@+id/toggleNoteASharp"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layoutKeysBlack"
                     android:layout_width="0dp"
-                    android:layout_height="76dp"
-                    android:background="#ff000000"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="8dp"
-                    android:textColor="#ffffffff"
-                    android:textOff=""
-                    android:textOn="@string/note_a_sharp"
-                    app:layout_constraintEnd_toStartOf="@+id/space6"
-                    app:layout_constraintHorizontal_weight="30"
-                    app:layout_constraintStart_toEndOf="@+id/space5"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <Space
-                    android:id="@+id/space6"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toTopOf="@id/space0"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_weight="20"
-                    app:layout_constraintStart_toEndOf="@+id/toggleNoteASharp"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_weight="0.67">
+
+                    <Space
+                        android:id="@+id/space1"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteCSharp"
+                        app:layout_constraintHorizontal_weight="20"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ToggleButton
+                        android:id="@+id/toggleNoteCSharp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_black"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ffffffff"
+                        android:textOff=""
+                        android:textOn="@string/note_c_sharp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/space2"
+                        app:layout_constraintHorizontal_weight="30"
+                        app:layout_constraintStart_toEndOf="@+id/space1"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <Space
+                        android:id="@+id/space2"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteDSharp"
+                        app:layout_constraintHorizontal_weight="20"
+                        app:layout_constraintStart_toEndOf="@+id/toggleNoteCSharp"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ToggleButton
+                        android:id="@+id/toggleNoteDSharp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_black"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ffffffff"
+                        android:textOff=""
+                        android:textOn="@string/note_d_sharp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/space3"
+                        app:layout_constraintHorizontal_weight="30"
+                        app:layout_constraintStart_toEndOf="@+id/space2"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <Space
+                        android:id="@+id/space3"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteFSharp"
+                        app:layout_constraintHorizontal_weight="40"
+                        app:layout_constraintStart_toEndOf="@+id/toggleNoteDSharp"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ToggleButton
+                        android:id="@+id/toggleNoteFSharp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_black"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ffffffff"
+                        android:textOff=""
+                        android:textOn="@string/note_f_sharp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/space4"
+                        app:layout_constraintHorizontal_weight="30"
+                        app:layout_constraintStart_toEndOf="@+id/space3"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <Space
+                        android:id="@+id/space4"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteGSharp"
+                        app:layout_constraintHorizontal_weight="15"
+                        app:layout_constraintStart_toEndOf="@+id/toggleNoteFSharp"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ToggleButton
+                        android:id="@+id/toggleNoteGSharp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_black"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ffffffff"
+                        android:textOff=""
+                        android:textOn="@string/note_g_sharp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/space5"
+                        app:layout_constraintHorizontal_weight="30"
+                        app:layout_constraintStart_toEndOf="@+id/space4"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <Space
+                        android:id="@+id/space5"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteASharp"
+                        app:layout_constraintHorizontal_weight="15"
+                        app:layout_constraintStart_toEndOf="@+id/toggleNoteGSharp"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ToggleButton
+                        android:id="@+id/toggleNoteASharp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@drawable/piano_key_black"
+                        android:gravity="bottom|center_horizontal"
+                        android:paddingBottom="8dp"
+                        android:textColor="#ffffffff"
+                        android:textOff=""
+                        android:textOn="@string/note_a_sharp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/space6"
+                        app:layout_constraintHorizontal_weight="30"
+                        app:layout_constraintStart_toEndOf="@+id/space5"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <Space
+                        android:id="@+id/space6"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_weight="20"
+                        app:layout_constraintStart_toEndOf="@+id/toggleNoteASharp"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <Space
+                    android:id="@+id/space0"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/layoutKeysBlack"
+                    app:layout_constraintVertical_weight="0.33" />
+
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
