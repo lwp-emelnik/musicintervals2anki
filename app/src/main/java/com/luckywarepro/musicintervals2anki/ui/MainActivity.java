@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -30,6 +31,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -49,10 +51,14 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
+
+import android.transition.AutoTransition;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -128,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         put(MusInterval.Builder.TIMING, R.string.timing);
         put(MusInterval.Builder.INSTRUMENT, R.string.instrument);
     }};
+
     static {
         Set<String> addingMandatorySingularKeysSet = new HashSet<>(
                 Arrays.asList(MusInterval.Builder.ADDING_MANDATORY_SINGULAR_MEMBERS)
@@ -142,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         put(MusInterval.Builder.OCTAVES, R.string.octave);
         put(MusInterval.Builder.INTERVALS, R.string.interval);
     }};
+
     static {
         Set<String> addingMandatorySelectionKeysSet = new HashSet<>(
                 Arrays.asList(MusInterval.Builder.ADDING_MANDATORY_SELECTION_MEMBERS)
@@ -217,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     };
 
     private final static Map<Integer, String> CHECK_INTERVAL_ID_VALUES = new HashMap<>();
+
     static {
         //noinspection ConstantConditions
         if (CHECK_INTERVAL_IDS.length != MusInterval.Fields.Interval.VALUES.length) {
@@ -360,6 +369,56 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         restoreUiState();
 
+        radioGroupDirection.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
+                boolean reverse = radioGroup.getCheckedRadioButtonId() == R.id.radioDirectionDesc;
+
+                ConstraintLayout layoutInterval = findViewById(R.id.viewGroupInterval);
+
+                ConstraintSet constraintSet = new ConstraintSet();
+                constraintSet.clone(layoutInterval);
+
+                View prev = null;
+                View current = layoutInterval.getChildAt(0);
+                View next = layoutInterval.getChildAt(1);
+                int childCount = layoutInterval.getChildCount();
+                for (int i = 0; i < childCount; i++) {
+                    int childId = current.getId();
+
+                    // @todo: refactor, add regular listener
+                    boolean first = prev == null;
+                    constraintSet.connect(
+                            childId,
+                            !reverse ? ConstraintSet.START : ConstraintSet.END,
+                            first ? R.id.viewGroupInterval : prev.getId(),
+                            reverse ?
+                                    !first ? ConstraintSet.START : ConstraintSet.END :
+                                    first ? ConstraintSet.START : ConstraintSet.END);
+                    boolean last = next == null;
+                    constraintSet.connect(
+                            childId,
+                            !reverse ? ConstraintSet.END : ConstraintSet.START,
+                            last ? R.id.viewGroupInterval : next.getId(),
+                            reverse ?
+                                    !last ? ConstraintSet.END : ConstraintSet.START :
+                                    last ? ConstraintSet.END : ConstraintSet.START);
+
+                    prev = current;
+                    current = next;
+                    next = i < childCount - 2 ? layoutInterval.getChildAt(i + 2) : null;
+                    System.nanoTime();
+                }
+
+                AutoTransition transition = new AutoTransition();
+                transition.setDuration(500);
+                transition.setInterpolator(new AccelerateDecelerateInterpolator());
+                TransitionManager.beginDelayedTransition(layoutInterval, transition);
+                constraintSet.applyTo(layoutInterval);
+            }
+        });
+
         checkNoteAny.setOnCheckedChangeListener(onNoteCheckChangeListener);
         for (CompoundButton checkNote : checkNotes) {
             checkNote.setOnCheckedChangeListener(onNoteCheckChangeListener);
@@ -368,7 +427,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (CompoundButton checkOctave : checkOctaves) {
             checkOctave.setOnCheckedChangeListener(onOctaveCheckChangeListener);
         }
-        radioGroupDirection.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
+        // radioGroupDirection.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
         radioGroupTiming.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
         checkIntervalAny.setOnCheckedChangeListener(onIntervalCheckChangeListener);
         for (CompoundButton checkInterval : checkIntervals) {
@@ -594,7 +653,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(intent);
             return true;
-        } else if(itemId == R.id.actionAbout) {
+        } else if (itemId == R.id.actionAbout) {
             startActivity(new Intent(MainActivity.this, AboutActivity.class));
             return true;
         } else {
@@ -938,7 +997,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             }
     );
 
-    private void handleCaptureAudio () {
+    private void handleCaptureAudio() {
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{
                             Manifest.permission.RECORD_AUDIO},
@@ -1071,7 +1130,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 .show();
     }
 
-    private final  ActivityResultLauncher<Intent> fileChooserLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> fileChooserLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new FileChooserResultCallback(this)
     );
@@ -1258,7 +1317,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     @Override
-    public void setMessage(final int resId, final Object ...formatArgs) {
+    public void setMessage(final int resId, final Object... formatArgs) {
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -1744,11 +1803,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         showMsg(R.string.unknown_error);
     }
 
-    void showMsg(int msgResId, Object ...formatArgs) {
+    void showMsg(int msgResId, Object... formatArgs) {
         displayToast(getResources().getString(msgResId, formatArgs));
     }
 
-    void showQuantityMsg(int msgResId, int quantity, Object ...formatArgs) {
+    void showQuantityMsg(int msgResId, int quantity, Object... formatArgs) {
         displayToast(getResources().getQuantityString(msgResId, quantity, formatArgs));
     }
 
