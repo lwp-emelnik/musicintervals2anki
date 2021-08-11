@@ -110,7 +110,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/viewGroupStartNote"
                 android:layout_width="match_parent"
-                android:layout_height="256dp"
+                android:layout_height="@dimen/note_keyboard_height"
                 app:layout_constraintTop_toBottomOf="@id/labelNote">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -243,7 +243,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_weight="0.67">
+                    app:layout_constraintVertical_weight="0.6">
 
                     <Space
                         android:id="@+id/space1"
@@ -395,7 +395,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/layoutKeysBlack"
-                    app:layout_constraintVertical_weight="0.33" />
+                    app:layout_constraintVertical_weight="0.4" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>
