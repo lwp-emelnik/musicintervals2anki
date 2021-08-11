@@ -414,49 +414,79 @@
                 android:text="@string/octave"
                 app:layout_constraintTop_toBottomOf="@id/checkNoteAny" />
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/viewGroupOctave"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                app:layout_constraintTop_toBottomOf="@id/labelOctave">
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/labelOctave"
+                tools:layout_editor_absoluteX="16dp">
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkOctave1"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/octave_1" />
+                    android:textOff="@string/octave_1"
+                    android:textOn="@string/octave_1"
+                    app:layout_constraintEnd_toStartOf="@+id/checkOctave2"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkOctave2"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/octave_2" />
+                    android:textOff="@string/octave_2"
+                    android:textOn="@string/octave_2"
+                    app:layout_constraintEnd_toStartOf="@+id/checkOctave3"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkOctave1"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkOctave3"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/octave_3" />
+                    android:textOff="@string/octave_3"
+                    android:textOn="@string/octave_3"
+                    app:layout_constraintEnd_toStartOf="@+id/checkOctave4"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkOctave2"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkOctave4"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/octave_4" />
+                    android:textOff="@string/octave_4"
+                    android:textOn="@string/octave_4"
+                    app:layout_constraintEnd_toStartOf="@+id/checkOctave5"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkOctave3"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkOctave5"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/octave_5" />
+                    android:textOff="@string/octave_5"
+                    android:textOn="@string/octave_5"
+                    app:layout_constraintEnd_toStartOf="@+id/checkOctave6"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkOctave4"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkOctave6"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/octave_6" />
-            </LinearLayout>
+                    android:textOff="@string/octave_6"
+                    android:textOn="@string/octave_6"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkOctave5"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <CheckBox
                 android:id="@+id/checkOctaveAny"
@@ -546,7 +576,6 @@
                 android:id="@+id/viewGroupInterval"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
-                android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@id/labelInterval"
                 tools:layout_editor_absoluteX="16dp">
 
