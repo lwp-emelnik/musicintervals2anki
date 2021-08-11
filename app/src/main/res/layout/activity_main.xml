@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -55,7 +56,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:animateLayoutChanges="true"
             android:padding="16dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -121,115 +122,115 @@
                     app:layout_constraintTop_toTopOf="parent">
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteC"
+                        android:id="@+id/checkNoteC"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_white"
+                        android:background="@drawable/bg_note"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ff000000"
-                        android:textOff=""
+                        android:textOff="@string/note_c"
                         android:textOn="@string/note_c"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteD"
+                        app:layout_constraintEnd_toStartOf="@+id/checkNoteD"
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteD"
+                        android:id="@+id/checkNoteD"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_white"
+                        android:background="@drawable/bg_note"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ff000000"
-                        android:textOff=""
+                        android:textOff="@string/note_d"
                         android:textOn="@string/note_d"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteE"
+                        app:layout_constraintEnd_toStartOf="@+id/checkNoteE"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/toggleNoteC"
+                        app:layout_constraintStart_toEndOf="@+id/checkNoteC"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteE"
+                        android:id="@+id/checkNoteE"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_white"
+                        android:background="@drawable/bg_note"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ff000000"
-                        android:textOff=""
+                        android:textOff="@string/note_e"
                         android:textOn="@string/note_e"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteF"
+                        app:layout_constraintEnd_toStartOf="@+id/checkNoteF"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/toggleNoteD"
+                        app:layout_constraintStart_toEndOf="@+id/checkNoteD"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteF"
+                        android:id="@+id/checkNoteF"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_white"
+                        android:background="@drawable/bg_note"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ff000000"
-                        android:textOff=""
+                        android:textOff="@string/note_f"
                         android:textOn="@string/note_f"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteG"
+                        app:layout_constraintEnd_toStartOf="@+id/checkNoteG"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/toggleNoteE"
+                        app:layout_constraintStart_toEndOf="@+id/checkNoteE"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteG"
+                        android:id="@+id/checkNoteG"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_white"
+                        android:background="@drawable/bg_note"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ff000000"
-                        android:textOff=""
+                        android:textOff="@string/note_g"
                         android:textOn="@string/note_g"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteA"
+                        app:layout_constraintEnd_toStartOf="@+id/checkNoteA"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/toggleNoteF"
+                        app:layout_constraintStart_toEndOf="@+id/checkNoteF"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteA"
+                        android:id="@+id/checkNoteA"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_white"
+                        android:background="@drawable/bg_note"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ff000000"
-                        android:textOff=""
+                        android:textOff="@string/note_a"
                         android:textOn="@string/note_a"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteB"
+                        app:layout_constraintEnd_toStartOf="@+id/checkNoteB"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/toggleNoteG"
+                        app:layout_constraintStart_toEndOf="@+id/checkNoteG"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteB"
+                        android:id="@+id/checkNoteB"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_white"
+                        android:background="@drawable/bg_note"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ff000000"
-                        android:textOff=""
+                        android:textOff="@string/note_b"
                         android:textOn="@string/note_b"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/toggleNoteA"
+                        app:layout_constraintStart_toEndOf="@+id/checkNoteA"
                         app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -249,20 +250,20 @@
                         android:layout_width="0dp"
                         android:layout_height="0dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteCSharp"
+                        app:layout_constraintEnd_toStartOf="@+id/checkNoteCSharp"
                         app:layout_constraintHorizontal_weight="20"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteCSharp"
+                        android:id="@+id/checkNoteCSharp"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_black"
+                        android:background="@drawable/bg_note_sharp"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ffffffff"
-                        android:textOff=""
+                        android:textOff="@string/note_c_sharp"
                         android:textOn="@string/note_c_sharp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/space2"
@@ -275,20 +276,20 @@
                         android:layout_width="0dp"
                         android:layout_height="0dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteDSharp"
+                        app:layout_constraintEnd_toStartOf="@+id/checkNoteDSharp"
                         app:layout_constraintHorizontal_weight="20"
-                        app:layout_constraintStart_toEndOf="@+id/toggleNoteCSharp"
+                        app:layout_constraintStart_toEndOf="@+id/checkNoteCSharp"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteDSharp"
+                        android:id="@+id/checkNoteDSharp"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_black"
+                        android:background="@drawable/bg_note_sharp"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ffffffff"
-                        android:textOff=""
+                        android:textOff="@string/note_d_sharp"
                         android:textOn="@string/note_d_sharp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/space3"
@@ -301,20 +302,20 @@
                         android:layout_width="0dp"
                         android:layout_height="0dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteFSharp"
+                        app:layout_constraintEnd_toStartOf="@+id/checkNoteFSharp"
                         app:layout_constraintHorizontal_weight="40"
-                        app:layout_constraintStart_toEndOf="@+id/toggleNoteDSharp"
+                        app:layout_constraintStart_toEndOf="@+id/checkNoteDSharp"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteFSharp"
+                        android:id="@+id/checkNoteFSharp"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_black"
+                        android:background="@drawable/bg_note_sharp"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ffffffff"
-                        android:textOff=""
+                        android:textOff="@string/note_f_sharp"
                         android:textOn="@string/note_f_sharp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/space4"
@@ -327,20 +328,20 @@
                         android:layout_width="0dp"
                         android:layout_height="0dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteGSharp"
+                        app:layout_constraintEnd_toStartOf="@+id/checkNoteGSharp"
                         app:layout_constraintHorizontal_weight="15"
-                        app:layout_constraintStart_toEndOf="@+id/toggleNoteFSharp"
+                        app:layout_constraintStart_toEndOf="@+id/checkNoteFSharp"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteGSharp"
+                        android:id="@+id/checkNoteGSharp"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_black"
+                        android:background="@drawable/bg_note_sharp"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ffffffff"
-                        android:textOff=""
+                        android:textOff="@string/note_g_sharp"
                         android:textOn="@string/note_g_sharp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/space5"
@@ -353,20 +354,20 @@
                         android:layout_width="0dp"
                         android:layout_height="0dp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/toggleNoteASharp"
+                        app:layout_constraintEnd_toStartOf="@+id/checkNoteASharp"
                         app:layout_constraintHorizontal_weight="15"
-                        app:layout_constraintStart_toEndOf="@+id/toggleNoteGSharp"
+                        app:layout_constraintStart_toEndOf="@+id/checkNoteGSharp"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ToggleButton
-                        android:id="@+id/toggleNoteASharp"
+                        android:id="@+id/checkNoteASharp"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/piano_key_black"
+                        android:background="@drawable/bg_note_sharp"
                         android:gravity="bottom|center_horizontal"
                         android:paddingBottom="8dp"
                         android:textColor="#ffffffff"
-                        android:textOff=""
+                        android:textOff="@string/note_a_sharp"
                         android:textOn="@string/note_a_sharp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/space6"
@@ -381,7 +382,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_weight="20"
-                        app:layout_constraintStart_toEndOf="@+id/toggleNoteASharp"
+                        app:layout_constraintStart_toEndOf="@+id/checkNoteASharp"
                         app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -541,92 +542,197 @@
                 android:text="@string/interval"
                 app:layout_constraintTop_toBottomOf="@id/radioGroupTiming" />
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/viewGroupInterval"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="64dp"
                 android:orientation="horizontal"
-                app:layout_constraintTop_toBottomOf="@id/labelInterval">
+                app:layout_constraintTop_toBottomOf="@id/labelInterval"
+                tools:layout_editor_absoluteX="16dp">
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalP1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_P1" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_P1"
+                    android:textOn="@string/interval_P1"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalm2"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalm2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_m2" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_m2"
+                    android:textOn="@string/interval_m2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalM2"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalP1"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalM2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_M2" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_M2"
+                    android:textOn="@string/interval_M2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalm3"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalm2"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalm3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_m3" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_m3"
+                    android:textOn="@string/interval_m3"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalM3"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalM2"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalM3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_M3" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_M3"
+                    android:textOn="@string/interval_M3"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalP4"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalm3"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalP4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_P4" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_P4"
+                    android:textOn="@string/interval_P4"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalTT"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalM3"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalTT"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_TT" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_TT"
+                    android:textOn="@string/interval_TT"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalP5"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalP4"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalP5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_P5" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_P5"
+                    android:textOn="@string/interval_P5"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalm6"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalTT"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalm6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_m6" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_m6"
+                    android:textOn="@string/interval_m6"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalM6"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalP5"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalM6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_M6" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_M6"
+                    android:textOn="@string/interval_M6"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalm7"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalm6"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalm7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_m7" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_m7"
+                    android:textOn="@string/interval_m7"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalM7"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalM6"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalM7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_M7" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_M7"
+                    android:textOn="@string/interval_M7"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalP8"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalm7"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <CheckBox
+                <ToggleButton
                     android:id="@+id/checkIntervalP8"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interval_P8" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_interval"
+                    android:textColor="#ff000000"
+                    android:textOff="@string/interval_P8"
+                    android:textOn="@string/interval_P8"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/checkIntervalM7"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <CheckBox
                 android:id="@+id/checkIntervalAny"

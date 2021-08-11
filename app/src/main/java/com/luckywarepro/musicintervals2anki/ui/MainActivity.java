@@ -184,13 +184,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     Handler handler;
 
     private final static int[] CHECK_NOTE_IDS = new int[]{
-            R.id.toggleNoteC, R.id.toggleNoteCSharp,
-            R.id.toggleNoteD, R.id.toggleNoteDSharp,
-            R.id.toggleNoteE,
-            R.id.toggleNoteF, R.id.toggleNoteFSharp,
-            R.id.toggleNoteG, R.id.toggleNoteGSharp,
-            R.id.toggleNoteA, R.id.toggleNoteASharp,
-            R.id.toggleNoteB
+            R.id.checkNoteC, R.id.checkNoteCSharp,
+            R.id.checkNoteD, R.id.checkNoteDSharp,
+            R.id.checkNoteE,
+            R.id.checkNoteF, R.id.checkNoteFSharp,
+            R.id.checkNoteG, R.id.checkNoteGSharp,
+            R.id.checkNoteA, R.id.checkNoteASharp,
+            R.id.checkNoteB
     };
     private final static int[] CHECK_OCTAVE_IDS = new int[]{
             R.id.checkOctave1,
