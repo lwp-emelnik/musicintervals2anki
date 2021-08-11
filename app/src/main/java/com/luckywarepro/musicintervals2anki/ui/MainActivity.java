@@ -328,15 +328,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         checkNotes = new CompoundButton[CHECK_NOTE_IDS.length];
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
             checkNotes[i] = findViewById(CHECK_NOTE_IDS[i]);
-            checkNotes[i].setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                        view.performClick();
-                    }
-                    return true;
-                }
-            });
         }
         checkOctaveAny = findViewById(R.id.checkOctaveAny);
         checkOctaves = new CompoundButton[CHECK_OCTAVE_IDS.length];
