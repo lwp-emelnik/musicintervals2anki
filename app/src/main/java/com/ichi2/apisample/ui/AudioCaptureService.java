@@ -40,6 +40,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.ichi2.apisample.R;
+import com.ichi2.apisample.helper.AudioUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -351,10 +352,7 @@ public class AudioCaptureService extends Service {
             String[] filenames = intent.getStringArrayExtra(EXTRA_RECORDINGS);
             for (String filename : filenames) {
                 Uri uri = Uri.parse(filename);
-                MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
-                metadataRetriever.setDataSource(this, uri);
-                String durationStr = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-                long duration = Long.parseLong(durationStr);
+                long duration = AudioUtil.getDuration(this, uri);
                 Recording recording = new Recording(uri, duration);
                 recordings.add(recording);
             }
