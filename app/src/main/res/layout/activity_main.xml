@@ -52,7 +52,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbarMain">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -61,7 +61,8 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/viewGroupFilename"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:id="@+id/labelFilename"
@@ -102,11 +103,14 @@
                 android:id="@+id/labelNote"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/start_note" />
+                android:text="@string/start_note"
+                app:layout_constraintTop_toBottomOf="@id/viewGroupFilename" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/viewGroupStartNote"
                 android:layout_width="match_parent"
-                android:layout_height="256dp">
+                android:layout_height="256dp"
+                app:layout_constraintTop_toBottomOf="@id/labelNote">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="0dp"
@@ -399,18 +403,22 @@
                 android:id="@+id/checkNoteAny"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/any" />
+                android:text="@string/any"
+                app:layout_constraintTop_toBottomOf="@id/viewGroupStartNote" />
 
             <TextView
                 android:id="@+id/labelOctave"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/octave" />
+                android:text="@string/octave"
+                app:layout_constraintTop_toBottomOf="@id/checkNoteAny" />
 
             <LinearLayout
+                android:id="@+id/viewGroupOctave"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/labelOctave">
 
                 <CheckBox
                     android:id="@+id/checkOctave1"
@@ -453,19 +461,22 @@
                 android:id="@+id/checkOctaveAny"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/any" />
+                android:text="@string/any"
+                app:layout_constraintTop_toBottomOf="@id/viewGroupOctave" />
 
             <TextView
                 android:id="@+id/labelDirection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/direction" />
+                android:text="@string/direction"
+                app:layout_constraintTop_toBottomOf="@id/checkOctaveAny" />
 
             <RadioGroup
                 android:id="@+id/radioGroupDirection"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/labelDirection">
 
                 <RadioButton
                     android:id="@+id/radioDirectionAny"
@@ -492,13 +503,15 @@
                 android:id="@+id/labelTiming"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/timing" />
+                android:text="@string/timing"
+                app:layout_constraintTop_toBottomOf="@id/radioGroupDirection" />
 
             <RadioGroup
                 android:id="@+id/radioGroupTiming"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/labelTiming">
 
                 <RadioButton
                     android:id="@+id/radioTimingAny"
@@ -525,12 +538,15 @@
                 android:id="@+id/labelInterval"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/interval" />
+                android:text="@string/interval"
+                app:layout_constraintTop_toBottomOf="@id/radioGroupTiming" />
 
             <LinearLayout
+                android:id="@+id/viewGroupInterval"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/labelInterval">
 
                 <CheckBox
                     android:id="@+id/checkIntervalP1"
@@ -562,13 +578,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/interval_M3" />
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
                 <CheckBox
                     android:id="@+id/checkIntervalP4"
                     android:layout_width="wrap_content"
@@ -586,12 +595,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/interval_P5" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
 
                 <CheckBox
                     android:id="@+id/checkIntervalm6"
@@ -629,14 +632,16 @@
                 android:id="@+id/checkIntervalAny"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/any" />
+                android:text="@string/any"
+                app:layout_constraintTop_toBottomOf="@id/viewGroupInterval" />
 
             <TextView
                 android:id="@+id/labelTempo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:labelFor="@id/inputTempo"
-                android:text="@string/tempo" />
+                android:text="@string/tempo"
+                app:layout_constraintTop_toBottomOf="@id/checkIntervalAny" />
 
             <EditText
                 android:id="@+id/inputTempo"
@@ -644,26 +649,30 @@
                 android:layout_height="wrap_content"
                 android:autofillHints=""
                 android:ems="10"
-                android:inputType="number" />
+                android:inputType="number"
+                app:layout_constraintTop_toBottomOf="@id/labelTempo" />
 
             <TextView
                 android:id="@+id/labelInstrument"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:labelFor="@id/inputInstrument"
-                android:text="@string/instrument" />
+                android:text="@string/instrument"
+                app:layout_constraintTop_toBottomOf="@id/inputTempo" />
 
             <AutoCompleteTextView
                 android:id="@+id/inputInstrument"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/labelInstrument" />
 
             <TextView
                 android:id="@+id/labelFirstNoteDurationCoefficient"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:labelFor="@id/inputFirstNoteDurationCoefficient"
-                android:text="@string/first_note_duration_coefficient" />
+                android:text="@string/first_note_duration_coefficient"
+                app:layout_constraintTop_toBottomOf="@id/inputInstrument" />
 
             <EditText
                 android:id="@+id/inputFirstNoteDurationCoefficient"
@@ -671,9 +680,10 @@
                 android:layout_height="wrap_content"
                 android:autofillHints=""
                 android:ems="10"
-                android:inputType="numberDecimal" />
+                android:inputType="numberDecimal"
+                app:layout_constraintTop_toBottomOf="@id/labelFirstNoteDurationCoefficient" />
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
 
