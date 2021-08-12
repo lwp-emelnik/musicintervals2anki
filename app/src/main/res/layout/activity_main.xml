@@ -63,6 +63,7 @@
                 android:id="@+id/viewGroupFilename"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
@@ -81,22 +82,42 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/textFilename"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/viewGroupSelectedFilename"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    app:layout_constraintBaseline_toBaselineOf="@id/actionPlay"
-                    app:layout_constraintEnd_toStartOf="@id/actionPlay"
-                    app:layout_constraintStart_toStartOf="parent" />
-
-                <Button
-                    android:id="@+id/actionPlay"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:text="@string/play"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/actionAttach" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/actionAttach">
+
+                    <TextView
+                        android:id="@+id/textFilename"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/actionPlay"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.luckywarepro.musicintervals2anki.ui.PlaybackButton
+                        android:id="@+id/actionPlay"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/selector_playback_control"
+                        app:layout_constraintEnd_toStartOf="@id/actionViewAll"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <Button
+                        android:id="@+id/actionViewAll"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_btn_more"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

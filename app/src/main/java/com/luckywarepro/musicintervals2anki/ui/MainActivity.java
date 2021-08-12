@@ -168,7 +168,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private View viewGroupFilename;
     private TextView textFilename;
-    Button actionPlay;
+    private View viewGroupSelectedFilename;
+    private PlaybackButton actionPlay;
+    Button actionViewAll;
     private CompoundButton checkNoteAny;
     private CompoundButton[] checkNotes;
     private CompoundButton checkOctaveAny;
@@ -334,7 +336,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         viewGroupFilename = findViewById(R.id.viewGroupFilename);
         textFilename = findViewById(R.id.textFilename);
+        viewGroupSelectedFilename = findViewById(R.id.viewGroupSelectedFilename);
         actionPlay = findViewById(R.id.actionPlay);
+        actionViewAll = findViewById(R.id.actionViewAll);
         checkNoteAny = findViewById(R.id.checkNoteAny);
         checkNotes = new CompoundButton[CHECK_NOTE_IDS.length];
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
@@ -556,7 +560,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             sortByDate = false;
             afterSelecting = false;
             afterCapturing = false;
-            resetPlayButton();
+            resetFilenameButtons();
             textFilename.setText("");
             checkNoteAny.setChecked(true);
             checkOctaveAny.setChecked(true);
@@ -710,7 +714,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
         refreshFilenames();
         if (selected && filenames.length > 1) {
-            actionPlay.callOnClick();
+            actionViewAll.callOnClick();
             if (mismatchingSorting) {
                 new AlertDialog.Builder(this)
                         .setMessage(intersectingNames ? R.string.intersecting_names : R.string.intersecting_dates)
@@ -930,19 +934,22 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
             if (soundPlayer != null) {
                 soundPlayer.stop();
+                actionPlay.setPlaying(false);
             }
-            actionPlay.setEnabled(true);
+            viewGroupSelectedFilename.setVisibility(View.VISIBLE);
             if (filenames.length > 1) {
-                actionPlay.setText(R.string.view_all);
-                actionPlay.setOnClickListener(new OnViewAllClickListener(this, uriPathNames));
+                actionPlay.setVisibility(View.GONE);
+                actionViewAll.setVisibility(View.VISIBLE);
+                actionViewAll.setOnClickListener(new OnViewAllClickListener(this, uriPathNames));
             } else {
-                actionPlay.setText(R.string.play);
+                actionPlay.setVisibility(View.VISIBLE);
                 actionPlay.setOnClickListener(new OnPlayClickListener(this, uriFirst, actionPlay));
+                actionViewAll.setVisibility(View.GONE);
             }
 
             refreshFilenameText(uriFirst.getName());
         } else {
-            resetPlayButton();
+            resetFilenameButtons();
             refreshFilenameText("");
         }
     }
@@ -967,10 +974,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         );
     }
 
-    private void resetPlayButton() {
-        actionPlay.setText(R.string.play);
+    private void resetFilenameButtons() {
+        viewGroupSelectedFilename.setVisibility(View.GONE);
+        actionPlay.setPlaying(false);
         actionPlay.setOnClickListener(null);
-        actionPlay.setEnabled(false);
+        actionPlay.setVisibility(View.GONE);
+        actionViewAll.setOnClickListener(null);
+        actionViewAll.setVisibility(View.GONE);
     }
 
     private final ActivityResultLauncher<Intent> overlayPermissionLauncher = registerForActivityResult(
@@ -1155,7 +1165,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                         filenames = uriStrings;
                         afterSelecting = true;
                         refreshFilenames();
-                        actionPlay.callOnClick();
+                        actionViewAll.callOnClick();
                     }
                 })
                 .setNegativeButton(R.string.sort_by_name, new DialogInterface.OnClickListener() {
@@ -1171,7 +1181,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                         filenames = uriStrings;
                         afterSelecting = true;
                         refreshFilenames();
-                        actionPlay.callOnClick();
+                        actionViewAll.callOnClick();
                     }
                 })
                 .show();
