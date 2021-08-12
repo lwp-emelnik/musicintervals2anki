@@ -3,4 +3,7 @@
     <declare-styleable name="playback_control">
         <attr name="state_playing" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="recording_control">
+        <attr name="state_recording" format="boolean" />
+    </declare-styleable>
 </resources>

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="#80808080"
+    android:background="@drawable/bg_overlay_capturing"
     android:orientation="vertical"
     android:paddingLeft="16dp"
     android:paddingTop="4dp"
@@ -21,17 +21,19 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
 
-        <Button
+        <com.luckywarepro.musicintervals2anki.ui.RecordingButton
             android:id="@+id/actionRecord"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/record" />
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:background="@drawable/selector_recording_control" />
 
         <Button
             android:id="@+id/actionClose"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/close" />
+            android:background="@drawable/bg_btn"
+            android:text="@string/close"
+            android:textColor="#ffffffff" />
 
     </LinearLayout>
 
@@ -58,18 +60,18 @@
         android:orientation="horizontal"
         android:visibility="gone">
 
-        <Button
+        <com.luckywarepro.musicintervals2anki.ui.PlaybackButton
             android:id="@+id/actionPlayLatest"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/play" />
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/selector_playback_control" />
 
         <Button
             android:id="@+id/actionDiscardLatest"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/discard" />
+            android:background="@drawable/bg_btn"
+            android:text="@string/discard"
+            android:textColor="#ffffffff" />
     </LinearLayout>
 </LinearLayout>
