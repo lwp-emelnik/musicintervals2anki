@@ -159,6 +159,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
+    private static final int TRANSITION_DURATION = 500;
+
     private static final String LOG_TAG = "MainActivity";
 
     private MenuItem menuItemAdd;
@@ -369,55 +371,43 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         restoreUiState();
 
-        radioGroupDirection.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        ConstraintLayout layoutIntervals = findViewById(R.id.viewGroupInterval);
 
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
-                boolean reverse = radioGroup.getCheckedRadioButtonId() == R.id.radioDirectionDesc;
+        ConstraintSet intervalConstraints = new ConstraintSet();
+        intervalConstraints.clone(layoutIntervals);
 
-                ConstraintLayout layoutInterval = findViewById(R.id.viewGroupInterval);
+        ConstraintSet intervalConstraintsReverse = new ConstraintSet();
+        intervalConstraintsReverse.clone(layoutIntervals);
 
-                ConstraintSet constraintSet = new ConstraintSet();
-                constraintSet.clone(layoutInterval);
+        int nIntervals = layoutIntervals.getChildCount();
+        for (int i = 0; i < nIntervals; i++) {
+            View prev = i > 0 ? layoutIntervals.getChildAt(i - 1) : null;
+            View current = layoutIntervals.getChildAt(i);
+            View next = i < nIntervals - 1 ? layoutIntervals.getChildAt(i + 1) : null;
 
-                View prev = null;
-                View current = layoutInterval.getChildAt(0);
-                View next = layoutInterval.getChildAt(1);
-                int childCount = layoutInterval.getChildCount();
-                for (int i = 0; i < childCount; i++) {
-                    int childId = current.getId();
+            int childId = current.getId();
 
-                    // @todo: refactor, add regular listener
-                    boolean first = prev == null;
-                    constraintSet.connect(
-                            childId,
-                            !reverse ? ConstraintSet.START : ConstraintSet.END,
-                            first ? R.id.viewGroupInterval : prev.getId(),
-                            reverse ?
-                                    !first ? ConstraintSet.START : ConstraintSet.END :
-                                    first ? ConstraintSet.START : ConstraintSet.END);
-                    boolean last = next == null;
-                    constraintSet.connect(
-                            childId,
-                            !reverse ? ConstraintSet.END : ConstraintSet.START,
-                            last ? R.id.viewGroupInterval : next.getId(),
-                            reverse ?
-                                    !last ? ConstraintSet.END : ConstraintSet.START :
-                                    last ? ConstraintSet.END : ConstraintSet.START);
+            boolean first = prev == null;
+            int anchorId1 = first ? R.id.viewGroupInterval : prev.getId();
+            intervalConstraints.connect(childId, ConstraintSet.START, anchorId1, first ? ConstraintSet.START : ConstraintSet.END);
+            intervalConstraintsReverse.connect(childId, ConstraintSet.END, anchorId1, !first ? ConstraintSet.START : ConstraintSet.END);
 
-                    prev = current;
-                    current = next;
-                    next = i < childCount - 2 ? layoutInterval.getChildAt(i + 2) : null;
-                    System.nanoTime();
-                }
+            boolean last = next == null;
+            int anchorId2 = last ? R.id.viewGroupInterval : next.getId();
+            intervalConstraints.connect(childId, ConstraintSet.END, anchorId2, last ? ConstraintSet.END : ConstraintSet.START);
+            intervalConstraintsReverse.connect(childId, ConstraintSet.START, anchorId2, !last ? ConstraintSet.END : ConstraintSet.START);
+        }
 
-                AutoTransition transition = new AutoTransition();
-                transition.setDuration(500);
-                transition.setInterpolator(new AccelerateDecelerateInterpolator());
-                TransitionManager.beginDelayedTransition(layoutInterval, transition);
-                constraintSet.applyTo(layoutInterval);
+        RadioGroup.OnCheckedChangeListener onDirectionChangedListener = (radioGroup, checkedId) -> {
+            if (checkedId == R.id.radioDirectionAny) {
+                return;
             }
-        });
+            AutoTransition transition = new AutoTransition();
+            transition.setDuration(TRANSITION_DURATION);
+            transition.setInterpolator(new AccelerateDecelerateInterpolator());
+            TransitionManager.beginDelayedTransition(layoutIntervals, transition);
+            (checkedId == R.id.radioDirectionDesc ? intervalConstraintsReverse : intervalConstraints).applyTo(layoutIntervals);
+        };
 
         checkNoteAny.setOnCheckedChangeListener(onNoteCheckChangeListener);
         for (CompoundButton checkNote : checkNotes) {
@@ -427,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (CompoundButton checkOctave : checkOctaves) {
             checkOctave.setOnCheckedChangeListener(onOctaveCheckChangeListener);
         }
-        // radioGroupDirection.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
+        radioGroupDirection.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this, onDirectionChangedListener));
         radioGroupTiming.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
         checkIntervalAny.setOnCheckedChangeListener(onIntervalCheckChangeListener);
         for (CompoundButton checkInterval : checkIntervals) {
