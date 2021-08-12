@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,12 +30,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -47,10 +51,14 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
+
+import android.transition.AutoTransition;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -126,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         put(MusInterval.Builder.TIMING, R.string.timing);
         put(MusInterval.Builder.INSTRUMENT, R.string.instrument);
     }};
+
     static {
         Set<String> addingMandatorySingularKeysSet = new HashSet<>(
                 Arrays.asList(MusInterval.Builder.ADDING_MANDATORY_SINGULAR_MEMBERS)
@@ -140,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         put(MusInterval.Builder.OCTAVES, R.string.octave);
         put(MusInterval.Builder.INTERVALS, R.string.interval);
     }};
+
     static {
         Set<String> addingMandatorySelectionKeysSet = new HashSet<>(
                 Arrays.asList(MusInterval.Builder.ADDING_MANDATORY_SELECTION_MEMBERS)
@@ -149,25 +159,30 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
+    private static final int TRANSITION_DURATION = 500;
+
     private static final String LOG_TAG = "MainActivity";
 
+    private MenuItem menuItemAdd;
+    private MenuItem menuItemMark;
+
+    private View viewGroupFilename;
     private TextView textFilename;
-    Button actionPlay;
-    private Button actionCaptureAudio;
-    private Button actionSelectFile;
-    private CheckBox checkNoteAny;
-    private CheckBox[] checkNotes;
-    private CheckBox checkOctaveAny;
-    private CheckBox[] checkOctaves;
+    private View viewGroupSelectedFilename;
+    private PlaybackButton actionPlay;
+    Button actionViewAll;
+    private CompoundButton checkNoteAny;
+    private CompoundButton[] checkNotes;
+    private CompoundButton checkOctaveAny;
+    private CompoundButton[] checkOctaves;
     private RadioGroup radioGroupDirection;
     private RadioGroup radioGroupTiming;
-    private CheckBox checkIntervalAny;
-    private CheckBox[] checkIntervals;
+    private CompoundButton checkIntervalAny;
+    private CompoundButton[] checkIntervals;
     private EditText inputTempo;
     private AutoCompleteTextView inputInstrument;
     private EditText inputFirstNoteDurationCoefficient;
     private TextView labelExisting;
-    private Button actionMarkExisting;
 
     private View[] anyOptions;
 
@@ -214,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     };
 
     private final static Map<Integer, String> CHECK_INTERVAL_ID_VALUES = new HashMap<>();
+
     static {
         //noinspection ConstantConditions
         if (CHECK_INTERVAL_IDS.length != MusInterval.Fields.Interval.VALUES.length) {
@@ -314,24 +330,58 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         Toolbar toolbarMain = findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbarMain);
 
+        Button actionAttach = findViewById(R.id.actionAttach);
+        PopupMenu popup = new PopupMenu(MainActivity.this, actionAttach);
+        popup.getMenuInflater().inflate(R.menu.attach_audio_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(menuItem -> {
+            int itemId = menuItem.getItemId();
+            if (itemId == R.id.actionSelectFromFilesystem) {
+                if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{
+                                    Manifest.permission.READ_EXTERNAL_STORAGE},
+                            PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_OPEN_CHOOSER
+                    );
+                    return true;
+                }
+                if (isCapturing) {
+                    closeCapturing();
+                }
+                handleSelectFile();
+                return true;
+            } else if (itemId == R.id.actionCaptureAudio) {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    showMsg(R.string.recording_unsupported);
+                    return true;
+                }
+                if (isCapturing) {
+                    closeCapturing();
+                }
+                handleCaptureAudio();
+                return true;
+            }
+            return true;
+        });
+        actionAttach.setOnClickListener(view -> popup.show());
+
+        viewGroupFilename = findViewById(R.id.viewGroupFilename);
         textFilename = findViewById(R.id.textFilename);
+        viewGroupSelectedFilename = findViewById(R.id.viewGroupSelectedFilename);
         actionPlay = findViewById(R.id.actionPlay);
-        actionCaptureAudio = findViewById(R.id.actionCaptureAudio);
-        actionSelectFile = findViewById(R.id.actionSelectFile);
+        actionViewAll = findViewById(R.id.actionViewAll);
         checkNoteAny = findViewById(R.id.checkNoteAny);
-        checkNotes = new CheckBox[CHECK_NOTE_IDS.length];
+        checkNotes = new CompoundButton[CHECK_NOTE_IDS.length];
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
             checkNotes[i] = findViewById(CHECK_NOTE_IDS[i]);
         }
         checkOctaveAny = findViewById(R.id.checkOctaveAny);
-        checkOctaves = new CheckBox[CHECK_OCTAVE_IDS.length];
+        checkOctaves = new CompoundButton[CHECK_OCTAVE_IDS.length];
         for (int i = 0; i < CHECK_OCTAVE_IDS.length; i++) {
             checkOctaves[i] = findViewById(CHECK_OCTAVE_IDS[i]);
         }
         radioGroupDirection = findViewById(R.id.radioGroupDirection);
         radioGroupTiming = findViewById(R.id.radioGroupTiming);
         checkIntervalAny = findViewById(R.id.checkIntervalAny);
-        checkIntervals = new CheckBox[CHECK_INTERVAL_IDS.length];
+        checkIntervals = new CompoundButton[CHECK_INTERVAL_IDS.length];
         for (int i = 0; i < CHECK_INTERVAL_IDS.length; i++) {
             checkIntervals[i] = findViewById(CHECK_INTERVAL_IDS[i]);
         }
@@ -339,7 +389,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputInstrument = findViewById(R.id.inputInstrument);
         inputFirstNoteDurationCoefficient = findViewById(R.id.inputFirstNoteDurationCoefficient);
         labelExisting = findViewById(R.id.labelExisting);
-        actionMarkExisting = findViewById(R.id.actionMarkExisting);
         anyOptions = new View[]{
                 checkNoteAny,
                 checkOctaveAny,
@@ -349,25 +398,62 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         };
         navigationBottom = findViewById(R.id.navigationBottom);
 
-        boolean enableMultiple = false;
-        onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny, enableMultiple);
-        onOctaveCheckChangeListener = new OnFieldCheckChangeListener(this, checkOctaves, checkOctaveAny, enableMultiple);
-        onIntervalCheckChangeListener = new OnFieldCheckChangeListener(this, checkIntervals, checkIntervalAny, enableMultiple);
+        onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny);
+        onOctaveCheckChangeListener = new OnFieldCheckChangeListener(this, checkOctaves, checkOctaveAny);
+        onIntervalCheckChangeListener = new OnFieldCheckChangeListener(this, checkIntervals, checkIntervalAny);
 
         restoreUiState();
 
+        ConstraintLayout layoutIntervals = findViewById(R.id.viewGroupInterval);
+
+        ConstraintSet intervalConstraints = new ConstraintSet();
+        intervalConstraints.clone(layoutIntervals);
+
+        ConstraintSet intervalConstraintsReverse = new ConstraintSet();
+        intervalConstraintsReverse.clone(layoutIntervals);
+
+        int nIntervals = layoutIntervals.getChildCount();
+        for (int i = 0; i < nIntervals; i++) {
+            View prev = i > 0 ? layoutIntervals.getChildAt(i - 1) : null;
+            View current = layoutIntervals.getChildAt(i);
+            View next = i < nIntervals - 1 ? layoutIntervals.getChildAt(i + 1) : null;
+
+            int childId = current.getId();
+
+            boolean first = prev == null;
+            int anchorId1 = first ? R.id.viewGroupInterval : prev.getId();
+            intervalConstraints.connect(childId, ConstraintSet.START, anchorId1, first ? ConstraintSet.START : ConstraintSet.END);
+            intervalConstraintsReverse.connect(childId, ConstraintSet.END, anchorId1, !first ? ConstraintSet.START : ConstraintSet.END);
+
+            boolean last = next == null;
+            int anchorId2 = last ? R.id.viewGroupInterval : next.getId();
+            intervalConstraints.connect(childId, ConstraintSet.END, anchorId2, last ? ConstraintSet.END : ConstraintSet.START);
+            intervalConstraintsReverse.connect(childId, ConstraintSet.START, anchorId2, !last ? ConstraintSet.END : ConstraintSet.START);
+        }
+
+        RadioGroup.OnCheckedChangeListener onDirectionChangedListener = (radioGroup, checkedId) -> {
+            if (checkedId == R.id.radioDirectionAny) {
+                return;
+            }
+            AutoTransition transition = new AutoTransition();
+            transition.setDuration(TRANSITION_DURATION);
+            transition.setInterpolator(new AccelerateDecelerateInterpolator());
+            TransitionManager.beginDelayedTransition(layoutIntervals, transition);
+            (checkedId == R.id.radioDirectionDesc ? intervalConstraintsReverse : intervalConstraints).applyTo(layoutIntervals);
+        };
+
         checkNoteAny.setOnCheckedChangeListener(onNoteCheckChangeListener);
-        for (CheckBox checkNote : checkNotes) {
+        for (CompoundButton checkNote : checkNotes) {
             checkNote.setOnCheckedChangeListener(onNoteCheckChangeListener);
         }
         checkOctaveAny.setOnCheckedChangeListener(onOctaveCheckChangeListener);
-        for (CheckBox checkOctave : checkOctaves) {
+        for (CompoundButton checkOctave : checkOctaves) {
             checkOctave.setOnCheckedChangeListener(onOctaveCheckChangeListener);
         }
-        radioGroupDirection.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
+        radioGroupDirection.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this, onDirectionChangedListener));
         radioGroupTiming.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
         checkIntervalAny.setOnCheckedChangeListener(onIntervalCheckChangeListener);
-        for (CheckBox checkInterval : checkIntervals) {
+        for (CompoundButton checkInterval : checkIntervals) {
             checkInterval.setOnCheckedChangeListener(onIntervalCheckChangeListener);
         }
         inputTempo.addTextChangedListener(new FieldInputTextWatcher(this));
@@ -383,38 +469,158 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         handler = new Handler();
 
-        configureClearAllButton();
-        configureCaptureAudioButton();
-        configureSelectFileButton();
-        configureMarkExistingButton();
-        configureAddToAnkiButton();
-        configureCheckIntegrityButton();
-
         mAnkiDroid = new AnkiDroidHelper(this);
     }
 
     private void handleNavigationItemSelected(int itemId) {
+        boolean selectedAddSingle = itemId == R.id.navigation_add_single;
+        boolean selectedAddBatch = itemId == R.id.navigation_add_batch;
         boolean selectedSearch = itemId == R.id.navigation_search;
-        int anyOptionsVisibility = selectedSearch ? View.VISIBLE : View.GONE;
+
+        boolean selectedAdd = selectedAddSingle || selectedAddBatch;
+        menuItemAdd.setVisible(selectedAdd);
+        viewGroupFilename.setVisibility(getVisibility(selectedAdd));
+
+        int anyOptionsVisibility = getVisibility(selectedSearch);
         for (View view : anyOptions) {
             view.setVisibility(anyOptionsVisibility);
         }
-        boolean enableMultiple = selectedSearch || itemId == R.id.navigation_add_batch;
+
+        boolean enableMultiple = selectedSearch || selectedAddBatch;
         onNoteCheckChangeListener.setEnableMultiple(enableMultiple);
         onOctaveCheckChangeListener.setEnableMultiple(enableMultiple);
         onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
     }
 
+    private int getVisibility(boolean condition) {
+        return condition ? View.VISIBLE : View.GONE;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        menuItemAdd = menu.findItem(R.id.actionAddToAnki);
+        menuItemMark = menu.findItem(R.id.actionMarkExisting);
+        handleNavigationItemSelected(navigationBottom.getSelectedItemId()); // @fixme
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        if (itemId == R.id.actionSettings) {
+        if (itemId == R.id.actionAddToAnki) {
+            if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
+                showMsg(R.string.api_unavailable);
+                return true;
+            }
+            if (mAnkiDroid.shouldRequestPermission()) {
+                mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
+                return true;
+            }
+            if (isCapturing) {
+                closeCapturing();
+            }
+
+            progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setTitle(R.string.batch_adding_title);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        getMusInterval().addToAnki(MainActivity.this, MainActivity.this);
+                    } catch (final Throwable t) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressDialog.dismiss();
+                                handleError(t);
+                            }
+                        });
+
+                    }
+                }
+            }).start();
+            return true;
+        } else if (itemId == R.id.actionClearAll) {
+            if (isCapturing) {
+                closeCapturing();
+            }
+            filenames = new String[]{};
+            afterAdding = false;
+            mismatchingSorting = false;
+            intersectingNames = false;
+            sortByName = false;
+            intersectingDates = false;
+            sortByDate = false;
+            afterSelecting = false;
+            afterCapturing = false;
+            resetFilenameButtons();
+            textFilename.setText("");
+            checkNoteAny.setChecked(true);
+            checkOctaveAny.setChecked(true);
+            radioGroupDirection.check(findViewById(R.id.radioDirectionAny).getId());
+            radioGroupTiming.check(findViewById(R.id.radioTimingAny).getId());
+            checkIntervalAny.setChecked(true);
+            inputTempo.setText("");
+            inputInstrument.setText("");
+            inputFirstNoteDurationCoefficient.setText("");
+            return true;
+        } else if (itemId == R.id.actionMarkExisting) {
+            if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
+                showMsg(R.string.api_unavailable);
+                return true;
+            }
+            if (mAnkiDroid.shouldRequestPermission()) {
+                mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
+                return true;
+            }
+            try {
+                final int count = getMusInterval().markExistingNotes();
+                showQuantityMsg(R.plurals.mi_marked_result, count, count);
+                refreshExisting();
+            } catch (Throwable e) {
+                handleError(e);
+            }
+            return true;
+        } else if (itemId == R.id.actionCheckIntegrity) {
+            if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
+                showMsg(R.string.api_unavailable);
+                return true;
+            }
+            if (mAnkiDroid.shouldRequestPermission()) {
+                mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
+                return true;
+            }
+            if (isCapturing) {
+                closeCapturing();
+            }
+            try {
+                MusInterval mi = getMusInterval();
+
+                final String corruptedTag = TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_CORRUPTED;
+                final String suspiciousTag = TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_SUSPICIOUS;
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                boolean tagDuplicates = preferences.getBoolean(SettingsFragment.KEY_TAG_DUPLICATES_SWITCH, SettingsFragment.DEFAULT_TAG_DUPLICATES_SWITCH);
+                final String duplicateTag = !tagDuplicates ? null : TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_DUPLICATE;
+
+                final NotesIntegrity integrity = new NotesIntegrity(mAnkiDroid, mi, corruptedTag, suspiciousTag, duplicateTag, MainActivity.this);
+
+                progressDialog = new ProgressDialog(MainActivity.this);
+                progressDialog.setTitle(R.string.integrity_progress_title);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+
+                new Thread(new IntegrityCheckWorker(integrity, MainActivity.this, progressDialog)).start();
+            } catch (Throwable e) {
+                handleError(e);
+            }
+            return true;
+        } else if (itemId == R.id.actionSettings) {
             if (AnkiDroidHelper.isApiUnavailable(this)) {
                 showMsg(R.string.api_unavailable);
                 return true;
@@ -439,7 +645,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(intent);
             return true;
-        } else if(itemId == R.id.actionAbout) {
+        } else if (itemId == R.id.actionAbout) {
             startActivity(new Intent(MainActivity.this, AboutActivity.class));
             return true;
         } else {
@@ -506,7 +712,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
         refreshFilenames();
         if (selected && filenames.length > 1) {
-            actionPlay.callOnClick();
+            actionViewAll.callOnClick();
             if (mismatchingSorting) {
                 new AlertDialog.Builder(this)
                         .setMessage(intersectingNames ? R.string.intersecting_names : R.string.intersecting_dates)
@@ -559,15 +765,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         } catch (Throwable e) {
             // probably best to ignore exceptions here as this function is called silently
         } finally {
-            Resources res = getResources();
-            String selectFileText;
             if (permutationsNumber <= 1) {
                 permutationsNumber = 1;
-                selectFileText = res.getQuantityString(R.plurals.select_file, permutationsNumber);
-            } else {
-                selectFileText = res.getQuantityString(R.plurals.select_file, permutationsNumber, permutationsNumber);
             }
-            actionSelectFile.setText(selectFileText);
             this.permutationsNumber = permutationsNumber;
         }
     }
@@ -634,8 +834,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 @Override
                 public void run() {
                     labelExisting.setText(_textExisting);
-                    actionMarkExisting.setText(getString(R.string.action_mark_n, unmarkedCount));
-                    actionMarkExisting.setEnabled(unmarkedCount > 0);
+                    menuItemMark.setTitle(getString(R.string.action_mark_n, unmarkedCount));
+                    menuItemMark.setEnabled(unmarkedCount > 0);
                 }
             });
         }
@@ -732,19 +932,22 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
             if (soundPlayer != null) {
                 soundPlayer.stop();
+                actionPlay.setPlaying(false);
             }
-            actionPlay.setEnabled(true);
+            viewGroupSelectedFilename.setVisibility(View.VISIBLE);
             if (filenames.length > 1) {
-                actionPlay.setText(R.string.view_all);
-                actionPlay.setOnClickListener(new OnViewAllClickListener(this, uriPathNames));
+                actionPlay.setVisibility(View.GONE);
+                actionViewAll.setVisibility(View.VISIBLE);
+                actionViewAll.setOnClickListener(new OnViewAllClickListener(this, uriPathNames));
             } else {
-                actionPlay.setText(R.string.play);
+                actionPlay.setVisibility(View.VISIBLE);
                 actionPlay.setOnClickListener(new OnPlayClickListener(this, uriFirst, actionPlay));
+                actionViewAll.setVisibility(View.GONE);
             }
 
             refreshFilenameText(uriFirst.getName());
         } else {
-            resetPlayButton();
+            resetFilenameButtons();
             refreshFilenameText("");
         }
     }
@@ -769,57 +972,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         );
     }
 
-    private void configureClearAllButton() {
-        final Button actionClearAll = findViewById(R.id.actionClearAll);
-        actionClearAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isCapturing) {
-                    closeCapturing();
-                }
-                filenames = new String[]{};
-                afterAdding = false;
-                mismatchingSorting = false;
-                intersectingNames = false;
-                sortByName = false;
-                intersectingDates = false;
-                sortByDate = false;
-                afterSelecting = false;
-                afterCapturing = false;
-                resetPlayButton();
-                textFilename.setText("");
-                checkNoteAny.setChecked(true);
-                checkOctaveAny.setChecked(true);
-                radioGroupDirection.check(findViewById(R.id.radioDirectionAny).getId());
-                radioGroupTiming.check(findViewById(R.id.radioTimingAny).getId());
-                checkIntervalAny.setChecked(true);
-                inputTempo.setText("");
-                inputInstrument.setText("");
-                inputFirstNoteDurationCoefficient.setText("");
-            }
-        });
-    }
-
-    private void resetPlayButton() {
-        actionPlay.setText(R.string.play);
+    private void resetFilenameButtons() {
+        viewGroupSelectedFilename.setVisibility(View.GONE);
+        actionPlay.setPlaying(false);
         actionPlay.setOnClickListener(null);
-        actionPlay.setEnabled(false);
-    }
-
-    private void configureCaptureAudioButton() {
-        actionCaptureAudio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                    showMsg(R.string.recording_unsupported);
-                    return;
-                }
-                if (isCapturing) {
-                    closeCapturing();
-                }
-                handleCaptureAudio();
-            }
-        });
+        actionPlay.setVisibility(View.GONE);
+        actionViewAll.setOnClickListener(null);
+        actionViewAll.setVisibility(View.GONE);
     }
 
     private final ActivityResultLauncher<Intent> overlayPermissionLauncher = registerForActivityResult(
@@ -836,7 +995,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             }
     );
 
-    private void handleCaptureAudio () {
+    private void handleCaptureAudio() {
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{
                             Manifest.permission.RECORD_AUDIO},
@@ -929,26 +1088,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         capturingLauncher.launch(intent);
     }
 
-    private void configureSelectFileButton() {
-        final Button actionSelectFile = findViewById(R.id.actionSelectFile);
-        actionSelectFile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{
-                                    Manifest.permission.READ_EXTERNAL_STORAGE},
-                            PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_OPEN_CHOOSER
-                    );
-                    return;
-                }
-                if (isCapturing) {
-                    closeCapturing();
-                }
-                handleSelectFile();
-            }
-        });
-    }
-
     private void handleSelectFile() {
         if (permutationsNumber == null || permutationsNumber <= 1) {
             openChooser();
@@ -989,7 +1128,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 .show();
     }
 
-    private final  ActivityResultLauncher<Intent> fileChooserLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> fileChooserLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new FileChooserResultCallback(this)
     );
@@ -1003,7 +1142,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                 .putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"audio/*", "video/*"});
 
-        Intent chooser = Intent.createChooser(target, actionSelectFile.getText().toString());
+        Intent chooser = Intent.createChooser(target, null);
 
         fileChooserLauncher.launch(chooser);
     }
@@ -1024,7 +1163,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                         filenames = uriStrings;
                         afterSelecting = true;
                         refreshFilenames();
-                        actionPlay.callOnClick();
+                        actionViewAll.callOnClick();
                     }
                 })
                 .setNegativeButton(R.string.sort_by_name, new DialogInterface.OnClickListener() {
@@ -1040,77 +1179,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                         filenames = uriStrings;
                         afterSelecting = true;
                         refreshFilenames();
-                        actionPlay.callOnClick();
+                        actionViewAll.callOnClick();
                     }
                 })
                 .show();
-    }
-
-    private void configureMarkExistingButton() {
-        actionMarkExisting.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
-                    showMsg(R.string.api_unavailable);
-                    return;
-                }
-                if (mAnkiDroid.shouldRequestPermission()) {
-                    mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
-                    return;
-                }
-                try {
-                    final int count = getMusInterval().markExistingNotes();
-                    showQuantityMsg(R.plurals.mi_marked_result, count, count);
-                    refreshExisting();
-                } catch (Throwable e) {
-                    handleError(e);
-                }
-            }
-        });
-    }
-
-    private void configureAddToAnkiButton() {
-        final Button actionAddToAnki = findViewById(R.id.actionAddToAnki);
-        actionAddToAnki.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
-                    showMsg(R.string.api_unavailable);
-                    return;
-                }
-                if (mAnkiDroid.shouldRequestPermission()) {
-                    mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
-                    return;
-                }
-                if (isCapturing) {
-                    closeCapturing();
-                }
-
-                progressDialog = new ProgressDialog(MainActivity.this);
-                progressDialog.setTitle(R.string.batch_adding_title);
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                progressDialog.setCancelable(false);
-                progressDialog.show();
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            getMusInterval().addToAnki(MainActivity.this, MainActivity.this);
-                        } catch (final Throwable t) {
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressDialog.dismiss();
-                                    handleError(t);
-                                }
-                            });
-
-                        }
-                    }
-                }).start();
-            }
-        });
     }
 
     @Override
@@ -1242,49 +1314,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         });
     }
 
-    private void configureCheckIntegrityButton() {
-        final Button actionCheckIntegrity = findViewById(R.id.actionCheckIntegrity);
-        actionCheckIntegrity.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
-                    showMsg(R.string.api_unavailable);
-                    return;
-                }
-                if (mAnkiDroid.shouldRequestPermission()) {
-                    mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
-                    return;
-                }
-                if (isCapturing) {
-                    closeCapturing();
-                }
-                try {
-                    MusInterval mi = getMusInterval();
-
-                    final String corruptedTag = TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_CORRUPTED;
-                    final String suspiciousTag = TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_SUSPICIOUS;
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                    boolean tagDuplicates = preferences.getBoolean(SettingsFragment.KEY_TAG_DUPLICATES_SWITCH, SettingsFragment.DEFAULT_TAG_DUPLICATES_SWITCH);
-                    final String duplicateTag = !tagDuplicates ? null : TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_DUPLICATE;
-
-                    final NotesIntegrity integrity = new NotesIntegrity(mAnkiDroid, mi, corruptedTag, suspiciousTag, duplicateTag, MainActivity.this);
-
-                    progressDialog = new ProgressDialog(MainActivity.this);
-                    progressDialog.setTitle(R.string.integrity_progress_title);
-                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    progressDialog.setCancelable(false);
-                    progressDialog.show();
-
-                    new Thread(new IntegrityCheckWorker(integrity, MainActivity.this, progressDialog)).start();
-                } catch (Throwable e) {
-                    handleError(e);
-                }
-            }
-        });
-    }
-
     @Override
-    public void setMessage(final int resId, final Object ...formatArgs) {
+    public void setMessage(final int resId, final Object... formatArgs) {
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -1373,9 +1404,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         noteKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_NOTE_KEYS, ""));
         octaveKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_OCTAVE_KEYS, ""));
         intervalKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_INTERVAL_KEYS, ""));
-        int navigationItemId = uiDb.getInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, R.id.navigation_add);
-        handleNavigationItemSelected(navigationItemId);
-        navigationBottom.setSelectedItemId(navigationItemId);
+        navigationBottom.setSelectedItemId(uiDb.getInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, R.id.navigation_add_single));
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
@@ -1516,13 +1545,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
-    private static String[] getCheckedValues(CheckBox[] checkBoxes) {
+    private static String[] getCheckedValues(CompoundButton[] checkBoxes) {
         return getCheckedValues(checkBoxes, null);
     }
 
-    private static String[] getCheckedValues(CheckBox[] checkBoxes, Map<Integer, String> checkIdValues) {
+    private static String[] getCheckedValues(CompoundButton[] checkBoxes, Map<Integer, String> checkIdValues) {
         ArrayList<String> valuesList = new ArrayList<>();
-        for (CheckBox checkBox : checkBoxes) {
+        for (CompoundButton checkBox : checkBoxes) {
             if (checkBox.isChecked()) {
                 String value = checkBox.getText().toString();
                 if (checkIdValues != null) {
@@ -1772,11 +1801,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         showMsg(R.string.unknown_error);
     }
 
-    void showMsg(int msgResId, Object ...formatArgs) {
+    void showMsg(int msgResId, Object... formatArgs) {
         displayToast(getResources().getString(msgResId, formatArgs));
     }
 
-    void showQuantityMsg(int msgResId, int quantity, Object ...formatArgs) {
+    void showQuantityMsg(int msgResId, int quantity, Object... formatArgs) {
         displayToast(getResources().getQuantityString(msgResId, quantity, formatArgs));
     }
 

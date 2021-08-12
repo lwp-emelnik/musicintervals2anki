@@ -105,7 +105,7 @@ public class AudioCaptureService extends Service {
 
     private View overlayView;
     private TextView textTop;
-    private Button actionRecord;
+    private RecordingButton actionRecord;
     private Button actionClose;
     private TextView textBottom;
 
@@ -115,7 +115,7 @@ public class AudioCaptureService extends Service {
 
     private TextView textLatest;
     private LinearLayout layoutLatestActions;
-    private Button actionPlayLatest;
+    private PlaybackButton actionPlayLatest;
 
     private LinkedList<Recording> recordings;
 
@@ -213,9 +213,7 @@ public class AudioCaptureService extends Service {
                 } else {
                     stopAudioCapture();
                     isRecording = false;
-                    actionRecord.setTextColor(Color.DKGRAY);
-                    actionRecord.getBackground().clearColorFilter();
-                    actionRecord.setText(R.string.record);
+                    actionRecord.setRecording(false);
                 }
             }
         });
@@ -255,7 +253,7 @@ public class AudioCaptureService extends Service {
             public void onClick(View view) {
                 try {
                     if (mediaPlayer == null) {
-                        actionPlayLatest.setText(R.string.stop);
+                        actionPlayLatest.setPlaying(true);
                         mediaPlayer = new MediaPlayer();
                         mediaPlayer.setAudioAttributes(
                                 new AudioAttributes.Builder()
@@ -366,7 +364,7 @@ public class AudioCaptureService extends Service {
             mediaPlayer.release();
             mediaPlayer = null;
         }
-        actionPlayLatest.setText(R.string.play);
+        actionPlayLatest.setPlaying(false);
     }
 
     private void hideLatestMenu() {
@@ -380,9 +378,7 @@ public class AudioCaptureService extends Service {
         startAudioCapture();
         isRecording = true;
         actionRecord.setEnabled(true);
-        actionRecord.getBackground().setColorFilter(Color.DKGRAY, PorterDuff.Mode.MULTIPLY);
-        actionRecord.setTextColor(Color.WHITE);
-        actionRecord.setText(R.string.stop);
+        actionRecord.setRecording(true);
         textTop.setTypeface(null, Typeface.BOLD);
         toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 150);
     }

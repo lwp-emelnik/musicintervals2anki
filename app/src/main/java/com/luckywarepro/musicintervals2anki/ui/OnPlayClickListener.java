@@ -2,9 +2,7 @@ package com.luckywarepro.musicintervals2anki.ui;
 
 import android.net.Uri;
 import android.view.View;
-import android.widget.Button;
 
-import com.luckywarepro.musicintervals2anki.R;
 import com.luckywarepro.musicintervals2anki.helper.AudioUtil;
 
 /**
@@ -14,11 +12,11 @@ import com.luckywarepro.musicintervals2anki.helper.AudioUtil;
 public class OnPlayClickListener implements View.OnClickListener {
     private final MainActivity mainActivity;
     private final FilenameAdapter.UriPathName uriPathName;
-    private Button actionPlay;
+    private PlaybackButton actionPlay;
     private Runnable callback;
     private boolean isPlaying;
 
-    public OnPlayClickListener(MainActivity mainActivity, FilenameAdapter.UriPathName uriPathName, Button actionPlay) {
+    public OnPlayClickListener(MainActivity mainActivity, FilenameAdapter.UriPathName uriPathName, PlaybackButton actionPlay) {
         this.mainActivity = mainActivity;
         this.uriPathName = uriPathName;
         this.actionPlay = actionPlay;
@@ -28,7 +26,7 @@ public class OnPlayClickListener implements View.OnClickListener {
         return isPlaying;
     }
 
-    public void setActionPlay(Button actionPlay) {
+    public void setActionPlay(PlaybackButton actionPlay) {
         this.actionPlay = actionPlay;
     }
 
@@ -54,7 +52,7 @@ public class OnPlayClickListener implements View.OnClickListener {
         mainActivity.handler.postDelayed(callback, duration);
 
         if (actionPlay != null) {
-            actionPlay.setText(R.string.stop);
+            actionPlay.setPlaying(true);
         }
         isPlaying = true;
     }
@@ -66,7 +64,7 @@ public class OnPlayClickListener implements View.OnClickListener {
 
     private void handleStopPlaying() {
         if (actionPlay != null) {
-            actionPlay.setText(R.string.play);
+            actionPlay.setPlaying(false);
         }
         isPlaying = false;
     }

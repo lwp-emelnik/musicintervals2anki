@@ -3,14 +3,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/actionHelp"
-        android:icon="@drawable/ic_help"
-        android:title="@string/help"
+        android:id="@+id/actionAddToAnki"
+        android:icon="@drawable/ic_add"
+        android:title="@string/action_add_to_anki"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/actionClearAll"
+        android:icon="@drawable/ic_clear"
+        android:title="@string/action_clear_all"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/actionMarkExisting"
+        android:title="@string/action_mark"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/actionCheckIntegrity"
+        android:title="@string/action_check_integrity"
+        app:showAsAction="never" />
     <item
         android:id="@+id/actionSettings"
         android:icon="@drawable/ic_settings"
         android:title="@string/settings"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/actionHelp"
+        android:icon="@drawable/ic_help"
+        android:title="@string/help"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/actionAbout"

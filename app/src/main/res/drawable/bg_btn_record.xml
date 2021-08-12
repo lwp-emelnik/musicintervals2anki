@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:bottom="4dp"
+        android:drawable="@drawable/bg_btn"
+        android:left="4dp"
+        android:right="4dp"
+        android:top="4dp" />
+    <item
+        android:bottom="8dp"
+        android:drawable="@drawable/ic_record"
+        android:left="8dp"
+        android:right="8dp"
+        android:top="8dp" />
+</layer-list>

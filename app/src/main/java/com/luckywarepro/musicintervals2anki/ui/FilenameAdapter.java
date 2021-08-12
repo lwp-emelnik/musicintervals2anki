@@ -23,7 +23,7 @@ public class FilenameAdapter extends RecyclerView.Adapter<FilenameAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView textFilename;
-        private final Button actionPlay;
+        private final PlaybackButton actionPlay;
 
         public ViewHolder(View view) {
             super(view);
@@ -36,7 +36,7 @@ public class FilenameAdapter extends RecyclerView.Adapter<FilenameAdapter.ViewHo
             return textFilename;
         }
 
-        public Button getActionPlay() {
+        public PlaybackButton getActionPlay() {
             return actionPlay;
         }
     }
@@ -81,9 +81,9 @@ public class FilenameAdapter extends RecyclerView.Adapter<FilenameAdapter.ViewHo
     public void onViewAttachedToWindow(@NonNull ViewHolder holder) {
         int position = holder.getAdapterPosition();
         OnPlayClickListener listener = listeners[position];
-        Button actionPlay = holder.getActionPlay();
+        PlaybackButton actionPlay = holder.getActionPlay();
         listener.setActionPlay(actionPlay);
-        actionPlay.setText(listener.isPlaying() ? R.string.stop : R.string.play);
+        actionPlay.setPlaying(listener.isPlaying());
     }
 
     @Override
