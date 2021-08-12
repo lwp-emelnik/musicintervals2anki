@@ -21,5 +21,8 @@
         android:id="@+id/actionSkip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/countdown_skip" />
+        android:background="@drawable/bg_btn"
+        android:paddingHorizontal="16dp"
+        android:text="@string/countdown_skip"
+        android:textColor="#ffffffff" />
 </LinearLayout>
