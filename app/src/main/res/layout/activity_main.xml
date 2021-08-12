@@ -74,11 +74,13 @@
                     app:layout_constraintBaseline_toBaselineOf="@id/actionAttach"
                     app:layout_constraintStart_toStartOf="parent" />
 
-                <Button
+                <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/actionAttach"
-                    android:layout_width="0dp"
+                    android:layout_width="72dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/attach_audio"
+                    android:layout_marginStart="8dp"
+                    android:drawableStart="@drawable/ic_attach"
+                    android:drawableEnd="@drawable/ic_expand"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 

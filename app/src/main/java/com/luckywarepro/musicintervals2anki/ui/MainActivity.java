@@ -23,7 +23,6 @@ import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.transition.TransitionManager;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,6 +38,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -331,8 +331,37 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         setSupportActionBar(toolbarMain);
 
         Button actionAttach = findViewById(R.id.actionAttach);
-        registerForContextMenu(actionAttach);
-        actionAttach.setOnClickListener(this::openContextMenu);
+        PopupMenu popup = new PopupMenu(MainActivity.this, actionAttach);
+        popup.getMenuInflater().inflate(R.menu.attach_audio_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(menuItem -> {
+            int itemId = menuItem.getItemId();
+            if (itemId == R.id.actionSelectFromFilesystem) {
+                if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{
+                                    Manifest.permission.READ_EXTERNAL_STORAGE},
+                            PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_OPEN_CHOOSER
+                    );
+                    return true;
+                }
+                if (isCapturing) {
+                    closeCapturing();
+                }
+                handleSelectFile();
+                return true;
+            } else if (itemId == R.id.actionCaptureAudio) {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    showMsg(R.string.recording_unsupported);
+                    return true;
+                }
+                if (isCapturing) {
+                    closeCapturing();
+                }
+                handleCaptureAudio();
+                return true;
+            }
+            return true;
+        });
+        actionAttach.setOnClickListener(view -> popup.show());
 
         viewGroupFilename = findViewById(R.id.viewGroupFilename);
         textFilename = findViewById(R.id.textFilename);
@@ -441,37 +470,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         handler = new Handler();
 
         mAnkiDroid = new AnkiDroidHelper(this);
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        menu.setHeaderTitle(R.string.attach_audio);
-        menu.add(Menu.NONE, Menu.NONE, Menu.NONE, R.string.select_from_filesystem).setOnMenuItemClickListener(menuItem -> {
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{
-                                Manifest.permission.READ_EXTERNAL_STORAGE},
-                        PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_OPEN_CHOOSER
-                );
-                return true;
-            }
-            if (isCapturing) {
-                closeCapturing();
-            }
-            handleSelectFile();
-            return true;
-        });
-        menu.add(Menu.NONE, Menu.NONE, Menu.NONE, R.string.capture_audio).setOnMenuItemClickListener(menuItem -> {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                showMsg(R.string.recording_unsupported);
-                return true;
-            }
-            if (isCapturing) {
-                closeCapturing();
-            }
-            handleCaptureAudio();
-            return true;
-        });
     }
 
     private void handleNavigationItemSelected(int itemId) {
