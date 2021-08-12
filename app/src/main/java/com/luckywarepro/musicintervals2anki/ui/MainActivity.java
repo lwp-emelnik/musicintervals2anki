@@ -505,10 +505,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         return true;
     }
 
+    private boolean adding;
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.actionAddToAnki) {
+            if (adding) {
+                return true;
+            }
             if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
                 showMsg(R.string.api_unavailable);
                 return true;
@@ -520,6 +525,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             if (isCapturing) {
                 closeCapturing();
             }
+
+            adding = true;
 
             progressDialog = new ProgressDialog(MainActivity.this);
             progressDialog.setTitle(R.string.batch_adding_title);
@@ -538,6 +545,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                             public void run() {
                                 progressDialog.dismiss();
                                 handleError(t);
+                                adding = false;
                             }
                         });
 
