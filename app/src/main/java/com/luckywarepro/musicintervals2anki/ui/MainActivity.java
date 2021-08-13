@@ -534,22 +534,16 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             progressDialog.setCancelable(false);
             progressDialog.show();
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        getMusInterval().addToAnki(MainActivity.this, MainActivity.this);
-                    } catch (final Throwable t) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressDialog.dismiss();
-                                handleError(t);
-                                adding = false;
-                            }
-                        });
+            new Thread(() -> {
+                try {
+                    getMusInterval().addToAnki(MainActivity.this, MainActivity.this);
+                } catch (final Throwable t) {
+                    handler.post(() -> {
+                        progressDialog.dismiss();
+                        handleError(t);
+                        adding = false;
+                    });
 
-                    }
                 }
             }).start();
             return true;
@@ -1204,77 +1198,76 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     @Override
     public void addingFinished(final MusInterval.AddingResult addingResult) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                progressDialog.dismiss();
+        handler.post(() -> {
+            progressDialog.dismiss();
 
-                final String[] originalFilenames = addingResult.getOriginalSounds();
-                MusInterval newMi = addingResult.getMusInterval();
-                filenames = newMi.sounds;
-                afterSelecting = false;
-                afterCapturing = false;
-                noteKeys = newMi.notes;
-                octaveKeys = newMi.octaves;
-                intervalKeys = newMi.intervals;
-                afterAdding = true;
-                mismatchingSorting = false;
-                intersectingNames = false;
-                sortByName = false;
-                intersectingDates = false;
-                sortByDate = false;
-                refreshFilenames();
-                String addedInstrument = newMi.instrument;
-                if (instrumentsAdapter.getPosition(addedInstrument) == -1) {
-                    instrumentsAdapter.add(addedInstrument);
-                }
-                refreshExisting();
-                final int nAdded = newMi.sounds.length;
-                if (nAdded == 1) {
-                    showQuantityMsg(R.plurals.mi_added, nAdded);
-                } else if (nAdded > 1) {
-                    showQuantityMsg(R.plurals.mi_added, nAdded, nAdded);
-                } else {
-                    return;
-                }
-
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                String filesDeletion = preferences.getString(SettingsFragment.KEY_FILES_DELETION_PREFERENCE, SettingsFragment.DEFAULT_FILES_DELETION);
-                switch (filesDeletion) {
-                    case SettingsFragment.VALUE_FILES_DELETION_DISABLED:
-                        break;
-                    case SettingsFragment.VALUE_FILES_DELETION_CREATED_ONLY:
-                        deleteCapturedFiles(originalFilenames);
-                        break;
-                    case SettingsFragment.VALUE_FILES_DELETION_ALL:
-                        deleteAddedFiles(originalFilenames);
-                        break;
-                    default:
-                    case SettingsFragment.VALUE_FILES_DELETION_ALWAYS_ASK:
-                        new AlertDialog.Builder(MainActivity.this)
-                                .setMessage(R.string.files_deletion_prompt)
-                                .setPositiveButton(R.string.files_deletion_all, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        deleteAddedFiles(originalFilenames);
-                                    }
-                                })
-                                .setNegativeButton(R.string.files_deletion_recorded, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        deleteCapturedFiles(originalFilenames);
-                                    }
-                                })
-                                .setNeutralButton(R.string.files_deletion_none, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        dialogInterface.dismiss();
-                                    }
-                                })
-                                .show();
-                        break;
-                }
+            final String[] originalFilenames = addingResult.getOriginalSounds();
+            MusInterval newMi = addingResult.getMusInterval();
+            filenames = newMi.sounds;
+            afterSelecting = false;
+            afterCapturing = false;
+            noteKeys = newMi.notes;
+            octaveKeys = newMi.octaves;
+            intervalKeys = newMi.intervals;
+            afterAdding = true;
+            mismatchingSorting = false;
+            intersectingNames = false;
+            sortByName = false;
+            intersectingDates = false;
+            sortByDate = false;
+            refreshFilenames();
+            String addedInstrument = newMi.instrument;
+            if (instrumentsAdapter.getPosition(addedInstrument) == -1) {
+                instrumentsAdapter.add(addedInstrument);
             }
+            refreshExisting();
+            final int nAdded = newMi.sounds.length;
+            if (nAdded == 1) {
+                showQuantityMsg(R.plurals.mi_added, nAdded);
+            } else if (nAdded > 1) {
+                showQuantityMsg(R.plurals.mi_added, nAdded, nAdded);
+            } else {
+                return;
+            }
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+            String filesDeletion = preferences.getString(SettingsFragment.KEY_FILES_DELETION_PREFERENCE, SettingsFragment.DEFAULT_FILES_DELETION);
+            switch (filesDeletion) {
+                case SettingsFragment.VALUE_FILES_DELETION_DISABLED:
+                    break;
+                case SettingsFragment.VALUE_FILES_DELETION_CREATED_ONLY:
+                    deleteCapturedFiles(originalFilenames);
+                    break;
+                case SettingsFragment.VALUE_FILES_DELETION_ALL:
+                    deleteAddedFiles(originalFilenames);
+                    break;
+                default:
+                case SettingsFragment.VALUE_FILES_DELETION_ALWAYS_ASK:
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setMessage(R.string.files_deletion_prompt)
+                            .setPositiveButton(R.string.files_deletion_all, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    deleteAddedFiles(originalFilenames);
+                                }
+                            })
+                            .setNegativeButton(R.string.files_deletion_recorded, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    deleteCapturedFiles(originalFilenames);
+                                }
+                            })
+                            .setNeutralButton(R.string.files_deletion_none, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                }
+                            })
+                            .show();
+                    break;
+            }
+
+            adding = false;
         });
     }
 
@@ -1314,11 +1307,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     @Override
     public void processException(final Throwable t) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                handleError(t);
-            }
+        handler.post(() -> {
+            handleError(t);
+            adding = false;
         });
     }
 
