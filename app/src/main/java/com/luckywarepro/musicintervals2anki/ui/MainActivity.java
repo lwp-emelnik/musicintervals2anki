@@ -361,7 +361,37 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             }
             return true;
         });
-        actionAttach.setOnClickListener(view -> popup.show());
+        actionAttach.setOnClickListener(view -> {
+            if (navigationBottom.getSelectedItemId() != R.id.navigation_add_batch) {
+                popup.show();
+                return;
+            }
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+            boolean batchNoticeSeen = preferences.getBoolean(REF_DB_BATCH_ADDING_NOTICE_SEEN, false);
+            if (batchNoticeSeen) {
+                popup.show();
+                return;
+            }
+
+            ViewGroup viewGroup = findViewById(R.id.content);
+            View dialogView = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_notice, viewGroup, false);
+            TextView textNotice = dialogView.findViewById(R.id.textNotice);
+            final CheckBox checkRemember = dialogView.findViewById(R.id.checkRemember);
+            textNotice.setText(getResources().getString(R.string.batch_adding_notice));
+            new AlertDialog.Builder(MainActivity.this)
+                    .setView(dialogView)
+                    .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.dismiss())
+                    .setOnDismissListener(dialogInterface -> {
+                        if (checkRemember.isChecked()) {
+                            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit();
+                            editor.putBoolean(REF_DB_BATCH_ADDING_NOTICE_SEEN, true);
+                            editor.apply();
+                        }
+                        popup.show();
+                    })
+                    .show();
+        });
 
         viewGroupFilename = findViewById(R.id.viewGroupFilename);
         textFilename = findViewById(R.id.textFilename);
@@ -492,7 +522,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
     }
 
-    private int getVisibility(boolean condition) {
+    private static int getVisibility(boolean condition) {
         return condition ? View.VISIBLE : View.GONE;
     }
 
@@ -1097,63 +1127,23 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void handleSelectFile() {
-        if (permutationsNumber == null || permutationsNumber <= 1) {
-            openChooser();
-            return;
-        }
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        boolean batchNoticeSeen = preferences.getBoolean(REF_DB_BATCH_ADDING_NOTICE_SEEN, false);
-        if (batchNoticeSeen) {
-            openChooser();
-            return;
-        }
-
-        ViewGroup viewGroup = findViewById(R.id.content);
-        View dialogView = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_notice, viewGroup, false);
-        TextView textNotice = dialogView.findViewById(R.id.textNotice);
-        final CheckBox checkRemember = dialogView.findViewById(R.id.checkRemember);
-        textNotice.setText(getResources().getString(R.string.batch_adding_notice));
-        new AlertDialog.Builder(MainActivity.this)
-                .setView(dialogView)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                })
-                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialogInterface) {
-                        if (checkRemember.isChecked()) {
-                            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit();
-                            editor.putBoolean(REF_DB_BATCH_ADDING_NOTICE_SEEN, true);
-                            editor.apply();
-                        }
-                        openChooser();
-                    }
-                })
-                .show();
-    }
-
-    private final ActivityResultLauncher<Intent> fileChooserLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            new FileChooserResultCallback(this)
-    );
-
-    private void openChooser() {
         Intent target = new Intent()
                 .setAction(Intent.ACTION_OPEN_DOCUMENT)
                 .setType("*/*")
                 .addCategory(Intent.CATEGORY_OPENABLE)
                 .putExtra(Intent.EXTRA_LOCAL_ONLY, true)
-                .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, navigationBottom.getSelectedItemId() == R.id.navigation_add_batch)
                 .putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"audio/*", "video/*"});
 
         Intent chooser = Intent.createChooser(target, null);
 
         fileChooserLauncher.launch(chooser);
     }
+
+    private final ActivityResultLauncher<Intent> fileChooserLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new FileChooserResultCallback(this)
+    );
 
     void showMismatchingSortingDialog(final ArrayList<Uri> uriList, final ArrayList<String> names, final ArrayList<String> namesSorted, final ArrayList<Long> lastModifiedValues, final ArrayList<Long> lastModifiedSorted) {
         new AlertDialog.Builder(this)
