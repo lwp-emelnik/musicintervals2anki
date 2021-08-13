@@ -75,6 +75,7 @@ import com.luckywarepro.musicintervals2anki.model.MusInterval;
 import com.luckywarepro.musicintervals2anki.model.NotesIntegrity;
 import com.luckywarepro.musicintervals2anki.model.ProgressIndicator;
 import com.luckywarepro.musicintervals2anki.ui.data.IntegerStatefulData;
+import com.luckywarepro.musicintervals2anki.ui.data.StringSetStatefulData;
 import com.luckywarepro.musicintervals2anki.ui.data.StringStatefulData;
 import com.luckywarepro.musicintervals2anki.ui.settings.MappingPreference;
 import com.luckywarepro.musicintervals2anki.ui.settings.SettingsActivity;
@@ -86,6 +87,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -119,11 +121,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     static final String REF_DB_INTERSECTING_DATES = "intersectingDates";
     static final String REF_DB_SORT_BY_DATE = "sortByDate";
     private static final String REF_DB_NOTE_KEYS = "noteKeys";
+    private static final String TEMPLATE_REF_DB_CHECK_NOTE = "checkNote_%d";
     private static final String REF_DB_CHECK_NOTE_ANY = "checkNoteAny";
     private static final String REF_DB_OCTAVE_KEYS = "octaveKeys";
+    private static final String TEMPLATE_REF_DB_CHECK_OCTAVE = "checkOctave_%d";
     private static final String REF_DB_CHECK_OCTAVE_ANY = "checkOctaveAny";
     private static final String REF_DB_INTERVAL_KEYS = "intervalKeys";
+    private static final String TEMPLATE_REF_DB_CHECK_INTERVAL = "checkInterval_%d";
     private static final String REF_DB_CHECK_INTERVAL_ANY = "checkIntervalAny";
+    private static final String TEMPLATE_REF_DB_TAB_MANUALLY_EDITED_DATA = "tabManuallyEditedData_%d";
 
     static final String REF_DB_SELECTED_FILENAMES = "selectedFilenamesArr";
     static final String REF_DB_AFTER_SELECTING = "afterSelecting";
@@ -442,6 +448,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         onIntervalCheckChangeListener = new OnFieldCheckChangeListener(this, checkIntervals, checkIntervalAny);
 
         configureStatefulData();
+        configureTabStatefulData();
 
         restoreUiState();
 
@@ -512,6 +519,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         mAnkiDroid = new AnkiDroidHelper(this);
     }
+
+    private static final int[] TAB_IDS = {R.id.navigation_add_single, R.id.navigation_add_batch, R.id.navigation_search};
+
+    private final Map<Integer, Set<String>> tabManuallyEditedData = new HashMap<>();
 
     private void handleNavigationItemSelected(int itemId) {
         boolean selectedAddSingle = itemId == R.id.navigation_add_single;
@@ -1809,78 +1820,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void configureStatefulData() {
-        statefulData.put(REF_DB_SELECTED_FILENAMES, new StringStatefulData(
-                () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, filenames),
-                (v) -> {
-                    filenames = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v);
-                    refreshFilenames();
-                },
-                "")
-        );
-        statefulData.put(REF_DB_AFTER_SELECTING, new BooleanStatefulData(
-                () -> afterSelecting,
-                (v) -> afterSelecting = v,
-                false)
-        );
-        statefulData.put(REF_DB_AFTER_CAPTURING, new BooleanStatefulData(
-                () -> afterCapturing,
-                (v) -> afterCapturing = v,
-                false)
-        );
-        statefulData.put(REF_DB_AFTER_ADDING, new BooleanStatefulData(
-                () -> afterAdding,
-                (v) -> afterAdding = v,
-                false)
-        );
-        for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
-            final CompoundButton check = checkNotes[i];
-            statefulData.put(String.valueOf(CHECK_NOTE_IDS[i]), new BooleanStatefulData(
-                    check::isChecked,
-                    check::setChecked,
-                    false)
-            );
-        }
-        for (int i = 0; i < CHECK_OCTAVE_IDS.length; i++) {
-            final CompoundButton check = checkOctaves[i];
-            statefulData.put(String.valueOf(CHECK_OCTAVE_IDS[i]), new BooleanStatefulData(
-                    check::isChecked,
-                    check::setChecked,
-                    false)
-            );
-        }
-        for (int i = 0; i < CHECK_INTERVAL_IDS.length; i++) {
-            final CompoundButton check = checkIntervals[i];
-            statefulData.put(String.valueOf(CHECK_INTERVAL_IDS[i]), new BooleanStatefulData(
-                    check::isChecked,
-                    check::setChecked,
-                    false)
-            );
-        }
-        statefulData.put(REF_DB_RADIO_GROUP_DIRECTION, new IntegerStatefulData(
-                () -> radioGroupDirection.getCheckedRadioButtonId(),
-                (v) -> radioGroupDirection.check(v),
-                findViewById(R.id.radioDirectionAny).getId())
-        );
-        statefulData.put(REF_DB_RADIO_GROUP_TIMING, new IntegerStatefulData(
-                () -> radioGroupTiming.getCheckedRadioButtonId(),
-                (v) -> radioGroupTiming.check(v),
-                findViewById(R.id.radioTimingAny).getId())
-        );
-        statefulData.put(REF_DB_INPUT_TEMPO, new StringStatefulData(
-                () -> inputTempo.getText().toString(),
-                (v) -> inputTempo.setText(v),
-                "")
-        );
-        statefulData.put(REF_DB_INPUT_INSTRUMENT, new StringStatefulData(
-                () -> inputInstrument.getText().toString(),
-                (v) -> inputInstrument.setText(v),
-                "")
-        );
-        statefulData.put(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, new StringStatefulData(
-                () -> inputFirstNoteDurationCoefficient.getText().toString(),
-                (v) -> inputFirstNoteDurationCoefficient.setText(v),
-                "")
-        );
         statefulData.put(REF_DB_NOTE_KEYS, new StringStatefulData(
                 () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, noteKeys),
                 (v) -> noteKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v),
@@ -1948,6 +1887,92 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 () -> checkIntervalAny.isChecked(),
                 (v) -> checkIntervalAny.setChecked(v),
                 true)
+        );
+        for (final int tabId : TAB_IDS) {
+            String refDb = String.format(Locale.US, TEMPLATE_REF_DB_TAB_MANUALLY_EDITED_DATA, tabId);
+            statefulData.put(refDb, new StringSetStatefulData(
+                    () -> tabManuallyEditedData.get(tabId),
+                    (v) -> tabManuallyEditedData.put(tabId, v),
+                    new HashSet<>())
+            );
+        }
+    }
+
+    private void configureTabStatefulData() {
+        statefulData.put(REF_DB_SELECTED_FILENAMES, new StringStatefulData(
+                () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, filenames),
+                (v) -> {
+                    filenames = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v);
+                    refreshFilenames();
+                },
+                "")
+        );
+        statefulData.put(REF_DB_AFTER_SELECTING, new BooleanStatefulData(
+                () -> afterSelecting,
+                (v) -> afterSelecting = v,
+                false)
+        );
+        statefulData.put(REF_DB_AFTER_CAPTURING, new BooleanStatefulData(
+                () -> afterCapturing,
+                (v) -> afterCapturing = v,
+                false)
+        );
+        statefulData.put(REF_DB_AFTER_ADDING, new BooleanStatefulData(
+                () -> afterAdding,
+                (v) -> afterAdding = v,
+                false)
+        );
+        for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
+            final CompoundButton check = checkNotes[i];
+            String refDb = String.format(Locale.US, TEMPLATE_REF_DB_CHECK_NOTE, CHECK_NOTE_IDS[i]);
+            statefulData.put(refDb, new BooleanStatefulData(
+                    check::isChecked,
+                    check::setChecked,
+                    false)
+            );
+        }
+        for (int i = 0; i < CHECK_OCTAVE_IDS.length; i++) {
+            final CompoundButton check = checkOctaves[i];
+            String refDb = String.format(Locale.US, TEMPLATE_REF_DB_CHECK_OCTAVE, CHECK_OCTAVE_IDS[i]);
+            statefulData.put(refDb, new BooleanStatefulData(
+                    check::isChecked,
+                    check::setChecked,
+                    false)
+            );
+        }
+        for (int i = 0; i < CHECK_INTERVAL_IDS.length; i++) {
+            final CompoundButton check = checkIntervals[i];
+            String refDb = String.format(Locale.US, TEMPLATE_REF_DB_CHECK_INTERVAL, CHECK_INTERVAL_IDS[i]);
+            statefulData.put(refDb, new BooleanStatefulData(
+                    check::isChecked,
+                    check::setChecked,
+                    false)
+            );
+        }
+        statefulData.put(REF_DB_RADIO_GROUP_DIRECTION, new IntegerStatefulData(
+                () -> radioGroupDirection.getCheckedRadioButtonId(),
+                (v) -> radioGroupDirection.check(v),
+                findViewById(R.id.radioDirectionAny).getId())
+        );
+        statefulData.put(REF_DB_RADIO_GROUP_TIMING, new IntegerStatefulData(
+                () -> radioGroupTiming.getCheckedRadioButtonId(),
+                (v) -> radioGroupTiming.check(v),
+                findViewById(R.id.radioTimingAny).getId())
+        );
+        statefulData.put(REF_DB_INPUT_TEMPO, new StringStatefulData(
+                () -> inputTempo.getText().toString(),
+                (v) -> inputTempo.setText(v),
+                "")
+        );
+        statefulData.put(REF_DB_INPUT_INSTRUMENT, new StringStatefulData(
+                () -> inputInstrument.getText().toString(),
+                (v) -> inputInstrument.setText(v),
+                "")
+        );
+        statefulData.put(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, new StringStatefulData(
+                () -> inputFirstNoteDurationCoefficient.getText().toString(),
+                (v) -> inputFirstNoteDurationCoefficient.setText(v),
+                "")
         );
     }
 }
