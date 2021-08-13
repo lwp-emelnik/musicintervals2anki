@@ -66,6 +66,7 @@ import linc.com.pcmdecoder.PCMDecoder;
 @SuppressWarnings("FieldCanBeLocal")
 public class AudioCaptureService extends Service {
     public final static String EXTRA_RESULT_DATA = "AudioCaptureService:Extra:ResultData";
+    public final static String EXTRA_ALLOW_MULTIPLE = "AudioCaptureService:Extra:AllowMultiple";
     public final static String EXTRA_RECORDINGS = "AudioCaptureService:Extra:Recordings";
 
     public final static String ACTION_FILES_UPDATED = "AudioCaptureService:FilesUpdated";
@@ -89,6 +90,8 @@ public class AudioCaptureService extends Service {
     private final static int BUFFER_SIZE_IN_BYTES = NUM_SAMPLES_PER_READ * BYTES_PER_SAMPLE;
 
     private final static String LOG_TAG = "AudioCaptureService";
+
+    private boolean allowMultiple;
 
     private MediaProjection projection;
     private AudioRecord record;
@@ -315,6 +318,7 @@ public class AudioCaptureService extends Service {
                 textBottom.setText(getString(R.string.recorded_files, recordings.size()));
                 if (recordings.size() == 0) {
                     hideLatestMenu();
+                    actionRecord.setEnabled(true);
                 } else {
                     Recording recording = recordings.getLast();
                     textLatest.setText(getString(R.string.latest_file, recording.getDurationSeconds()));
@@ -426,6 +430,9 @@ public class AudioCaptureService extends Service {
         if (intent == null) {
             return Service.START_NOT_STICKY;
         }
+        if (intent.hasExtra(EXTRA_ALLOW_MULTIPLE)) {
+            allowMultiple = intent.getBooleanExtra(EXTRA_ALLOW_MULTIPLE, false);
+        }
         if (intent.hasExtra(EXTRA_RECORDINGS)) {
             String[] filenames = intent.getStringArrayExtra(EXTRA_RECORDINGS);
             for (String filename : filenames) {
@@ -435,6 +442,9 @@ public class AudioCaptureService extends Service {
                 recordings.add(recording);
             }
             if (recordings.size() > 0) {
+                if (!allowMultiple) {
+                    actionRecord.setEnabled(false);
+                }
                 Recording recording = recordings.getLast();
                 textBottom.setText(getString(R.string.recorded_files, recordings.size()));
                 textLatest.setVisibility(View.VISIBLE);
@@ -584,6 +594,9 @@ public class AudioCaptureService extends Service {
             long duration = System.currentTimeMillis() - recordingStartedAt;
             Recording recording = new Recording(uri, duration);
             recordings.add(recording);
+            if (!allowMultiple) {
+                actionRecord.setEnabled(false);
+            }
             textBottom.setText(getString(R.string.recorded_files, recordings.size()));
             textLatest.setVisibility(View.VISIBLE);
             textLatest.setText(getString(R.string.latest_file, recording.getDurationSeconds()));

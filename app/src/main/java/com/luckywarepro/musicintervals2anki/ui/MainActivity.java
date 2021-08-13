@@ -518,6 +518,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         if (selectedAddSingle && filenames.length > 1) {
             filenames = new String[]{};
             refreshFilenames();
+            afterAdding = false;
+            afterSelecting = false;
+            afterCapturing = false;
         }
 
         int anyOptionsVisibility = getVisibility(selectedSearch);
@@ -1120,6 +1123,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     }
                     Intent intent = new Intent(MainActivity.this, AudioCaptureService.class);
                     intent.putExtra(AudioCaptureService.EXTRA_RESULT_DATA, result.getData());
+                    intent.putExtra(AudioCaptureService.EXTRA_ALLOW_MULTIPLE, getAllowMultipleFilenames());
                     if (afterCapturing) {
                         intent.putExtra(AudioCaptureService.EXTRA_RECORDINGS, filenames);
                     }
