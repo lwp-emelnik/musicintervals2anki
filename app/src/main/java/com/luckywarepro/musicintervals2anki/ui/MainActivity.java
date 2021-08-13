@@ -362,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             return true;
         });
         actionAttach.setOnClickListener(view -> {
-            if (navigationBottom.getSelectedItemId() != R.id.navigation_add_batch) {
+            if (!getAllowMultipleFilenames()) {
                 popup.show();
                 return;
             }
@@ -510,6 +510,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         boolean selectedAdd = selectedAddSingle || selectedAddBatch;
         menuItemAdd.setVisible(selectedAdd);
         viewGroupFilename.setVisibility(getVisibility(selectedAdd));
+
+        if (isCapturing) {
+            closeCapturing();
+        }
+
+        if (selectedAddSingle && filenames.length > 1) {
+            filenames = new String[]{};
+            refreshFilenames();
+        }
 
         int anyOptionsVisibility = getVisibility(selectedSearch);
         for (View view : anyOptions) {
@@ -1132,7 +1141,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 .setType("*/*")
                 .addCategory(Intent.CATEGORY_OPENABLE)
                 .putExtra(Intent.EXTRA_LOCAL_ONLY, true)
-                .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, navigationBottom.getSelectedItemId() == R.id.navigation_add_batch)
+                .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, getAllowMultipleFilenames())
                 .putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"audio/*", "video/*"});
 
         Intent chooser = Intent.createChooser(target, null);
@@ -1144,6 +1153,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             new ActivityResultContracts.StartActivityForResult(),
             new FileChooserResultCallback(this)
     );
+
+    private boolean getAllowMultipleFilenames() {
+        return navigationBottom.getSelectedItemId() == R.id.navigation_add_batch;
+    }
 
     void showMismatchingSortingDialog(final ArrayList<Uri> uriList, final ArrayList<String> names, final ArrayList<String> namesSorted, final ArrayList<Long> lastModifiedValues, final ArrayList<Long> lastModifiedSorted) {
         new AlertDialog.Builder(this)
