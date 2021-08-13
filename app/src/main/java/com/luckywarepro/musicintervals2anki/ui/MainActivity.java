@@ -173,6 +173,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private MenuItem menuItemMark;
 
     private View viewGroupFilename;
+    private Button actionAttach;
     private TextView textFilename;
     private View viewGroupSelectedFilename;
     private PlaybackButton actionPlay;
@@ -284,8 +285,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     SoundPlayer soundPlayer;
 
-    private Integer permutationsNumber;
-
     private ArrayAdapter<String> instrumentsAdapter;
 
     private AnkiDroidHelper mAnkiDroid;
@@ -340,7 +339,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         Toolbar toolbarMain = findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbarMain);
 
-        Button actionAttach = findViewById(R.id.actionAttach);
+        actionAttach = findViewById(R.id.actionAttach);
         PopupMenu popup = new PopupMenu(MainActivity.this, actionAttach);
         popup.getMenuInflater().inflate(R.menu.attach_audio_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(menuItem -> {
@@ -546,6 +545,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
 
         navigationItemSelected = itemId;
+        refreshPermutations();
     }
 
     private static int getVisibility(boolean condition) {
@@ -822,17 +822,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         if (mAnkiDroid.shouldRequestPermission()) {
             return;
         }
-        int permutationsNumber = 1;
+        int permutationsNumber = 0;
         try {
             permutationsNumber = getMusInterval().getPermutationsNumber();
-
         } catch (Throwable e) {
             // probably best to ignore exceptions here as this function is called silently
         } finally {
-            if (permutationsNumber <= 1) {
-                permutationsNumber = 1;
-            }
-            this.permutationsNumber = permutationsNumber;
+            actionAttach.setText(!getAllowMultipleFilenames() || permutationsNumber == 0 ? "" : String.valueOf(permutationsNumber));
         }
     }
 
@@ -1173,7 +1169,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     );
 
     private boolean getAllowMultipleFilenames() {
-        return navigationBottom.getSelectedItemId() == R.id.navigation_add_batch;
+        return navigationItemSelected == R.id.navigation_add_batch;
     }
 
     void showMismatchingSortingDialog(final ArrayList<Uri> uriList, final ArrayList<String> names, final ArrayList<String> namesSorted, final ArrayList<Long> lastModifiedValues, final ArrayList<Long> lastModifiedSorted) {
@@ -1907,7 +1903,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         );
         statefulData.put(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, new IntegerStatefulData(
                 () -> navigationItemSelected,
-                (v) -> navigationBottom.setSelectedItemId(v),
+                (v) -> {
+                    navigationBottom.setSelectedItemId(v);
+                    navigationItemSelected = v;
+                },
                 R.id.navigation_add_single)
         );
         statefulData.put(REF_DB_MISMATCHING_SORTING, new BooleanStatefulData(
