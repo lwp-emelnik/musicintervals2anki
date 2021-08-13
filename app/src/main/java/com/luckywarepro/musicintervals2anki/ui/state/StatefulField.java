@@ -1,4 +1,4 @@
-package com.luckywarepro.musicintervals2anki.ui.data;
+package com.luckywarepro.musicintervals2anki.ui.state;
 
 import android.content.SharedPreferences;
 
@@ -9,12 +9,12 @@ import java.util.function.Supplier;
  * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
  */
 
-public abstract class StatefulData<T> {
+public abstract class StatefulField<T> {
     private final Supplier<T> supplier;
     private final Consumer<T> consumer;
     private final T defaultValue;
 
-    public StatefulData(Supplier<T> supplier, Consumer<T> consumer, T defaultValue) {
+    public StatefulField(Supplier<T> supplier, Consumer<T> consumer, T defaultValue) {
         this.supplier = supplier;
         this.consumer = consumer;
         this.defaultValue = defaultValue;

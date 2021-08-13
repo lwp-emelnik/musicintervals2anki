@@ -64,8 +64,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.luckywarepro.musicintervals2anki.BuildConfig;
 import com.luckywarepro.musicintervals2anki.R;
-import com.luckywarepro.musicintervals2anki.ui.data.BooleanStatefulData;
-import com.luckywarepro.musicintervals2anki.ui.data.StatefulData;
+import com.luckywarepro.musicintervals2anki.ui.state.BooleanStatefulField;
+import com.luckywarepro.musicintervals2anki.ui.state.StatefulField;
 import com.luckywarepro.musicintervals2anki.helper.AnkiDroidHelper;
 import com.luckywarepro.musicintervals2anki.helper.StringUtil;
 import com.luckywarepro.musicintervals2anki.helper.UriUtil;
@@ -74,9 +74,9 @@ import com.luckywarepro.musicintervals2anki.model.AddingPrompter;
 import com.luckywarepro.musicintervals2anki.model.MusInterval;
 import com.luckywarepro.musicintervals2anki.model.NotesIntegrity;
 import com.luckywarepro.musicintervals2anki.model.ProgressIndicator;
-import com.luckywarepro.musicintervals2anki.ui.data.IntegerStatefulData;
-import com.luckywarepro.musicintervals2anki.ui.data.StringSetStatefulData;
-import com.luckywarepro.musicintervals2anki.ui.data.StringStatefulData;
+import com.luckywarepro.musicintervals2anki.ui.state.IntegerStatefulField;
+import com.luckywarepro.musicintervals2anki.ui.state.StringSetStatefulField;
+import com.luckywarepro.musicintervals2anki.ui.state.StringStatefulField;
 import com.luckywarepro.musicintervals2anki.ui.settings.MappingPreference;
 import com.luckywarepro.musicintervals2anki.ui.settings.SettingsActivity;
 import com.luckywarepro.musicintervals2anki.ui.settings.SettingsFragment;
@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private Integer navigationItemSelected;
 
-    private final Map<String, StatefulData<?>> statefulData = new HashMap<>();
+    private final Map<String, StatefulField<?>> statefulData = new HashMap<>();
 
     private Toast toast;
     private String lastToastText;
@@ -1363,8 +1363,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onPause() {
         final SharedPreferences.Editor uiDbEditor = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE).edit();
-        for (Map.Entry<String, StatefulData<?>> dataBinder : statefulData.entrySet()) {
-            dataBinder.getValue().save(uiDbEditor, dataBinder.getKey());
+        for (Map.Entry<String, StatefulField<?>> statefulField : statefulData.entrySet()) {
+            statefulField.getValue().save(uiDbEditor, statefulField.getKey());
         }
         uiDbEditor.apply();
 
@@ -1381,8 +1381,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     protected void restoreUiState() {
         final SharedPreferences uiDb = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE);
-        for (Map.Entry<String, StatefulData<?>> dataBinder : statefulData.entrySet()) {
-            dataBinder.getValue().restore(uiDb, dataBinder.getKey());
+        for (Map.Entry<String, StatefulField<?>> statefulField : statefulData.entrySet()) {
+            statefulField.getValue().restore(uiDb, statefulField.getKey());
         }
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -1820,27 +1820,27 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void configureStatefulData() {
-        statefulData.put(REF_DB_NOTE_KEYS, new StringStatefulData(
+        statefulData.put(REF_DB_NOTE_KEYS, new StringStatefulField(
                 () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, noteKeys),
                 (v) -> noteKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v),
                 "")
         );
-        statefulData.put(REF_DB_OCTAVE_KEYS, new StringStatefulData(
+        statefulData.put(REF_DB_OCTAVE_KEYS, new StringStatefulField(
                 () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, octaveKeys),
                 (v) -> octaveKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v),
                 "")
         );
-        statefulData.put(REF_DB_INTERVAL_KEYS, new StringStatefulData(
+        statefulData.put(REF_DB_INTERVAL_KEYS, new StringStatefulField(
                 () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, intervalKeys),
                 (v) -> intervalKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v),
                 "")
         );
-        statefulData.put(REF_DB_IS_CAPTURING, new BooleanStatefulData(
+        statefulData.put(REF_DB_IS_CAPTURING, new BooleanStatefulField(
                 () -> isCapturing,
                 (v) -> isCapturing = v,
                 false)
         );
-        statefulData.put(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, new IntegerStatefulData(
+        statefulData.put(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, new IntegerStatefulField(
                 () -> navigationItemSelected,
                 (v) -> {
                     navigationBottom.setSelectedItemId(v);
@@ -1848,49 +1848,49 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 },
                 R.id.navigation_add_single)
         );
-        statefulData.put(REF_DB_MISMATCHING_SORTING, new BooleanStatefulData(
+        statefulData.put(REF_DB_MISMATCHING_SORTING, new BooleanStatefulField(
                 () -> mismatchingSorting,
                 (v) -> mismatchingSorting = v,
                 false)
         );
-        statefulData.put(REF_DB_INTERSECTING_NAMES, new BooleanStatefulData(
+        statefulData.put(REF_DB_INTERSECTING_NAMES, new BooleanStatefulField(
                 () -> intersectingNames,
                 (v) -> intersectingNames = v,
                 false)
         );
-        statefulData.put(REF_DB_SORT_BY_NAME, new BooleanStatefulData(
+        statefulData.put(REF_DB_SORT_BY_NAME, new BooleanStatefulField(
                 () -> sortByName,
                 (v) -> sortByName = v,
                 false)
         );
-        statefulData.put(REF_DB_INTERSECTING_DATES, new BooleanStatefulData(
+        statefulData.put(REF_DB_INTERSECTING_DATES, new BooleanStatefulField(
                 () -> intersectingDates,
                 (v) -> intersectingDates = v,
                 false)
         );
-        statefulData.put(REF_DB_SORT_BY_DATE, new BooleanStatefulData(
+        statefulData.put(REF_DB_SORT_BY_DATE, new BooleanStatefulField(
                 () -> sortByDate,
                 (v) -> sortByDate = v,
                 false)
         );
-        statefulData.put(REF_DB_CHECK_NOTE_ANY, new BooleanStatefulData(
+        statefulData.put(REF_DB_CHECK_NOTE_ANY, new BooleanStatefulField(
                 () -> checkNoteAny.isChecked(),
                 (v) -> checkNoteAny.setChecked(v),
                 true)
         );
-        statefulData.put(REF_DB_CHECK_OCTAVE_ANY, new BooleanStatefulData(
+        statefulData.put(REF_DB_CHECK_OCTAVE_ANY, new BooleanStatefulField(
                 () -> checkOctaveAny.isChecked(),
                 (v) -> checkOctaveAny.setChecked(v),
                 true)
         );
-        statefulData.put(REF_DB_CHECK_INTERVAL_ANY, new BooleanStatefulData(
+        statefulData.put(REF_DB_CHECK_INTERVAL_ANY, new BooleanStatefulField(
                 () -> checkIntervalAny.isChecked(),
                 (v) -> checkIntervalAny.setChecked(v),
                 true)
         );
         for (final int tabId : TAB_IDS) {
             String refDb = String.format(Locale.US, TEMPLATE_REF_DB_TAB_MANUALLY_EDITED_DATA, tabId);
-            statefulData.put(refDb, new StringSetStatefulData(
+            statefulData.put(refDb, new StringSetStatefulField(
                     () -> tabManuallyEditedData.get(tabId),
                     (v) -> tabManuallyEditedData.put(tabId, v),
                     new HashSet<>())
@@ -1899,7 +1899,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void configureTabStatefulData() {
-        statefulData.put(REF_DB_SELECTED_FILENAMES, new StringStatefulData(
+        statefulData.put(REF_DB_SELECTED_FILENAMES, new StringStatefulField(
                 () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, filenames),
                 (v) -> {
                     filenames = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v);
@@ -1907,17 +1907,17 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 },
                 "")
         );
-        statefulData.put(REF_DB_AFTER_SELECTING, new BooleanStatefulData(
+        statefulData.put(REF_DB_AFTER_SELECTING, new BooleanStatefulField(
                 () -> afterSelecting,
                 (v) -> afterSelecting = v,
                 false)
         );
-        statefulData.put(REF_DB_AFTER_CAPTURING, new BooleanStatefulData(
+        statefulData.put(REF_DB_AFTER_CAPTURING, new BooleanStatefulField(
                 () -> afterCapturing,
                 (v) -> afterCapturing = v,
                 false)
         );
-        statefulData.put(REF_DB_AFTER_ADDING, new BooleanStatefulData(
+        statefulData.put(REF_DB_AFTER_ADDING, new BooleanStatefulField(
                 () -> afterAdding,
                 (v) -> afterAdding = v,
                 false)
@@ -1925,7 +1925,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
             final CompoundButton check = checkNotes[i];
             String refDb = String.format(Locale.US, TEMPLATE_REF_DB_CHECK_NOTE, CHECK_NOTE_IDS[i]);
-            statefulData.put(refDb, new BooleanStatefulData(
+            statefulData.put(refDb, new BooleanStatefulField(
                     check::isChecked,
                     check::setChecked,
                     false)
@@ -1934,7 +1934,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (int i = 0; i < CHECK_OCTAVE_IDS.length; i++) {
             final CompoundButton check = checkOctaves[i];
             String refDb = String.format(Locale.US, TEMPLATE_REF_DB_CHECK_OCTAVE, CHECK_OCTAVE_IDS[i]);
-            statefulData.put(refDb, new BooleanStatefulData(
+            statefulData.put(refDb, new BooleanStatefulField(
                     check::isChecked,
                     check::setChecked,
                     false)
@@ -1943,33 +1943,33 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (int i = 0; i < CHECK_INTERVAL_IDS.length; i++) {
             final CompoundButton check = checkIntervals[i];
             String refDb = String.format(Locale.US, TEMPLATE_REF_DB_CHECK_INTERVAL, CHECK_INTERVAL_IDS[i]);
-            statefulData.put(refDb, new BooleanStatefulData(
+            statefulData.put(refDb, new BooleanStatefulField(
                     check::isChecked,
                     check::setChecked,
                     false)
             );
         }
-        statefulData.put(REF_DB_RADIO_GROUP_DIRECTION, new IntegerStatefulData(
+        statefulData.put(REF_DB_RADIO_GROUP_DIRECTION, new IntegerStatefulField(
                 () -> radioGroupDirection.getCheckedRadioButtonId(),
                 (v) -> radioGroupDirection.check(v),
                 findViewById(R.id.radioDirectionAny).getId())
         );
-        statefulData.put(REF_DB_RADIO_GROUP_TIMING, new IntegerStatefulData(
+        statefulData.put(REF_DB_RADIO_GROUP_TIMING, new IntegerStatefulField(
                 () -> radioGroupTiming.getCheckedRadioButtonId(),
                 (v) -> radioGroupTiming.check(v),
                 findViewById(R.id.radioTimingAny).getId())
         );
-        statefulData.put(REF_DB_INPUT_TEMPO, new StringStatefulData(
+        statefulData.put(REF_DB_INPUT_TEMPO, new StringStatefulField(
                 () -> inputTempo.getText().toString(),
                 (v) -> inputTempo.setText(v),
                 "")
         );
-        statefulData.put(REF_DB_INPUT_INSTRUMENT, new StringStatefulData(
+        statefulData.put(REF_DB_INPUT_INSTRUMENT, new StringStatefulField(
                 () -> inputInstrument.getText().toString(),
                 (v) -> inputInstrument.setText(v),
                 "")
         );
-        statefulData.put(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, new StringStatefulData(
+        statefulData.put(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, new StringStatefulField(
                 () -> inputFirstNoteDurationCoefficient.getText().toString(),
                 (v) -> inputFirstNoteDurationCoefficient.setText(v),
                 "")

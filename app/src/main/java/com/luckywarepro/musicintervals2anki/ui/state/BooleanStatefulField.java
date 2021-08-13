@@ -1,4 +1,4 @@
-package com.luckywarepro.musicintervals2anki.ui.data;
+package com.luckywarepro.musicintervals2anki.ui.state;
 
 import android.content.SharedPreferences;
 
@@ -9,18 +9,18 @@ import java.util.function.Supplier;
  * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
  */
 
-public class IntegerStatefulData extends StatefulData<Integer> {
-    public IntegerStatefulData(Supplier<Integer> supplier, Consumer<Integer> consumer, Integer defaultValue) {
+public class BooleanStatefulField extends StatefulField<Boolean> {
+    public BooleanStatefulField(Supplier<Boolean> supplier, Consumer<Boolean> consumer, Boolean defaultValue) {
         super(supplier, consumer, defaultValue);
     }
 
     @Override
     public void save(SharedPreferences.Editor preferenceEditor, String key) {
-        preferenceEditor.putInt(key, getSupplier().get());
+        preferenceEditor.putBoolean(key, getSupplier().get());
     }
 
     @Override
     public void restore(SharedPreferences preferences, String key) {
-        getConsumer().accept(preferences.getInt(key, getDefaultValue()));
+        getConsumer().accept(preferences.getBoolean(key, getDefaultValue()));
     }
 }
