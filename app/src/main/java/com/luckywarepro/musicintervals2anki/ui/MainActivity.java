@@ -64,6 +64,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.luckywarepro.musicintervals2anki.BuildConfig;
 import com.luckywarepro.musicintervals2anki.R;
+import com.luckywarepro.musicintervals2anki.ui.data.BooleanStatefulData;
+import com.luckywarepro.musicintervals2anki.ui.data.StatefulData;
 import com.luckywarepro.musicintervals2anki.helper.AnkiDroidHelper;
 import com.luckywarepro.musicintervals2anki.helper.StringUtil;
 import com.luckywarepro.musicintervals2anki.helper.UriUtil;
@@ -72,6 +74,8 @@ import com.luckywarepro.musicintervals2anki.model.AddingPrompter;
 import com.luckywarepro.musicintervals2anki.model.MusInterval;
 import com.luckywarepro.musicintervals2anki.model.NotesIntegrity;
 import com.luckywarepro.musicintervals2anki.model.ProgressIndicator;
+import com.luckywarepro.musicintervals2anki.ui.data.IntegerStatefulData;
+import com.luckywarepro.musicintervals2anki.ui.data.StringStatefulData;
 import com.luckywarepro.musicintervals2anki.ui.settings.MappingPreference;
 import com.luckywarepro.musicintervals2anki.ui.settings.SettingsActivity;
 import com.luckywarepro.musicintervals2anki.ui.settings.SettingsFragment;
@@ -104,30 +108,32 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private static final String TAG_SUSPICIOUS = "suspicious";
 
     static final String REF_DB_STATE = "com.luckywarepro.musicintervals2anki.uistate";
-    static final String REF_DB_SELECTED_FILENAMES = "selectedFilenamesArr";
+    private static final String DB_STRING_ARRAY_SEPARATOR = ",";
+
+    static final String REF_DB_IS_CAPTURING = "isCapturing";
+    private static final String REF_DB_BATCH_ADDING_NOTICE_SEEN = "batchAddingNoticeSeen";
+    private static final String REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM = "navigationBottomSelectedItem";
     static final String REF_DB_MISMATCHING_SORTING = "mismatchingSorting";
     static final String REF_DB_INTERSECTING_NAMES = "intersectingNames";
     static final String REF_DB_SORT_BY_NAME = "sortByName";
     static final String REF_DB_INTERSECTING_DATES = "intersectingDates";
     static final String REF_DB_SORT_BY_DATE = "sortByDate";
+    private static final String REF_DB_NOTE_KEYS = "noteKeys";
+    private static final String REF_DB_CHECK_NOTE_ANY = "checkNoteAny";
+    private static final String REF_DB_OCTAVE_KEYS = "octaveKeys";
+    private static final String REF_DB_CHECK_OCTAVE_ANY = "checkOctaveAny";
+    private static final String REF_DB_INTERVAL_KEYS = "intervalKeys";
+    private static final String REF_DB_CHECK_INTERVAL_ANY = "checkIntervalAny";
+
+    static final String REF_DB_SELECTED_FILENAMES = "selectedFilenamesArr";
     static final String REF_DB_AFTER_SELECTING = "afterSelecting";
     static final String REF_DB_AFTER_CAPTURING = "afterCapturing";
-    static final String REF_DB_IS_CAPTURING = "isCapturing";
     static final String REF_DB_AFTER_ADDING = "afterAdding";
-    private static final String REF_DB_CHECK_NOTE_ANY = "checkNoteAny";
-    private static final String REF_DB_CHECK_OCTAVE_ANY = "checkOctaveAny";
     private static final String REF_DB_RADIO_GROUP_DIRECTION = "radioGroupDirection";
     private static final String REF_DB_RADIO_GROUP_TIMING = "radioGroupTiming";
-    private static final String REF_DB_CHECK_INTERVAL_ANY = "checkIntervalAny";
     private static final String REF_DB_INPUT_TEMPO = "inputTempo";
     private static final String REF_DB_INPUT_INSTRUMENT = "inputInstrument";
     private static final String REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT = "firstNoteDurationCoefficient";
-    private static final String REF_DB_BATCH_ADDING_NOTICE_SEEN = "batchAddingNoticeSeen";
-    private static final String REF_DB_NOTE_KEYS = "noteKeys";
-    private static final String REF_DB_OCTAVE_KEYS = "octaveKeys";
-    private static final String REF_DB_INTERVAL_KEYS = "intervalKeys";
-    private static final String REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM = "navigationBottomSelectedItem";
-    private static final String DB_STRING_ARRAY_SEPARATOR = ",";
 
     private final static Map<String, Integer> FIELD_LABEL_STRING_IDS_SINGULAR = new HashMap<String, Integer>() {{
         put(MusInterval.Builder.DIRECTION, R.string.direction);
@@ -187,6 +193,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private View[] anyOptions;
 
     private BottomNavigationView navigationBottom;
+
+    private Integer navigationItemSelected;
+
+    private final Map<String, StatefulData<?>> statefulData = new HashMap<>();
 
     private Toast toast;
     private String lastToastText;
@@ -432,6 +442,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         onOctaveCheckChangeListener = new OnFieldCheckChangeListener(this, checkOctaves, checkOctaveAny);
         onIntervalCheckChangeListener = new OnFieldCheckChangeListener(this, checkIntervals, checkIntervalAny);
 
+        configureStatefulData();
+
         restoreUiState();
 
         ConstraintLayout layoutIntervals = findViewById(R.id.viewGroupInterval);
@@ -532,6 +544,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         onNoteCheckChangeListener.setEnableMultiple(enableMultiple);
         onOctaveCheckChangeListener.setEnableMultiple(enableMultiple);
         onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
+
+        navigationItemSelected = itemId;
     }
 
     private static int getVisibility(boolean condition) {
@@ -1342,37 +1356,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onPause() {
         final SharedPreferences.Editor uiDbEditor = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE).edit();
-        storeFilenames(this, filenames);
-        uiDbEditor.putBoolean(REF_DB_AFTER_SELECTING, afterSelecting);
-        uiDbEditor.putBoolean(REF_DB_AFTER_CAPTURING, afterCapturing);
-        uiDbEditor.putBoolean(REF_DB_IS_CAPTURING, isCapturing);
-        uiDbEditor.putBoolean(REF_DB_CHECK_NOTE_ANY, checkNoteAny.isChecked());
-        for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
-            uiDbEditor.putBoolean(String.valueOf(CHECK_NOTE_IDS[i]), checkNotes[i].isChecked());
+        for (Map.Entry<String, StatefulData<?>> dataBinder : statefulData.entrySet()) {
+            dataBinder.getValue().save(uiDbEditor, dataBinder.getKey());
         }
-        uiDbEditor.putBoolean(REF_DB_CHECK_OCTAVE_ANY, checkOctaveAny.isChecked());
-        for (int i = 0; i < CHECK_OCTAVE_IDS.length; i++) {
-            uiDbEditor.putBoolean(String.valueOf(CHECK_OCTAVE_IDS[i]), checkOctaves[i].isChecked());
-        }
-        uiDbEditor.putInt(REF_DB_RADIO_GROUP_DIRECTION, radioGroupDirection.getCheckedRadioButtonId());
-        uiDbEditor.putInt(REF_DB_RADIO_GROUP_TIMING, radioGroupTiming.getCheckedRadioButtonId());
-        uiDbEditor.putBoolean(REF_DB_CHECK_INTERVAL_ANY, checkIntervalAny.isChecked());
-        for (int i = 0; i < CHECK_INTERVAL_IDS.length; i++) {
-            uiDbEditor.putBoolean(String.valueOf(CHECK_INTERVAL_IDS[i]), checkIntervals[i].isChecked());
-        }
-        uiDbEditor.putString(REF_DB_INPUT_TEMPO, inputTempo.getText().toString());
-        uiDbEditor.putString(REF_DB_INPUT_INSTRUMENT, inputInstrument.getText().toString());
-        uiDbEditor.putString(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, inputFirstNoteDurationCoefficient.getText().toString());
-        uiDbEditor.putBoolean(REF_DB_AFTER_ADDING, afterAdding);
-        uiDbEditor.putBoolean(REF_DB_MISMATCHING_SORTING, mismatchingSorting);
-        uiDbEditor.putBoolean(REF_DB_INTERSECTING_NAMES, intersectingNames);
-        uiDbEditor.putBoolean(REF_DB_SORT_BY_NAME, sortByName);
-        uiDbEditor.putBoolean(REF_DB_INTERSECTING_DATES, intersectingDates);
-        uiDbEditor.putBoolean(REF_DB_SORT_BY_DATE, sortByDate);
-        uiDbEditor.putString(REF_DB_NOTE_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, noteKeys));
-        uiDbEditor.putString(REF_DB_OCTAVE_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, octaveKeys));
-        uiDbEditor.putString(REF_DB_INTERVAL_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, intervalKeys));
-        uiDbEditor.putInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, navigationBottom.getSelectedItemId());
         uiDbEditor.apply();
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
@@ -1388,38 +1374,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     protected void restoreUiState() {
         final SharedPreferences uiDb = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE);
-        filenames = getStoredFilenames(this);
-        refreshFilenames();
-        afterSelecting = uiDb.getBoolean(REF_DB_AFTER_SELECTING, false);
-        afterCapturing = uiDb.getBoolean(REF_DB_AFTER_CAPTURING, false);
-        isCapturing = uiDb.getBoolean(REF_DB_IS_CAPTURING, false);
-        checkNoteAny.setChecked(uiDb.getBoolean(REF_DB_CHECK_NOTE_ANY, true));
-        for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
-            checkNotes[i].setChecked(uiDb.getBoolean(String.valueOf(CHECK_NOTE_IDS[i]), false));
+        for (Map.Entry<String, StatefulData<?>> dataBinder : statefulData.entrySet()) {
+            dataBinder.getValue().restore(uiDb, dataBinder.getKey());
         }
-        checkOctaveAny.setChecked(uiDb.getBoolean(REF_DB_CHECK_OCTAVE_ANY, true));
-        for (int i = 0; i < CHECK_OCTAVE_IDS.length; i++) {
-            checkOctaves[i].setChecked(uiDb.getBoolean(String.valueOf(CHECK_OCTAVE_IDS[i]), false));
-        }
-        radioGroupDirection.check(uiDb.getInt(REF_DB_RADIO_GROUP_DIRECTION, findViewById(R.id.radioDirectionAny).getId()));
-        radioGroupTiming.check(uiDb.getInt(REF_DB_RADIO_GROUP_TIMING, findViewById(R.id.radioTimingAny).getId()));
-        checkIntervalAny.setChecked(uiDb.getBoolean(REF_DB_CHECK_INTERVAL_ANY, true));
-        for (int i = 0; i < CHECK_INTERVAL_IDS.length; i++) {
-            checkIntervals[i].setChecked(uiDb.getBoolean(String.valueOf(CHECK_INTERVAL_IDS[i]), false));
-        }
-        inputTempo.setText(uiDb.getString(REF_DB_INPUT_TEMPO, ""));
-        inputInstrument.setText(uiDb.getString(REF_DB_INPUT_INSTRUMENT, ""));
-        inputFirstNoteDurationCoefficient.setText(uiDb.getString(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, ""));
-        afterAdding = uiDb.getBoolean(REF_DB_AFTER_ADDING, false);
-        mismatchingSorting = uiDb.getBoolean(REF_DB_MISMATCHING_SORTING, false);
-        intersectingNames = uiDb.getBoolean(REF_DB_INTERSECTING_NAMES, false);
-        sortByName = uiDb.getBoolean(REF_DB_SORT_BY_NAME, false);
-        intersectingDates = uiDb.getBoolean(REF_DB_INTERSECTING_DATES, false);
-        sortByDate = uiDb.getBoolean(REF_DB_SORT_BY_DATE, false);
-        noteKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_NOTE_KEYS, ""));
-        octaveKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_OCTAVE_KEYS, ""));
-        intervalKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_INTERVAL_KEYS, ""));
-        navigationBottom.setSelectedItemId(uiDb.getInt(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, R.id.navigation_add_single));
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
@@ -1853,5 +1810,145 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 break;
         }
         return super.dispatchTouchEvent(ev);
+    }
+
+    private void configureStatefulData() {
+        statefulData.put(REF_DB_SELECTED_FILENAMES, new StringStatefulData(
+                () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, filenames),
+                (v) -> {
+                    filenames = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v);
+                    refreshFilenames();
+                },
+                "")
+        );
+        statefulData.put(REF_DB_AFTER_SELECTING, new BooleanStatefulData(
+                () -> afterSelecting,
+                (v) -> afterSelecting = v,
+                false)
+        );
+        statefulData.put(REF_DB_AFTER_CAPTURING, new BooleanStatefulData(
+                () -> afterCapturing,
+                (v) -> afterCapturing = v,
+                false)
+        );
+        statefulData.put(REF_DB_AFTER_ADDING, new BooleanStatefulData(
+                () -> afterAdding,
+                (v) -> afterAdding = v,
+                false)
+        );
+        for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
+            final CompoundButton check = checkNotes[i];
+            statefulData.put(String.valueOf(CHECK_NOTE_IDS[i]), new BooleanStatefulData(
+                    check::isChecked,
+                    check::setChecked,
+                    false)
+            );
+        }
+        for (int i = 0; i < CHECK_OCTAVE_IDS.length; i++) {
+            final CompoundButton check = checkOctaves[i];
+            statefulData.put(String.valueOf(CHECK_OCTAVE_IDS[i]), new BooleanStatefulData(
+                    check::isChecked,
+                    check::setChecked,
+                    false)
+            );
+        }
+        for (int i = 0; i < CHECK_INTERVAL_IDS.length; i++) {
+            final CompoundButton check = checkIntervals[i];
+            statefulData.put(String.valueOf(CHECK_INTERVAL_IDS[i]), new BooleanStatefulData(
+                    check::isChecked,
+                    check::setChecked,
+                    false)
+            );
+        }
+        statefulData.put(REF_DB_RADIO_GROUP_DIRECTION, new IntegerStatefulData(
+                () -> radioGroupDirection.getCheckedRadioButtonId(),
+                (v) -> radioGroupDirection.check(v),
+                findViewById(R.id.radioDirectionAny).getId())
+        );
+        statefulData.put(REF_DB_RADIO_GROUP_TIMING, new IntegerStatefulData(
+                () -> radioGroupTiming.getCheckedRadioButtonId(),
+                (v) -> radioGroupTiming.check(v),
+                findViewById(R.id.radioTimingAny).getId())
+        );
+        statefulData.put(REF_DB_INPUT_TEMPO, new StringStatefulData(
+                () -> inputTempo.getText().toString(),
+                (v) -> inputTempo.setText(v),
+                "")
+        );
+        statefulData.put(REF_DB_INPUT_INSTRUMENT, new StringStatefulData(
+                () -> inputInstrument.getText().toString(),
+                (v) -> inputInstrument.setText(v),
+                "")
+        );
+        statefulData.put(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, new StringStatefulData(
+                () -> inputFirstNoteDurationCoefficient.getText().toString(),
+                (v) -> inputFirstNoteDurationCoefficient.setText(v),
+                "")
+        );
+        statefulData.put(REF_DB_NOTE_KEYS, new StringStatefulData(
+                () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, noteKeys),
+                (v) -> noteKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v),
+                "")
+        );
+        statefulData.put(REF_DB_OCTAVE_KEYS, new StringStatefulData(
+                () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, octaveKeys),
+                (v) -> octaveKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v),
+                "")
+        );
+        statefulData.put(REF_DB_INTERVAL_KEYS, new StringStatefulData(
+                () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, intervalKeys),
+                (v) -> intervalKeys = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v),
+                "")
+        );
+        statefulData.put(REF_DB_IS_CAPTURING, new BooleanStatefulData(
+                () -> isCapturing,
+                (v) -> isCapturing = v,
+                false)
+        );
+        statefulData.put(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, new IntegerStatefulData(
+                () -> navigationItemSelected,
+                (v) -> navigationBottom.setSelectedItemId(v),
+                R.id.navigation_add_single)
+        );
+        statefulData.put(REF_DB_MISMATCHING_SORTING, new BooleanStatefulData(
+                () -> mismatchingSorting,
+                (v) -> mismatchingSorting = v,
+                false)
+        );
+        statefulData.put(REF_DB_INTERSECTING_NAMES, new BooleanStatefulData(
+                () -> intersectingNames,
+                (v) -> intersectingNames = v,
+                false)
+        );
+        statefulData.put(REF_DB_SORT_BY_NAME, new BooleanStatefulData(
+                () -> sortByName,
+                (v) -> sortByName = v,
+                false)
+        );
+        statefulData.put(REF_DB_INTERSECTING_DATES, new BooleanStatefulData(
+                () -> intersectingDates,
+                (v) -> intersectingDates = v,
+                false)
+        );
+        statefulData.put(REF_DB_SORT_BY_DATE, new BooleanStatefulData(
+                () -> sortByDate,
+                (v) -> sortByDate = v,
+                false)
+        );
+        statefulData.put(REF_DB_CHECK_NOTE_ANY, new BooleanStatefulData(
+                () -> checkNoteAny.isChecked(),
+                (v) -> checkNoteAny.setChecked(v),
+                true)
+        );
+        statefulData.put(REF_DB_CHECK_OCTAVE_ANY, new BooleanStatefulData(
+                () -> checkOctaveAny.isChecked(),
+                (v) -> checkOctaveAny.setChecked(v),
+                true)
+        );
+        statefulData.put(REF_DB_CHECK_INTERVAL_ANY, new BooleanStatefulData(
+                () -> checkIntervalAny.isChecked(),
+                (v) -> checkIntervalAny.setChecked(v),
+                true)
+        );
     }
 }
