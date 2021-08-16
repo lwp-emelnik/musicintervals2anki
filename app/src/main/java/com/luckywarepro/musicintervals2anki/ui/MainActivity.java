@@ -61,7 +61,6 @@ import androidx.preference.PreferenceManager;
 import android.transition.AutoTransition;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
 import com.luckywarepro.musicintervals2anki.BuildConfig;
 import com.luckywarepro.musicintervals2anki.R;
 import com.luckywarepro.musicintervals2anki.ui.state.BooleanStatefulField;
@@ -109,17 +108,18 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private static final String TAG_CORRUPTED = "corrupted";
     private static final String TAG_SUSPICIOUS = "suspicious";
 
-    static final String REF_DB_STATE = "com.luckywarepro.musicintervals2anki.uistate";
+    private static final String REF_DB_STATE = "com.luckywarepro.musicintervals2anki.uistate";
     private static final String DB_STRING_ARRAY_SEPARATOR = ",";
 
-    static final String REF_DB_IS_CAPTURING = "isCapturing";
+    // keys for app-level stateful fields
+    private static final String REF_DB_IS_CAPTURING = "isCapturing";
     private static final String REF_DB_BATCH_ADDING_NOTICE_SEEN = "batchAddingNoticeSeen";
-    private static final String REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM = "navigationBottomSelectedItem";
-    static final String REF_DB_MISMATCHING_SORTING = "mismatchingSorting";
-    static final String REF_DB_INTERSECTING_NAMES = "intersectingNames";
-    static final String REF_DB_SORT_BY_NAME = "sortByName";
-    static final String REF_DB_INTERSECTING_DATES = "intersectingDates";
-    static final String REF_DB_SORT_BY_DATE = "sortByDate";
+    private static final String REF_DB_SELECTED_NAVIGATION_ITEM = "selectedNavigationItem";
+    private static final String REF_DB_MISMATCHING_SORTING = "mismatchingSorting";
+    private static final String REF_DB_INTERSECTING_NAMES = "intersectingNames";
+    private static final String REF_DB_SORT_BY_NAME = "sortByName";
+    private static final String REF_DB_INTERSECTING_DATES = "intersectingDates";
+    private static final String REF_DB_SORT_BY_DATE = "sortByDate";
     private static final String REF_DB_NOTE_KEYS = "noteKeys";
     private static final String TEMPLATE_REF_DB_CHECK_NOTE = "checkNote_%d";
     private static final String REF_DB_CHECK_NOTE_ANY = "checkNoteAny";
@@ -131,15 +131,24 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private static final String REF_DB_CHECK_INTERVAL_ANY = "checkIntervalAny";
     private static final String TEMPLATE_REF_DB_TAB_MANUALLY_EDITED_DATA = "tabManuallyEditedData_%d";
 
-    static final String REF_DB_SELECTED_FILENAMES = "selectedFilenamesArr";
-    static final String REF_DB_AFTER_SELECTING = "afterSelecting";
-    static final String REF_DB_AFTER_CAPTURING = "afterCapturing";
-    static final String REF_DB_AFTER_ADDING = "afterAdding";
+
+    private static final String TEMPLATE_REF_DB_TAB_STATEFUL_FIELD = "%s_%d";
+
+    // keys for stateful fields that are unique for tabs
+    private static final String REF_DB_SELECTED_FILENAMES = "selectedFilenamesArr";
+    private static final String REF_DB_AFTER_SELECTING = "afterSelecting";
+    private static final String REF_DB_AFTER_CAPTURING = "afterCapturing";
+    private static final String REF_DB_AFTER_ADDING = "afterAdding";
     private static final String REF_DB_RADIO_GROUP_DIRECTION = "radioGroupDirection";
     private static final String REF_DB_RADIO_GROUP_TIMING = "radioGroupTiming";
     private static final String REF_DB_INPUT_TEMPO = "inputTempo";
     private static final String REF_DB_INPUT_INSTRUMENT = "inputInstrument";
     private static final String REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT = "firstNoteDurationCoefficient";
+
+    private static final int DEFAULT_SELECTED_NAVIGATION_ITEM = R.id.navigation_add_single;
+    private static final String DEFAULT_SELECTED_FILENAMES = "";
+    private static final boolean DEFAULT_AFTER_SELECTING = false;
+    private static final boolean DEFAULT_AFTER_ADDING = false;
 
     private final static Map<String, Integer> FIELD_LABEL_STRING_IDS_SINGULAR = new HashMap<String, Integer>() {{
         put(MusInterval.Builder.DIRECTION, R.string.direction);
@@ -199,11 +208,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private View[] anyOptions;
 
-    private BottomNavigationView navigationBottom;
+    private BottomNavigationView navigation;
 
-    private Integer navigationItemSelected;
+    private Integer selectedNavigationItem;
 
     private final Map<String, StatefulField<?>> statefulData = new HashMap<>();
+    private final Map<String, StatefulField<?>> tabStatefulData = new HashMap<>();
 
     private Toast toast;
     private String lastToastText;
@@ -441,7 +451,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 findViewById(R.id.radioTimingAny),
                 checkIntervalAny
         };
-        navigationBottom = findViewById(R.id.navigationBottom);
+        navigation = findViewById(R.id.navigationBottom);
 
         onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny);
         onOctaveCheckChangeListener = new OnFieldCheckChangeListener(this, checkOctaves, checkOctaveAny);
@@ -507,12 +517,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         inputTempo.addTextChangedListener(new FieldInputTextWatcher(this));
         inputInstrument.addTextChangedListener(new FieldInputTextWatcher(this));
         inputFirstNoteDurationCoefficient.addTextChangedListener(new FieldInputTextWatcher(this));
-        navigationBottom.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                handleNavigationItemSelected(item.getItemId());
-                return true;
-            }
+        navigation.setOnItemSelectedListener(item -> {
+            handleNavigationItemSelected(item.getItemId());
+            return true;
         });
 
         handler = new Handler();
@@ -537,6 +544,33 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             closeCapturing();
         }
 
+        int anyOptionsVisibility = getVisibility(selectedSearch);
+        for (View view : anyOptions) {
+            view.setVisibility(anyOptionsVisibility);
+        }
+
+        SharedPreferences uiDb = getUiDb(this);
+        SharedPreferences.Editor uiDbEditor = uiDb.edit();
+
+        if (itemId != selectedNavigationItem) {
+            for (Map.Entry<String, StatefulField<?>> tabStatefulField : tabStatefulData.entrySet()) {
+                StatefulField<?> statefulField = tabStatefulField.getValue();
+                String refDb = getTabRefDb(selectedNavigationItem, tabStatefulField.getKey());
+                statefulField.save(uiDbEditor, refDb);
+            }
+        }
+
+        boolean enableMultiple = selectedSearch || selectedAddBatch;
+        onNoteCheckChangeListener.setEnableMultiple(enableMultiple);
+        onOctaveCheckChangeListener.setEnableMultiple(enableMultiple);
+        onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
+
+        for (Map.Entry<String, StatefulField<?>> tabStatefulField : tabStatefulData.entrySet()) {
+            StatefulField<?> statefulField = tabStatefulField.getValue();
+            String refDb = getTabRefDb(itemId, tabStatefulField.getKey());
+            statefulField.restore(uiDb, refDb);
+        }
+
         if (selectedAddSingle && filenames.length > 1) {
             filenames = new String[]{};
             refreshFilenames();
@@ -545,17 +579,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             afterCapturing = false;
         }
 
-        int anyOptionsVisibility = getVisibility(selectedSearch);
-        for (View view : anyOptions) {
-            view.setVisibility(anyOptionsVisibility);
-        }
+        selectedNavigationItem = itemId;
+        StatefulField<?> selectedItemStatefulField = Objects.requireNonNull(statefulData.get(REF_DB_SELECTED_NAVIGATION_ITEM));
+        selectedItemStatefulField.save(uiDbEditor, REF_DB_SELECTED_NAVIGATION_ITEM);
+        uiDbEditor.apply();
 
-        boolean enableMultiple = selectedSearch || selectedAddBatch;
-        onNoteCheckChangeListener.setEnableMultiple(enableMultiple);
-        onOctaveCheckChangeListener.setEnableMultiple(enableMultiple);
-        onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
-
-        navigationItemSelected = itemId;
         refreshPermutations();
     }
 
@@ -568,7 +596,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         getMenuInflater().inflate(R.menu.main, menu);
         menuItemAdd = menu.findItem(R.id.actionAddToAnki);
         menuItemMark = menu.findItem(R.id.actionMarkExisting);
-        handleNavigationItemSelected(navigationBottom.getSelectedItemId()); // @fixme
+        handleNavigationItemSelected(navigation.getSelectedItemId()); // @fixme
         return true;
     }
 
@@ -1180,7 +1208,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     );
 
     private boolean getAllowMultipleFilenames() {
-        return navigationItemSelected == R.id.navigation_add_batch;
+        return selectedNavigationItem == R.id.navigation_add_batch;
     }
 
     void showMismatchingSortingDialog(final ArrayList<Uri> uriList, final ArrayList<String> names, final ArrayList<String> namesSorted, final ArrayList<Long> lastModifiedValues, final ArrayList<Long> lastModifiedSorted) {
@@ -1362,7 +1390,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     @Override
     protected void onPause() {
-        final SharedPreferences.Editor uiDbEditor = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE).edit();
+        final SharedPreferences.Editor uiDbEditor = getUiDb(this).edit();
         for (Map.Entry<String, StatefulField<?>> statefulField : statefulData.entrySet()) {
             statefulField.getValue().save(uiDbEditor, statefulField.getKey());
         }
@@ -1380,7 +1408,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     protected void restoreUiState() {
-        final SharedPreferences uiDb = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE);
+        final SharedPreferences uiDb = getUiDb(this);
         for (Map.Entry<String, StatefulField<?>> statefulField : statefulData.entrySet()) {
             statefulField.getValue().restore(uiDb, statefulField.getKey());
         }
@@ -1388,15 +1416,88 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
-    static String[] getStoredFilenames(Context context) {
-        final SharedPreferences uiDb = context.getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE);
-        return StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(REF_DB_SELECTED_FILENAMES, ""));
+    private static SharedPreferences getUiDb(Context context) {
+        return context.getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE);
     }
 
-    static void storeFilenames(Context context, String[] filenames) {
-        final SharedPreferences.Editor uiDbEditor = context.getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE).edit();
-        uiDbEditor.putString(REF_DB_SELECTED_FILENAMES, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, filenames));
+    public static void storeCapturing(Context context, boolean capturing) {
+        final SharedPreferences.Editor uiDbEditor = getUiDb(context).edit();
+        uiDbEditor.putBoolean(REF_DB_IS_CAPTURING, capturing);
         uiDbEditor.apply();
+    }
+
+    public static void resetStoredMismatchingSorting(Context context) {
+        final SharedPreferences.Editor uiDbEditor = getUiDb(context).edit();
+        uiDbEditor.putBoolean(REF_DB_MISMATCHING_SORTING, false);
+        uiDbEditor.putBoolean(REF_DB_INTERSECTING_NAMES, false);
+        uiDbEditor.putBoolean(REF_DB_SORT_BY_NAME, false);
+        uiDbEditor.putBoolean(REF_DB_INTERSECTING_DATES, false);
+        uiDbEditor.putBoolean(REF_DB_SORT_BY_DATE, false);
+        uiDbEditor.apply();
+    }
+
+    public static String[] getStoredFilenames(Context context) {
+        final SharedPreferences uiDb = getUiDb(context);
+        String refDb = getTabRefDb(uiDb, REF_DB_SELECTED_FILENAMES);
+        return StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, uiDb.getString(refDb, DEFAULT_SELECTED_FILENAMES));
+    }
+
+    public static void storeFilenames(Context context, String[] filenames) {
+        final SharedPreferences uiDb = getUiDb(context);
+        final SharedPreferences.Editor uiDbEditor = uiDb.edit();
+        String refDb = getTabRefDb(uiDb, REF_DB_SELECTED_FILENAMES);
+        uiDbEditor.putString(refDb, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, filenames));
+        uiDbEditor.apply();
+    }
+
+    public static void storeAfterCapturing(Context context, boolean afterCapturing) {
+        final SharedPreferences uiDb = getUiDb(context);
+        final SharedPreferences.Editor uiDbEditor = uiDb.edit();
+        String refDb = getTabRefDb(uiDb, REF_DB_AFTER_CAPTURING);
+        uiDbEditor.putBoolean(refDb, afterCapturing);
+        uiDbEditor.apply();
+    }
+
+    public static boolean getStoredAfterSelecting(Context context) {
+        final SharedPreferences uiDb = getUiDb(context);
+        String refDb = getTabRefDb(uiDb, REF_DB_AFTER_SELECTING);
+        return uiDb.getBoolean(refDb, DEFAULT_AFTER_SELECTING);
+    }
+
+    public static void storeAfterSelecting(Context context, boolean afterSelecting) {
+        final SharedPreferences uiDb = getUiDb(context);
+        final SharedPreferences.Editor uiDbEditor = uiDb.edit();
+        String refDb = getTabRefDb(uiDb, REF_DB_AFTER_SELECTING);
+        uiDbEditor.putBoolean(refDb, afterSelecting);
+        uiDbEditor.apply();
+    }
+
+    public static boolean getStoredAfterAdding(Context context) {
+        final SharedPreferences uiDb = getUiDb(context);
+        String refDb = getTabRefDb(uiDb, REF_DB_AFTER_ADDING);
+        return uiDb.getBoolean(refDb, DEFAULT_AFTER_ADDING);
+    }
+
+    public static void storeAfterAdding(Context context, boolean afterAdding) {
+        final SharedPreferences uiDb = getUiDb(context);
+        final SharedPreferences.Editor uiDbEditor = uiDb.edit();
+        String refDb = getTabRefDb(uiDb, REF_DB_AFTER_ADDING);
+        uiDbEditor.putBoolean(refDb, afterAdding);
+        uiDbEditor.apply();
+    }
+
+    private static String getTabRefDb(SharedPreferences uiDb, String refDb) {
+        int selectedNavigationItem = uiDb.getInt(REF_DB_SELECTED_NAVIGATION_ITEM, DEFAULT_SELECTED_NAVIGATION_ITEM);
+        return getTabRefDb(selectedNavigationItem, refDb);
+    }
+
+    private static String getTabRefDb(int tabId, String refDb) {
+        return String.format(
+                Locale.US,
+                TEMPLATE_REF_DB_TAB_STATEFUL_FIELD,
+                refDb,
+                tabId
+        );
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -1751,9 +1852,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     protected void onDestroy() {
         super.onDestroy();
         closeCapturing();
-        final SharedPreferences.Editor uiDbEditor = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE).edit();
-        uiDbEditor.putBoolean(REF_DB_IS_CAPTURING, isCapturing);
-        uiDbEditor.apply();
+        storeCapturing(this, isCapturing);
     }
 
     @Override
@@ -1840,13 +1939,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 (v) -> isCapturing = v,
                 false)
         );
-        statefulData.put(REF_DB_NAVIGATION_BOTTOM_SELECTED_ITEM, new IntegerStatefulField(
-                () -> navigationItemSelected,
+        statefulData.put(REF_DB_SELECTED_NAVIGATION_ITEM, new IntegerStatefulField(
+                () -> selectedNavigationItem,
                 (v) -> {
-                    navigationBottom.setSelectedItemId(v);
-                    navigationItemSelected = v;
+                    navigation.setSelectedItemId(v);
+                    selectedNavigationItem = v;
                 },
-                R.id.navigation_add_single)
+                DEFAULT_SELECTED_NAVIGATION_ITEM)
         );
         statefulData.put(REF_DB_MISMATCHING_SORTING, new BooleanStatefulField(
                 () -> mismatchingSorting,
@@ -1899,33 +1998,33 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void configureTabStatefulData() {
-        statefulData.put(REF_DB_SELECTED_FILENAMES, new StringStatefulField(
+        tabStatefulData.put(REF_DB_SELECTED_FILENAMES, new StringStatefulField(
                 () -> StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, filenames),
                 (v) -> {
                     filenames = StringUtil.splitStrings(DB_STRING_ARRAY_SEPARATOR, v);
                     refreshFilenames();
                 },
-                "")
+                DEFAULT_SELECTED_FILENAMES)
         );
-        statefulData.put(REF_DB_AFTER_SELECTING, new BooleanStatefulField(
+        tabStatefulData.put(REF_DB_AFTER_SELECTING, new BooleanStatefulField(
                 () -> afterSelecting,
                 (v) -> afterSelecting = v,
-                false)
+                DEFAULT_AFTER_SELECTING)
         );
-        statefulData.put(REF_DB_AFTER_CAPTURING, new BooleanStatefulField(
+        tabStatefulData.put(REF_DB_AFTER_CAPTURING, new BooleanStatefulField(
                 () -> afterCapturing,
                 (v) -> afterCapturing = v,
                 false)
         );
-        statefulData.put(REF_DB_AFTER_ADDING, new BooleanStatefulField(
+        tabStatefulData.put(REF_DB_AFTER_ADDING, new BooleanStatefulField(
                 () -> afterAdding,
                 (v) -> afterAdding = v,
-                false)
+                DEFAULT_AFTER_ADDING)
         );
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
             final CompoundButton check = checkNotes[i];
             String refDb = String.format(Locale.US, TEMPLATE_REF_DB_CHECK_NOTE, CHECK_NOTE_IDS[i]);
-            statefulData.put(refDb, new BooleanStatefulField(
+            tabStatefulData.put(refDb, new BooleanStatefulField(
                     check::isChecked,
                     check::setChecked,
                     false)
@@ -1934,7 +2033,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (int i = 0; i < CHECK_OCTAVE_IDS.length; i++) {
             final CompoundButton check = checkOctaves[i];
             String refDb = String.format(Locale.US, TEMPLATE_REF_DB_CHECK_OCTAVE, CHECK_OCTAVE_IDS[i]);
-            statefulData.put(refDb, new BooleanStatefulField(
+            tabStatefulData.put(refDb, new BooleanStatefulField(
                     check::isChecked,
                     check::setChecked,
                     false)
@@ -1943,33 +2042,33 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (int i = 0; i < CHECK_INTERVAL_IDS.length; i++) {
             final CompoundButton check = checkIntervals[i];
             String refDb = String.format(Locale.US, TEMPLATE_REF_DB_CHECK_INTERVAL, CHECK_INTERVAL_IDS[i]);
-            statefulData.put(refDb, new BooleanStatefulField(
+            tabStatefulData.put(refDb, new BooleanStatefulField(
                     check::isChecked,
                     check::setChecked,
                     false)
             );
         }
-        statefulData.put(REF_DB_RADIO_GROUP_DIRECTION, new IntegerStatefulField(
+        tabStatefulData.put(REF_DB_RADIO_GROUP_DIRECTION, new IntegerStatefulField(
                 () -> radioGroupDirection.getCheckedRadioButtonId(),
                 (v) -> radioGroupDirection.check(v),
                 findViewById(R.id.radioDirectionAny).getId())
         );
-        statefulData.put(REF_DB_RADIO_GROUP_TIMING, new IntegerStatefulField(
+        tabStatefulData.put(REF_DB_RADIO_GROUP_TIMING, new IntegerStatefulField(
                 () -> radioGroupTiming.getCheckedRadioButtonId(),
                 (v) -> radioGroupTiming.check(v),
                 findViewById(R.id.radioTimingAny).getId())
         );
-        statefulData.put(REF_DB_INPUT_TEMPO, new StringStatefulField(
+        tabStatefulData.put(REF_DB_INPUT_TEMPO, new StringStatefulField(
                 () -> inputTempo.getText().toString(),
                 (v) -> inputTempo.setText(v),
                 "")
         );
-        statefulData.put(REF_DB_INPUT_INSTRUMENT, new StringStatefulField(
+        tabStatefulData.put(REF_DB_INPUT_INSTRUMENT, new StringStatefulField(
                 () -> inputInstrument.getText().toString(),
                 (v) -> inputInstrument.setText(v),
                 "")
         );
-        statefulData.put(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, new StringStatefulField(
+        tabStatefulData.put(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, new StringStatefulField(
                 () -> inputFirstNoteDurationCoefficient.getText().toString(),
                 (v) -> inputFirstNoteDurationCoefficient.setText(v),
                 "")
