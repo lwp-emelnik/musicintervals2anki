@@ -586,7 +586,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         autoEditing = true;
         for (Map.Entry<String, StatefulField<?>> tabStatefulField : tabStatefulData.entrySet()) {
             String statefulFieldKey = tabStatefulField.getKey();
-            if (!manuallyEditedFields.contains(statefulFieldKey) && selectedItemChanged) {
+            if (selectedItemChanged &&
+                    (!manuallyEditedFields.contains(statefulFieldKey) || selectedSearch)) {
                 continue;
             }
             StatefulField<?> statefulField = tabStatefulField.getValue();
