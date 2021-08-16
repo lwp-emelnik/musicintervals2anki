@@ -299,12 +299,15 @@ public class AudioCaptureService extends Service {
                     }
                 }
 
-                Recording discardedRecording = recordings.removeLast();
-                Uri uri = discardedRecording.getUri();
-                String path = uri.getPath();
-                if (!new File(path).delete()) {
-                    Log.e(LOG_TAG, "Could not delete discarded recording file");
-                }
+                // Recording discardedRecording = recordings.getLast();
+                //  Uri uri = discardedRecording.getUri();
+                //  String path = uri.getPath();
+                //  if (!new File(path).delete()) {
+                //      Log.e(LOG_TAG, "Could not delete discarded recording file");
+                //  }
+                // since draft files might be referenced from other tabs we cannot simply delete them anymore
+
+                recordings.removeLast();
 
                 textBottom.setText(getString(R.string.recorded_files, recordings.size()));
                 if (recordings.size() == 0) {

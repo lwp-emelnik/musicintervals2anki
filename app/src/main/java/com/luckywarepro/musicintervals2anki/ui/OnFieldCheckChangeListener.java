@@ -1,5 +1,6 @@
 package com.luckywarepro.musicintervals2anki.ui;
 
+import android.view.View;
 import android.widget.CompoundButton;
 
 import java.util.ArrayList;
@@ -15,10 +16,13 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
     private final CompoundButton checkBoxAny;
     private boolean enableMultiple;
 
-    public OnFieldCheckChangeListener(MainActivity mainActivity, CompoundButton[] checkBoxes, CompoundButton checkBoxAny) {
+    private final String templateKey;
+
+    public OnFieldCheckChangeListener(MainActivity mainActivity, CompoundButton[] checkBoxes, CompoundButton checkBoxAny, String templateKey) {
         this.mainActivity = mainActivity;
         this.checkBoxes = checkBoxes;
         this.checkBoxAny = checkBoxAny;
+        this.templateKey = templateKey;
     }
 
     @Override
@@ -26,7 +30,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
         if (compoundButton.getId() == checkBoxAny.getId()) {
             if (b) {
                 for (CompoundButton checkBox : checkBoxes) {
-                    setChecked(checkBox,false);
+                    setChecked(checkBox, false);
                 }
             } else if (enableMultiple) {
                 for (CompoundButton checkBox : checkBoxes) {
@@ -35,7 +39,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
                     }
                 }
                 for (CompoundButton checkBox : checkBoxes) {
-                    setChecked(checkBox,true);
+                    setChecked(checkBox, true);
                 }
             }
         } else if (b) {
@@ -43,10 +47,13 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
             if (!enableMultiple) {
                 for (CompoundButton checkBox : checkBoxes) {
                     if (checkBox.getId() != compoundButton.getId()) {
-                        setChecked(checkBox,false);
+                        setChecked(checkBox, false);
                     }
                 }
             }
+        }
+        for (View view : checkBoxes) {
+            mainActivity.fieldEdited(String.format(templateKey, view.getId()));
         }
         mainActivity.clearAddedFilenames();
         mainActivity.refreshExisting();
@@ -64,7 +71,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
             }
             if (checked.size() > 1) {
                 for (CompoundButton checkBox : checked) {
-                    setChecked(checkBox,false);
+                    setChecked(checkBox, false);
                 }
                 mainActivity.clearAddedFilenames();
                 mainActivity.refreshExisting();

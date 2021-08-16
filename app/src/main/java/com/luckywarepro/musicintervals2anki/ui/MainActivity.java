@@ -131,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private static final String REF_DB_CHECK_INTERVAL_ANY = "checkIntervalAny";
     private static final String TEMPLATE_REF_DB_TAB_MANUALLY_EDITED_DATA = "tabManuallyEditedData_%d";
 
-
     private static final String TEMPLATE_REF_DB_TAB_STATEFUL_FIELD = "%s_%d";
 
     // keys for stateful fields that are unique for tabs
@@ -324,14 +323,17 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     System.arraycopy(filenames, 0, newFilenames, 0, filenames.length);
                     newFilenames[filenames.length] = uriString;
                     afterCapturing = true;
+                    fieldEdited(REF_DB_AFTER_CAPTURING);
                 } else {
                     newFilenames = new String[filenames.length - 1];
                     System.arraycopy(filenames, 0, newFilenames, 0, filenames.length - 1);
                     if (newFilenames.length == 0) {
                         afterCapturing = false;
+                        fieldEdited(REF_DB_AFTER_CAPTURING);
                     }
                 }
                 filenames = newFilenames;
+                fieldEdited(REF_DB_SELECTED_FILENAMES);
                 refreshFilenames();
             }
         });
@@ -453,9 +455,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         };
         navigation = findViewById(R.id.navigationBottom);
 
-        onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny);
-        onOctaveCheckChangeListener = new OnFieldCheckChangeListener(this, checkOctaves, checkOctaveAny);
-        onIntervalCheckChangeListener = new OnFieldCheckChangeListener(this, checkIntervals, checkIntervalAny);
+        onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny, TEMPLATE_REF_DB_CHECK_NOTE);
+        onOctaveCheckChangeListener = new OnFieldCheckChangeListener(this, checkOctaves, checkOctaveAny, TEMPLATE_REF_DB_CHECK_OCTAVE);
+        onIntervalCheckChangeListener = new OnFieldCheckChangeListener(this, checkIntervals, checkIntervalAny, TEMPLATE_REF_DB_CHECK_INTERVAL);
 
         configureStatefulData();
         configureTabStatefulData();
@@ -508,15 +510,17 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (CompoundButton checkOctave : checkOctaves) {
             checkOctave.setOnCheckedChangeListener(onOctaveCheckChangeListener);
         }
-        radioGroupDirection.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this, onDirectionChangedListener));
-        radioGroupTiming.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this));
+        radioGroupDirection.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this, onDirectionChangedListener, REF_DB_RADIO_GROUP_DIRECTION));
+        radioGroupTiming.setOnCheckedChangeListener(new OnFieldRadioChangeListener(this, REF_DB_RADIO_GROUP_TIMING));
         checkIntervalAny.setOnCheckedChangeListener(onIntervalCheckChangeListener);
         for (CompoundButton checkInterval : checkIntervals) {
             checkInterval.setOnCheckedChangeListener(onIntervalCheckChangeListener);
         }
-        inputTempo.addTextChangedListener(new FieldInputTextWatcher(this));
-        inputInstrument.addTextChangedListener(new FieldInputTextWatcher(this));
-        inputFirstNoteDurationCoefficient.addTextChangedListener(new FieldInputTextWatcher(this));
+        inputTempo.addTextChangedListener(new FieldInputTextWatcher(this, REF_DB_INPUT_TEMPO));
+        inputInstrument.addTextChangedListener(new FieldInputTextWatcher(this, REF_DB_INPUT_INSTRUMENT));
+        inputFirstNoteDurationCoefficient.addTextChangedListener(new FieldInputTextWatcher(this, REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT));
+        navigation.setOnItemReselectedListener((item) -> {
+        });
         navigation.setOnItemSelectedListener(item -> {
             handleNavigationItemSelected(item.getItemId());
             return true;
@@ -530,6 +534,19 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private static final int[] TAB_IDS = {R.id.navigation_add_single, R.id.navigation_add_batch, R.id.navigation_search};
 
     private final Map<Integer, Set<String>> tabManuallyEditedData = new HashMap<>();
+
+    private boolean autoEditing;
+
+    void fieldEdited(String key) {
+        if (autoEditing) {
+            return;
+        }
+        Set<String> manuallyEditedData = Objects.requireNonNull(
+                tabManuallyEditedData.getOrDefault(selectedNavigationItem, new HashSet<>())
+        );
+        manuallyEditedData.add(key);
+        tabManuallyEditedData.put(selectedNavigationItem, manuallyEditedData);
+    }
 
     private void handleNavigationItemSelected(int itemId) {
         boolean selectedAddSingle = itemId == R.id.navigation_add_single;
@@ -552,8 +569,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         SharedPreferences uiDb = getUiDb(this);
         SharedPreferences.Editor uiDbEditor = uiDb.edit();
 
-        if (itemId != selectedNavigationItem) {
-            storeSelectedNavigationItemState(uiDbEditor);
+        boolean selectedItemChanged = itemId != selectedNavigationItem;
+        if (selectedItemChanged) {
+            storeTabUiState(uiDbEditor);
         }
 
         boolean enableMultiple = selectedSearch || selectedAddBatch;
@@ -561,11 +579,21 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         onOctaveCheckChangeListener.setEnableMultiple(enableMultiple);
         onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
 
+        Set<String> manuallyEditedFields = Objects.requireNonNull(
+                tabManuallyEditedData.getOrDefault(itemId, new HashSet<>())
+        );
+
+        autoEditing = true;
         for (Map.Entry<String, StatefulField<?>> tabStatefulField : tabStatefulData.entrySet()) {
+            String statefulFieldKey = tabStatefulField.getKey();
+            if (!manuallyEditedFields.contains(statefulFieldKey) && selectedItemChanged) {
+                continue;
+            }
             StatefulField<?> statefulField = tabStatefulField.getValue();
-            String refDb = getTabRefDb(itemId, tabStatefulField.getKey());
+            String refDb = getTabRefDb(itemId, statefulFieldKey);
             statefulField.restore(uiDb, refDb);
         }
+        autoEditing = false;
 
         if (selectedAddSingle && filenames.length > 1) {
             filenames = new String[]{};
@@ -583,7 +611,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         refreshPermutations();
     }
 
-    private void storeSelectedNavigationItemState(SharedPreferences.Editor uiDbEditor) {
+    private void storeTabUiState(SharedPreferences.Editor uiDbEditor) {
         for (Map.Entry<String, StatefulField<?>> tabStatefulField : tabStatefulData.entrySet()) {
             StatefulField<?> statefulField = tabStatefulField.getValue();
             String refDb = getTabRefDb(selectedNavigationItem, tabStatefulField.getKey());
@@ -667,6 +695,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             afterCapturing = false;
             resetFilenameButtons();
             textFilename.setText("");
+
+            autoEditing = true;
             checkNoteAny.setChecked(true);
             checkOctaveAny.setChecked(true);
             radioGroupDirection.check(findViewById(R.id.radioDirectionAny).getId());
@@ -675,6 +705,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             inputTempo.setText("");
             inputInstrument.setText("");
             inputFirstNoteDurationCoefficient.setText("");
+            autoEditing = false;
+
+            tabManuallyEditedData.remove(selectedNavigationItem);
             return true;
         } else if (itemId == R.id.actionMarkExisting) {
             if (AnkiDroidHelper.isApiUnavailable(MainActivity.this)) {
@@ -811,8 +844,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         boolean selected = selectedFilenames != null;
         if (selected) {
             afterCapturing = false;
+            fieldEdited(REF_DB_AFTER_CAPTURING);
             afterAdding = false;
+            fieldEdited(REF_DB_AFTER_ADDING);
             filenames = selectedFilenames;
+            fieldEdited(REF_DB_SELECTED_FILENAMES);
             selectedFilenames = null;
         } else {
             filenames = getStoredFilenames(this);
@@ -1125,34 +1161,22 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         if (afterCapturing) {
             new AlertDialog.Builder(this)
                     .setMessage(getResources().getQuantityString(R.plurals.recordings_clearing_prompt, filenames.length, filenames.length))
-                    .setPositiveButton(R.string.add_more, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int which) {
-                            handleInitiateCapturing();
-                        }
+                    .setPositiveButton(R.string.add_more, (dialogInterface, which) -> handleInitiateCapturing())
+                    .setNegativeButton(R.string.clear, (dialogInterface, i) -> {
+                        // for (String filename : filenames) {
+                        //     Uri uri = Uri.parse(filename);
+                        //     String path = uri.getPath();
+                        //     if (!new File(path).delete()) {
+                        //         Log.e(LOG_TAG, "Could not delete discarded recording file");
+                        //     }
+                        // }
+                        // since draft files might be referenced from other tabs we cannot simply delete them anymore
+                        filenames = new String[]{};
+                        refreshFilenames();
+                        afterCapturing = false;
+                        handleInitiateCapturing();
                     })
-                    .setNegativeButton(R.string.clear, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            for (String filename : filenames) {
-                                Uri uri = Uri.parse(filename);
-                                String path = uri.getPath();
-                                if (!new File(path).delete()) {
-                                    Log.e(LOG_TAG, "Could not delete discarded recording file");
-                                }
-                            }
-                            filenames = new String[]{};
-                            refreshFilenames();
-                            afterCapturing = false;
-                            handleInitiateCapturing();
-                        }
-                    })
-                    .setNeutralButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.dismiss();
-                        }
-                    })
+                    .setNeutralButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss())
                     .show();
             return;
         }
@@ -1229,7 +1253,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                         sortByDate = true;
                         sortByName = false;
                         filenames = uriStrings;
+                        fieldEdited(REF_DB_SELECTED_FILENAMES);
                         afterSelecting = true;
+                        fieldEdited(REF_DB_AFTER_SELECTING);
                         refreshFilenames();
                         actionViewAll.callOnClick();
                     }
@@ -1245,7 +1271,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                         sortByName = true;
                         sortByDate = false;
                         filenames = uriStrings;
+                        fieldEdited(REF_DB_SELECTED_FILENAMES);
                         afterSelecting = true;
+                        fieldEdited(REF_DB_AFTER_SELECTING);
                         refreshFilenames();
                         actionViewAll.callOnClick();
                     }
@@ -1272,12 +1300,16 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 final String[] originalFilenames = addingResult.getOriginalSounds();
                 MusInterval newMi = addingResult.getMusInterval();
                 filenames = newMi.sounds;
+                fieldEdited(REF_DB_SELECTED_FILENAMES);
                 afterSelecting = false;
+                fieldEdited(REF_DB_AFTER_SELECTING);
                 afterCapturing = false;
+                fieldEdited(REF_DB_AFTER_CAPTURING);
                 noteKeys = newMi.notes;
                 octaveKeys = newMi.octaves;
                 intervalKeys = newMi.intervals;
                 afterAdding = true;
+                fieldEdited(REF_DB_AFTER_ADDING);
                 mismatchingSorting = false;
                 intersectingNames = false;
                 sortByName = false;
@@ -1398,7 +1430,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (Map.Entry<String, StatefulField<?>> statefulField : statefulData.entrySet()) {
             statefulField.getValue().save(uiDbEditor, statefulField.getKey());
         }
-        storeSelectedNavigationItemState(uiDbEditor);
+        storeTabUiState(uiDbEditor);
         uiDbEditor.apply();
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
@@ -1414,9 +1446,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     protected void restoreUiState() {
         final SharedPreferences uiDb = getUiDb(this);
+        autoEditing = true;
         for (Map.Entry<String, StatefulField<?>> statefulField : statefulData.entrySet()) {
             statefulField.getValue().restore(uiDb, statefulField.getKey());
         }
+        autoEditing = false;
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
@@ -1450,8 +1484,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     public static void storeFilenames(Context context, String[] filenames) {
         final SharedPreferences uiDb = getUiDb(context);
         final SharedPreferences.Editor uiDbEditor = uiDb.edit();
-        String refDb = getTabRefDb(uiDb, REF_DB_SELECTED_FILENAMES);
-        uiDbEditor.putString(refDb, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, filenames));
+        int selectedNavigationItem = getStoredSelectedNavigationItem(uiDb);
+        String selectedFilenamesRefDb = getTabRefDb(selectedNavigationItem, REF_DB_SELECTED_FILENAMES);
+        uiDbEditor.putString(selectedFilenamesRefDb, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, filenames));
+        String manuallyEditedFieldsRefDb = String.format(Locale.US, TEMPLATE_REF_DB_TAB_MANUALLY_EDITED_DATA, selectedNavigationItem);
+        Set<String> manuallyEditedFields = uiDb.getStringSet(manuallyEditedFieldsRefDb, new HashSet<>());
+        manuallyEditedFields.add(REF_DB_SELECTED_FILENAMES);
+        uiDbEditor.putStringSet(manuallyEditedFieldsRefDb, manuallyEditedFields);
         uiDbEditor.apply();
     }
 
@@ -1492,8 +1531,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private static String getTabRefDb(SharedPreferences uiDb, String refDb) {
-        int selectedNavigationItem = uiDb.getInt(REF_DB_SELECTED_NAVIGATION_ITEM, DEFAULT_SELECTED_NAVIGATION_ITEM);
+        int selectedNavigationItem = getStoredSelectedNavigationItem(uiDb);
         return getTabRefDb(selectedNavigationItem, refDb);
+    }
+
+    private static int getStoredSelectedNavigationItem(SharedPreferences preferences) {
+        return preferences.getInt(REF_DB_SELECTED_NAVIGATION_ITEM, DEFAULT_SELECTED_NAVIGATION_ITEM);
     }
 
     private static String getTabRefDb(int tabId, String refDb) {
@@ -1995,7 +2038,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (final int tabId : TAB_IDS) {
             String refDb = String.format(Locale.US, TEMPLATE_REF_DB_TAB_MANUALLY_EDITED_DATA, tabId);
             statefulData.put(refDb, new StringSetStatefulField(
-                    () -> tabManuallyEditedData.get(tabId),
+                    () -> tabManuallyEditedData.getOrDefault(tabId, new HashSet<>()),
                     (v) -> tabManuallyEditedData.put(tabId, v),
                     new HashSet<>())
             );
