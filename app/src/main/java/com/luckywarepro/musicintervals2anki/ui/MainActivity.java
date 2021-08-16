@@ -345,9 +345,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         });
     }};
 
-    private OnFieldCheckChangeListener onNoteCheckChangeListener;
-    private OnFieldCheckChangeListener onOctaveCheckChangeListener;
-    private OnFieldCheckChangeListener onIntervalCheckChangeListener;
+    private OnFieldCheckChangeListener[] onFieldCheckChangeListeners;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -455,9 +453,30 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         };
         navigation = findViewById(R.id.navigationBottom);
 
-        onNoteCheckChangeListener = new OnFieldCheckChangeListener(this, checkNotes, checkNoteAny, TEMPLATE_REF_DB_CHECK_NOTE);
-        onOctaveCheckChangeListener = new OnFieldCheckChangeListener(this, checkOctaves, checkOctaveAny, TEMPLATE_REF_DB_CHECK_OCTAVE);
-        onIntervalCheckChangeListener = new OnFieldCheckChangeListener(this, checkIntervals, checkIntervalAny, TEMPLATE_REF_DB_CHECK_INTERVAL);
+        OnFieldCheckChangeListener onNoteCheckChangeListener = new OnFieldCheckChangeListener(
+                this,
+                checkNotes,
+                checkNoteAny,
+                TEMPLATE_REF_DB_CHECK_NOTE
+        );
+        OnFieldCheckChangeListener onOctaveCheckChangeListener = new OnFieldCheckChangeListener(
+                this,
+                checkOctaves,
+                checkOctaveAny,
+                TEMPLATE_REF_DB_CHECK_OCTAVE
+        );
+        OnFieldCheckChangeListener onIntervalCheckChangeListener = new OnFieldCheckChangeListener(
+                this,
+                checkIntervals,
+                checkIntervalAny,
+                TEMPLATE_REF_DB_CHECK_INTERVAL
+        );
+
+        onFieldCheckChangeListeners = new OnFieldCheckChangeListener[]{
+                onNoteCheckChangeListener,
+                onOctaveCheckChangeListener,
+                onIntervalCheckChangeListener
+        };
 
         configureStatefulData();
         configureTabStatefulData();
@@ -575,9 +594,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
 
         boolean enableMultiple = selectedSearch || selectedAddBatch;
-        onNoteCheckChangeListener.setEnableMultiple(enableMultiple);
-        onOctaveCheckChangeListener.setEnableMultiple(enableMultiple);
-        onIntervalCheckChangeListener.setEnableMultiple(enableMultiple);
+        for (OnFieldCheckChangeListener onFieldCheckChangeListener : onFieldCheckChangeListeners) {
+            onFieldCheckChangeListener.setEnableMultiple(enableMultiple);
+            onFieldCheckChangeListener.setEnableAny(selectedSearch);
+        }
 
         Set<String> manuallyEditedFields = Objects.requireNonNull(
                 tabManuallyEditedData.getOrDefault(itemId, new HashSet<>())
@@ -698,11 +718,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             textFilename.setText("");
 
             autoEditing = true;
-            checkNoteAny.setChecked(true);
-            checkOctaveAny.setChecked(true);
+            for (OnFieldCheckChangeListener onFieldCheckChangeListener : onFieldCheckChangeListeners) {
+                onFieldCheckChangeListener.clear();
+            }
             radioGroupDirection.check(findViewById(R.id.radioDirectionAny).getId());
             radioGroupTiming.check(findViewById(R.id.radioTimingAny).getId());
-            checkIntervalAny.setChecked(true);
             inputTempo.setText("");
             inputInstrument.setText("");
             inputFirstNoteDurationCoefficient.setText("");

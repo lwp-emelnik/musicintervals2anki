@@ -15,6 +15,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
     private final CompoundButton[] checkBoxes;
     private final CompoundButton checkBoxAny;
     private boolean enableMultiple;
+    private boolean enableAny;
 
     private final String templateKey;
 
@@ -42,23 +43,43 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
                     setChecked(checkBox, true);
                 }
             }
-        } else if (b) {
-            setChecked(checkBoxAny, false);
-            if (!enableMultiple) {
-                for (CompoundButton checkBox : checkBoxes) {
-                    if (checkBox.getId() != compoundButton.getId()) {
-                        setChecked(checkBox, false);
+        } else {
+            if (b) {
+                setChecked(checkBoxAny, false);
+                if (!enableMultiple) {
+                    for (CompoundButton checkBox : checkBoxes) {
+                        if (checkBox.getId() != compoundButton.getId()) {
+                            setChecked(checkBox, false);
+                        }
                     }
+                }
+            } else if (enableAny) {
+                boolean checked = false;
+                for (CompoundButton checkBox : checkBoxes) {
+                    if (checkBox.isChecked()) {
+                        checked = true;
+                        break;
+                    }
+                }
+                if (!checked) {
+                    setChecked(checkBoxAny, true);
                 }
             }
         }
         for (View view : checkBoxes) {
             mainActivity.fieldEdited(String.format(templateKey, view.getId()));
         }
-        mainActivity.clearAddedFilenames();
-        mainActivity.refreshExisting();
-        mainActivity.refreshPermutations();
-        mainActivity.refreshKeys();
+        commit();
+    }
+
+    public void clear() {
+        for (CompoundButton checkBox : checkBoxes) {
+            setChecked(checkBox, false);
+        }
+        if (enableAny) {
+            setChecked(checkBoxAny, true);
+        }
+        commit();
     }
 
     public void setEnableMultiple(boolean enableMultiple) {
@@ -73,13 +94,36 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
                 for (CompoundButton checkBox : checked) {
                     setChecked(checkBox, false);
                 }
-                mainActivity.clearAddedFilenames();
-                mainActivity.refreshExisting();
-                mainActivity.refreshPermutations();
-                mainActivity.refreshKeys();
+                commit();
             }
         }
         this.enableMultiple = enableMultiple;
+    }
+
+    public void setEnableAny(boolean enableAny) {
+        if (!enableAny) {
+            setChecked(checkBoxAny, false);
+        } else {
+            boolean checked = false;
+            for (CompoundButton checkBox : checkBoxes) {
+                if (checkBox.isChecked()) {
+                    checked = true;
+                    break;
+                }
+            }
+            if (!checked) {
+                setChecked(checkBoxAny, true);
+            }
+        }
+        this.enableAny = enableAny;
+        commit();
+    }
+
+    private void commit() {
+        mainActivity.clearAddedFilenames();
+        mainActivity.refreshExisting();
+        mainActivity.refreshPermutations();
+        mainActivity.refreshKeys();
     }
 
     private void setChecked(CompoundButton checkBox, boolean value) {
