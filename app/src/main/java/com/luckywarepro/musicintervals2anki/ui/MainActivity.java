@@ -553,11 +553,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         SharedPreferences.Editor uiDbEditor = uiDb.edit();
 
         if (itemId != selectedNavigationItem) {
-            for (Map.Entry<String, StatefulField<?>> tabStatefulField : tabStatefulData.entrySet()) {
-                StatefulField<?> statefulField = tabStatefulField.getValue();
-                String refDb = getTabRefDb(selectedNavigationItem, tabStatefulField.getKey());
-                statefulField.save(uiDbEditor, refDb);
-            }
+            storeSelectedNavigationItemState(uiDbEditor);
         }
 
         boolean enableMultiple = selectedSearch || selectedAddBatch;
@@ -585,6 +581,14 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         uiDbEditor.apply();
 
         refreshPermutations();
+    }
+
+    private void storeSelectedNavigationItemState(SharedPreferences.Editor uiDbEditor) {
+        for (Map.Entry<String, StatefulField<?>> tabStatefulField : tabStatefulData.entrySet()) {
+            StatefulField<?> statefulField = tabStatefulField.getValue();
+            String refDb = getTabRefDb(selectedNavigationItem, tabStatefulField.getKey());
+            statefulField.save(uiDbEditor, refDb);
+        }
     }
 
     private static int getVisibility(boolean condition) {
@@ -1394,6 +1398,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (Map.Entry<String, StatefulField<?>> statefulField : statefulData.entrySet()) {
             statefulField.getValue().save(uiDbEditor, statefulField.getKey());
         }
+        storeSelectedNavigationItemState(uiDbEditor);
         uiDbEditor.apply();
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
