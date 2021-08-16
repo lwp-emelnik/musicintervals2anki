@@ -10,7 +10,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
@@ -77,6 +79,9 @@ public class AudioCaptureService extends Service {
     private final static int NUM_SAMPLES_PER_READ = 1024;
     private final static int BYTES_PER_SAMPLE = 2;
     private final static int BUFFER_SIZE_IN_BYTES = NUM_SAMPLES_PER_READ * BYTES_PER_SAMPLE;
+
+    private final static int TONE_VOLUME = 25;
+    private final static int TONE_DURATION = 150;
 
     private MediaProjection projection;
     private AudioRecord record;
@@ -188,6 +193,8 @@ public class AudioCaptureService extends Service {
                 } else {
                     stopAudioCapture();
                     isRecording = false;
+                    actionRecord.setTextColor(Color.DKGRAY);
+                    actionRecord.getBackground().clearColorFilter();
                     actionRecord.setText(R.string.record);
                 }
             }
@@ -227,7 +234,7 @@ public class AudioCaptureService extends Service {
                         .setUsage(AudioAttributes.USAGE_MEDIA)
                         .build()
         );
-        toneGenerator = new ToneGenerator(AudioManager.STREAM_SYSTEM, 25);
+        toneGenerator = new ToneGenerator(AudioManager.STREAM_SYSTEM, TONE_VOLUME);
 
         TouchableButton actionPlayLatest = overlayView.findViewById(R.id.actionPlayLatest);
         actionPlayLatest.setOnClickListener(new View.OnClickListener() {
@@ -276,7 +283,7 @@ public class AudioCaptureService extends Service {
                     textLatest.setVisibility(View.GONE);
                 } else {
                     Recording recording = recordings.getLast();
-                    textLatest.setText(getString(R.string.latest_file, recording.getDuration() / 1000d));
+                    textLatest.setText(getString(R.string.latest_file, recording.getDurationSeconds()));
                 }
             }
         });
@@ -317,9 +324,11 @@ public class AudioCaptureService extends Service {
         startAudioCapture();
         isRecording = true;
         actionRecord.setEnabled(true);
+        actionRecord.getBackground().setColorFilter(Color.DKGRAY, PorterDuff.Mode.MULTIPLY);
+        actionRecord.setTextColor(Color.WHITE);
         actionRecord.setText(R.string.stop);
         textTop.setTypeface(null, Typeface.BOLD);
-        toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 150);
+        toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, TONE_DURATION);
     }
 
     private void tearDown() {
@@ -372,7 +381,7 @@ public class AudioCaptureService extends Service {
                 Recording recording = recordings.getLast();
                 textBottom.setText(getString(R.string.recorded_files, recordings.size()));
                 textLatest.setVisibility(View.VISIBLE);
-                textLatest.setText(getString(R.string.latest_file, recording.getDuration() / 1000d));
+                textLatest.setText(getString(R.string.latest_file, recording.getDurationSeconds()));
                 layoutLatestActions.setVisibility(View.VISIBLE);
             }
         }
@@ -510,7 +519,7 @@ public class AudioCaptureService extends Service {
             recordings.add(recording);
             textBottom.setText(getString(R.string.recorded_files, recordings.size()));
             textLatest.setVisibility(View.VISIBLE);
-            textLatest.setText(getString(R.string.latest_file, recording.getDuration() / 1000d));
+            textLatest.setText(getString(R.string.latest_file, recording.getDurationSeconds()));
             layoutLatestActions.setVisibility(View.VISIBLE);
             handler.post(new Runnable() {
                 @Override
@@ -558,8 +567,8 @@ public class AudioCaptureService extends Service {
             return uri;
         }
 
-        public long getDuration() {
-            return duration;
+        public double getDurationSeconds() {
+            return duration / 1000d;
         }
     }
 }
