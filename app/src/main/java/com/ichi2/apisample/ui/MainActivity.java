@@ -67,6 +67,7 @@ import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, AddingPrompter, ProgressIndicator {
+    public static final String ACTION_CLOSE_CAPTURING = "MainActivity:CloseCapturing";
 
     private static final int AD_PERM_REQUEST = 0;
     private static final int PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_OPEN_CHOOSER = 1;
@@ -91,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     static final String REF_DB_SORT_BY_DATE = "sortByDate";
     static final String REF_DB_AFTER_SELECTING = "afterSelecting";
     static final String REF_DB_AFTER_CAPTURING = "afterCapturing";
+    static final String REF_DB_IS_CAPTURING = "isCapturing";
     static final String REF_DB_AFTER_ADDING = "afterAdding";
     private static final String REF_DB_SWITCH_BATCH = "switchBatch";
     private static final String REF_DB_CHECK_NOTE_ANY = "checkNoteAny";
@@ -155,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private ProgressDialog progressDialog;
 
-    private Handler mHandler;
+    Handler handler;
 
     private final static int[] CHECK_NOTE_IDS = new int[]{
             R.id.checkNoteC, R.id.checkNoteCSharp,
@@ -231,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private boolean afterSelecting;
     private boolean afterCapturing;
+    boolean isCapturing;
 
     SoundPlayer soundPlayer;
 
@@ -246,6 +249,38 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     String[] noteKeys = new String[]{};
     String[] octaveKeys = new String[]{};
     String[] intervalKeys = new String[]{};
+
+    private final Map<String, BroadcastReceiver> actionReceivers = new HashMap<String, BroadcastReceiver>() {{
+        put(AudioCaptureService.ACTION_FILES_UPDATED, new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String[] newFilenames;
+                if (intent.hasExtra(AudioCaptureService.EXTRA_URI_STRING)) {
+                    clearSelectedFilenames();
+                    clearAddedFilenames();
+                    String uriString = intent.getStringExtra(AudioCaptureService.EXTRA_URI_STRING);
+                    newFilenames = new String[filenames.length + 1];
+                    System.arraycopy(filenames, 0, newFilenames, 0, filenames.length);
+                    newFilenames[filenames.length] = uriString;
+                    afterCapturing = true;
+                } else {
+                    newFilenames = new String[filenames.length - 1];
+                    System.arraycopy(filenames, 0, newFilenames, 0, filenames.length - 1);
+                    if (newFilenames.length == 0) {
+                        afterCapturing = false;
+                    }
+                }
+                filenames = newFilenames;
+                refreshFilenames();
+            }
+        });
+        put(AudioCaptureService.ACTION_CLOSED, new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                isCapturing = false;
+            }
+        });
+    }};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -315,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             }
         });
 
-        mHandler = new Handler();
+        handler = new Handler();
 
         configureClearAllButton();
         configureCaptureAudioButton();
@@ -350,35 +385,14 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
-    private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String[] newFilenames;
-            if (intent.hasExtra(AudioCaptureService.EXTRA_URI_STRING)) {
-                clearSelectedFilenames();
-                clearAddedFilenames();
-                String uriString = intent.getStringExtra(AudioCaptureService.EXTRA_URI_STRING);
-                newFilenames = new String[filenames.length + 1];
-                System.arraycopy(filenames, 0, newFilenames, 0, filenames.length);
-                newFilenames[filenames.length] = uriString;
-                afterCapturing = true;
-            } else {
-                newFilenames = new String[filenames.length - 1];
-                System.arraycopy(filenames, 0, newFilenames, 0, filenames.length - 1);
-                if (newFilenames.length == 0) {
-                    afterCapturing = false;
-                }
-            }
-            filenames = newFilenames;
-            refreshFilenames();
-        }
-    };
-
     @Override
     protected void onResume() {
         super.onResume();
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter(AudioCaptureService.ACTION_FILES_UPDATED));
+        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
+        for (Map.Entry<String, BroadcastReceiver> actionReceiver : actionReceivers.entrySet()) {
+            broadcastManager.registerReceiver(actionReceiver.getValue(), new IntentFilter(actionReceiver.getKey()));
+        }
 
         refreshExisting();
         refreshPermutations();
@@ -571,12 +585,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 actionPlay.setOnClickListener(new OnViewAllClickListener(this, uriPathNames));
             } else {
                 actionPlay.setText(R.string.play);
-                actionPlay.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        soundPlayer.play(uriFirst.getUri(), uriFirst.getPath());
-                    }
-                });
+                actionPlay.setOnClickListener(new OnPlayClickListener(this, uriFirst, actionPlay));
             }
 
             refreshFilenameText(uriFirst.getName());
@@ -648,6 +657,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     showMsg(R.string.recording_unsupported);
                     return;
                 }
+                if (isCapturing) {
+                    closeCapturing();
+                }
                 handleCaptureAudio();
             }
         });
@@ -676,7 +688,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             startActivityForResult(intent, ACTION_PROMPT_OVERLAY_PERMISSION);
             return;
         }
-
 
         if (afterCapturing) {
             new AlertDialog.Builder(this)
@@ -714,6 +725,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         handleInitiateCapturing();
     }
 
+    void closeCapturing() {
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_CLOSE_CAPTURING));
+        isCapturing = false;
+    }
+
     private void handleInitiateCapturing() {
         MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         Intent intent = mediaProjectionManager.createScreenCaptureIntent();
@@ -731,6 +747,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                             PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_OPEN_CHOOSER
                     );
                     return;
+                }
+                if (isCapturing) {
+                    closeCapturing();
                 }
                 handleSelectFile();
             }
@@ -879,6 +898,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     intent.putExtra(AudioCaptureService.EXTRA_RECORDINGS, filenames);
                 }
                 startForegroundService(intent);
+                isCapturing = true;
                 break;
             case ACTION_PROMPT_OVERLAY_PERMISSION:
                 if (!Settings.canDrawOverlays(this)) {
@@ -955,6 +975,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     mAnkiDroid.requestPermission(MainActivity.this, AD_PERM_REQUEST);
                     return;
                 }
+                if (isCapturing) {
+                    closeCapturing();
+                }
 
                 progressDialog = new ProgressDialog(MainActivity.this);
                 progressDialog.setTitle(R.string.batch_adding_title);
@@ -968,7 +991,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                         try {
                             getMusInterval().addToAnki(MainActivity.this, MainActivity.this);
                         } catch (final Throwable t) {
-                            mHandler.post(new Runnable() {
+                            handler.post(new Runnable() {
                                 @Override
                                 public void run() {
                                     progressDialog.dismiss();
@@ -989,12 +1012,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         final boolean tagDuplicates = sharedPreferences.getBoolean(SettingsFragment.KEY_TAG_DUPLICATES_SWITCH, SettingsFragment.DEFAULT_TAG_DUPLICATES_SWITCH);
         final String duplicateTag = TAG_APPLICATION + AnkiDroidHelper.HIERARCHICAL_TAG_SEPARATOR + TAG_DUPLICATE;
 
-        mHandler.post(new DuplicatePromptWorker(this, tagDuplicates, duplicateTag, existingMis, handler));
+        this.handler.post(new DuplicatePromptWorker(this, tagDuplicates, duplicateTag, existingMis, handler));
     }
 
     @Override
     public void addingFinished(final MusInterval.AddingResult addingResult) {
-        mHandler.post(new Runnable() {
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 progressDialog.dismiss();
@@ -1098,7 +1121,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     @Override
     public void processException(final Throwable t) {
-        mHandler.post(new Runnable() {
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 handleError(t);
@@ -1159,7 +1182,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     progressDialog.setCancelable(false);
                     progressDialog.show();
 
-                    new Thread(new IntegrityCheckWorker(integrity, MainActivity.this, progressDialog, mHandler)).start();
+                    new Thread(new IntegrityCheckWorker(integrity, MainActivity.this, progressDialog)).start();
                 } catch (Throwable e) {
                     handleError(e);
                 }
@@ -1169,7 +1192,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     @Override
     public void setMessage(final int resId, final Object ...formatArgs) {
-        mHandler.post(new Runnable() {
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 progressDialog.setMessage(getString(resId, formatArgs));
@@ -1180,11 +1203,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onPause() {
         final SharedPreferences.Editor uiDbEditor = getSharedPreferences(REF_DB_STATE, Context.MODE_PRIVATE).edit();
-
         uiDbEditor.putBoolean(REF_DB_SWITCH_BATCH, switchBatch.isChecked());
         storeFilenames(this, filenames);
         uiDbEditor.putBoolean(REF_DB_AFTER_SELECTING, afterSelecting);
         uiDbEditor.putBoolean(REF_DB_AFTER_CAPTURING, afterCapturing);
+        uiDbEditor.putBoolean(REF_DB_IS_CAPTURING, isCapturing);
         uiDbEditor.putBoolean(REF_DB_CHECK_NOTE_ANY, checkNoteAny.isChecked());
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
             uiDbEditor.putBoolean(String.valueOf(CHECK_NOTE_IDS[i]), checkNotes[i].isChecked());
@@ -1203,7 +1226,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         uiDbEditor.putString(REF_DB_INPUT_INSTRUMENT, inputInstrument.getText().toString());
         uiDbEditor.putStringSet(REF_DB_SAVED_INSTRUMENTS, savedInstruments);
         uiDbEditor.putString(REF_DB_INPUT_FIRST_NOTE_DURATION_COEFFICIENT, inputFirstNoteDurationCoefficient.getText().toString());
-
         uiDbEditor.putBoolean(REF_DB_AFTER_ADDING, afterAdding);
         uiDbEditor.putBoolean(REF_DB_MISMATCHING_SORTING, mismatchingSorting);
         uiDbEditor.putBoolean(REF_DB_INTERSECTING_NAMES, intersectingNames);
@@ -1213,10 +1235,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         uiDbEditor.putString(REF_DB_NOTE_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, noteKeys));
         uiDbEditor.putString(REF_DB_OCTAVE_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, octaveKeys));
         uiDbEditor.putString(REF_DB_INTERVAL_KEYS, StringUtil.joinStrings(DB_STRING_ARRAY_SEPARATOR, intervalKeys));
-
         uiDbEditor.apply();
 
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
+        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
+        for (Map.Entry<String, BroadcastReceiver> actionReceiver : actionReceivers.entrySet()) {
+            broadcastManager.unregisterReceiver(actionReceiver.getValue());
+        }
 
         soundPlayer.stop();
         soundPlayer.release();
@@ -1231,6 +1255,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         refreshFilenames();
         afterSelecting = uiDb.getBoolean(REF_DB_AFTER_SELECTING, false);
         afterCapturing = uiDb.getBoolean(REF_DB_AFTER_CAPTURING, false);
+        isCapturing = uiDb.getBoolean(REF_DB_IS_CAPTURING, false);
         checkNoteAny.setChecked(uiDb.getBoolean(REF_DB_CHECK_NOTE_ANY, true));
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
             checkNotes[i].setChecked(uiDb.getBoolean(String.valueOf(CHECK_NOTE_IDS[i]), false));
