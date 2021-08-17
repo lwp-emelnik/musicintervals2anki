@@ -649,7 +649,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         getMenuInflater().inflate(R.menu.main, menu);
         menuItemAdd = menu.findItem(R.id.actionAddToAnki);
         menuItemMark = menu.findItem(R.id.actionMarkExisting);
-        handleNavigationItemSelected(navigation.getSelectedItemId()); // @fixme
+        handleNavigationItemSelected(navigation.getSelectedItemId());
         return true;
     }
 
