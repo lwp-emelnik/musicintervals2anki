@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:drawable="@drawable/bg_btn_record_disabled" android:state_enabled="false" />
     <item android:drawable="@drawable/bg_btn_record" app:state_recording="false" />
     <item android:drawable="@drawable/bg_btn_stop_recording" app:state_recording="true" />
 </selector>

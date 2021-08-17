@@ -10,10 +10,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
@@ -66,6 +63,7 @@ import linc.com.pcmdecoder.PCMDecoder;
 @SuppressWarnings("FieldCanBeLocal")
 public class AudioCaptureService extends Service {
     public final static String EXTRA_RESULT_DATA = "AudioCaptureService:Extra:ResultData";
+    public final static String EXTRA_ALLOW_MULTIPLE = "AudioCaptureService:Extra:AllowMultiple";
     public final static String EXTRA_RECORDINGS = "AudioCaptureService:Extra:Recordings";
 
     public final static String ACTION_FILES_UPDATED = "AudioCaptureService:FilesUpdated";
@@ -89,6 +87,8 @@ public class AudioCaptureService extends Service {
     private final static int BUFFER_SIZE_IN_BYTES = NUM_SAMPLES_PER_READ * BYTES_PER_SAMPLE;
 
     private final static String LOG_TAG = "AudioCaptureService";
+
+    private boolean allowMultiple;
 
     private MediaProjection projection;
     private AudioRecord record;
@@ -225,10 +225,7 @@ public class AudioCaptureService extends Service {
             public void onClick(View view) {
                 LocalBroadcastManager.getInstance(AudioCaptureService.this).sendBroadcast(new Intent(ACTION_CLOSED));
 
-                SharedPreferences uiDb = getSharedPreferences(MainActivity.REF_DB_STATE, Context.MODE_PRIVATE);
-                SharedPreferences.Editor uiDbEditor = uiDb.edit();
-                uiDbEditor.putBoolean(MainActivity.REF_DB_IS_CAPTURING, false);
-                uiDbEditor.apply();
+                MainActivity.storeCapturing(AudioCaptureService.this, false);
 
                 Intent intent = new Intent(AudioCaptureService.this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -298,23 +295,24 @@ public class AudioCaptureService extends Service {
                     System.arraycopy(filenames, 0, newFilenames, 0, filenames.length - 1);
                     MainActivity.storeFilenames(AudioCaptureService.this, newFilenames);
                     if (newFilenames.length == 0) {
-                        SharedPreferences uiDb = getSharedPreferences(MainActivity.REF_DB_STATE, Context.MODE_PRIVATE);
-                        SharedPreferences.Editor uiDbEditor = uiDb.edit();
-                        uiDbEditor.putBoolean(MainActivity.REF_DB_AFTER_CAPTURING, false);
-                        uiDbEditor.apply();
+                        MainActivity.storeAfterCapturing(AudioCaptureService.this, false);
                     }
                 }
 
-                Recording discardedRecording = recordings.removeLast();
-                Uri uri = discardedRecording.getUri();
-                String path = uri.getPath();
-                if (!new File(path).delete()) {
-                    Log.e(LOG_TAG, "Could not delete discarded recording file");
-                }
+                // Recording discardedRecording = recordings.getLast();
+                //  Uri uri = discardedRecording.getUri();
+                //  String path = uri.getPath();
+                //  if (!new File(path).delete()) {
+                //      Log.e(LOG_TAG, "Could not delete discarded recording file");
+                //  }
+                // since draft files might be referenced from other tabs we cannot simply delete them anymore
+
+                recordings.removeLast();
 
                 textBottom.setText(getString(R.string.recorded_files, recordings.size()));
                 if (recordings.size() == 0) {
                     hideLatestMenu();
+                    actionRecord.setEnabled(true);
                 } else {
                     Recording recording = recordings.getLast();
                     textLatest.setText(getString(R.string.latest_file, recording.getDurationSeconds()));
@@ -426,6 +424,9 @@ public class AudioCaptureService extends Service {
         if (intent == null) {
             return Service.START_NOT_STICKY;
         }
+        if (intent.hasExtra(EXTRA_ALLOW_MULTIPLE)) {
+            allowMultiple = intent.getBooleanExtra(EXTRA_ALLOW_MULTIPLE, false);
+        }
         if (intent.hasExtra(EXTRA_RECORDINGS)) {
             String[] filenames = intent.getStringArrayExtra(EXTRA_RECORDINGS);
             for (String filename : filenames) {
@@ -435,6 +436,9 @@ public class AudioCaptureService extends Service {
                 recordings.add(recording);
             }
             if (recordings.size() > 0) {
+                if (!allowMultiple) {
+                    actionRecord.setEnabled(false);
+                }
                 Recording recording = recordings.getLast();
                 textBottom.setText(getString(R.string.recorded_files, recordings.size()));
                 textLatest.setVisibility(View.VISIBLE);
@@ -558,32 +562,28 @@ public class AudioCaptureService extends Service {
             intent.putExtra(EXTRA_URI_STRING, uri.toString());
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
-            SharedPreferences uiDb = getSharedPreferences(MainActivity.REF_DB_STATE, Context.MODE_PRIVATE);
-            SharedPreferences.Editor uiDbEditor = uiDb.edit();
-            boolean afterSelecting = uiDb.getBoolean(MainActivity.REF_DB_AFTER_SELECTING, false);
-            boolean afterAdding = uiDb.getBoolean(MainActivity.REF_DB_AFTER_ADDING, false);
+            boolean afterSelecting = MainActivity.getStoredAfterSelecting(this);
+            boolean afterAdding = MainActivity.getStoredAfterAdding(this);
             ArrayList<String> newFilenames;
             if (afterSelecting || afterAdding) {
                 newFilenames = new ArrayList<>();
-                uiDbEditor.putBoolean(MainActivity.REF_DB_MISMATCHING_SORTING, false);
-                uiDbEditor.putBoolean(MainActivity.REF_DB_INTERSECTING_NAMES, false);
-                uiDbEditor.putBoolean(MainActivity.REF_DB_SORT_BY_NAME, false);
-                uiDbEditor.putBoolean(MainActivity.REF_DB_INTERSECTING_DATES, false);
-                uiDbEditor.putBoolean(MainActivity.REF_DB_SORT_BY_DATE, false);
-                uiDbEditor.putBoolean(MainActivity.REF_DB_AFTER_SELECTING, false);
-                uiDbEditor.putBoolean(MainActivity.REF_DB_AFTER_ADDING, false);
+                MainActivity.resetStoredMismatchingSorting(this);
+                MainActivity.storeAfterSelecting(this, false);
+                MainActivity.storeAfterAdding(this, false);
             } else {
                 String[] filenames = MainActivity.getStoredFilenames(this);
                 newFilenames = new ArrayList<>(Arrays.asList(filenames));
             }
             newFilenames.add(uri.toString());
             MainActivity.storeFilenames(this, newFilenames.toArray(new String[0]));
-            uiDbEditor.putBoolean(MainActivity.REF_DB_AFTER_CAPTURING, true);
-            uiDbEditor.apply();
+            MainActivity.storeAfterCapturing(this, true);
 
             long duration = System.currentTimeMillis() - recordingStartedAt;
             Recording recording = new Recording(uri, duration);
             recordings.add(recording);
+            if (!allowMultiple) {
+                actionRecord.setEnabled(false);
+            }
             textBottom.setText(getString(R.string.recorded_files, recordings.size()));
             textLatest.setVisibility(View.VISIBLE);
             textLatest.setText(getString(R.string.latest_file, recording.getDurationSeconds()));

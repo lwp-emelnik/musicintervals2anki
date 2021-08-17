@@ -10,14 +10,18 @@ public class OnFieldRadioChangeListener implements RadioGroup.OnCheckedChangeLis
     private final MainActivity mainActivity;
     private final RadioGroup.OnCheckedChangeListener listener;
 
-    public OnFieldRadioChangeListener(MainActivity mainActivity) {
+    private final String key;
+
+    public OnFieldRadioChangeListener(MainActivity mainActivity, String key) {
         this.mainActivity = mainActivity;
         listener = null;
+        this.key = key;
     }
 
-    public OnFieldRadioChangeListener(MainActivity mainActivity, RadioGroup.OnCheckedChangeListener listener) {
+    public OnFieldRadioChangeListener(MainActivity mainActivity, RadioGroup.OnCheckedChangeListener listener, String key) {
         this.mainActivity = mainActivity;
         this.listener = listener;
+        this.key = key;
     }
 
     @Override
@@ -25,6 +29,7 @@ public class OnFieldRadioChangeListener implements RadioGroup.OnCheckedChangeLis
         if (listener != null) {
             listener.onCheckedChanged(radioGroup, i);
         }
+        mainActivity.fieldEdited(key);
         mainActivity.clearAddedFilenames();
         mainActivity.refreshExisting();
     }

@@ -1,5 +1,6 @@
 package com.luckywarepro.musicintervals2anki.ui;
 
+import android.view.View;
 import android.widget.CompoundButton;
 
 import java.util.ArrayList;
@@ -14,11 +15,15 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
     private final CompoundButton[] checkBoxes;
     private final CompoundButton checkBoxAny;
     private boolean enableMultiple;
+    private boolean enableAny;
 
-    public OnFieldCheckChangeListener(MainActivity mainActivity, CompoundButton[] checkBoxes, CompoundButton checkBoxAny) {
+    private final String templateKey;
+
+    public OnFieldCheckChangeListener(MainActivity mainActivity, CompoundButton[] checkBoxes, CompoundButton checkBoxAny, String templateKey) {
         this.mainActivity = mainActivity;
         this.checkBoxes = checkBoxes;
         this.checkBoxAny = checkBoxAny;
+        this.templateKey = templateKey;
     }
 
     @Override
@@ -26,7 +31,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
         if (compoundButton.getId() == checkBoxAny.getId()) {
             if (b) {
                 for (CompoundButton checkBox : checkBoxes) {
-                    setChecked(checkBox,false);
+                    setChecked(checkBox, false);
                 }
             } else if (enableMultiple) {
                 for (CompoundButton checkBox : checkBoxes) {
@@ -35,23 +40,46 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
                     }
                 }
                 for (CompoundButton checkBox : checkBoxes) {
-                    setChecked(checkBox,true);
+                    setChecked(checkBox, true);
                 }
             }
-        } else if (b) {
-            setChecked(checkBoxAny, false);
-            if (!enableMultiple) {
-                for (CompoundButton checkBox : checkBoxes) {
-                    if (checkBox.getId() != compoundButton.getId()) {
-                        setChecked(checkBox,false);
+        } else {
+            if (b) {
+                setChecked(checkBoxAny, false);
+                if (!enableMultiple) {
+                    for (CompoundButton checkBox : checkBoxes) {
+                        if (checkBox.getId() != compoundButton.getId()) {
+                            setChecked(checkBox, false);
+                        }
                     }
+                }
+            } else if (enableAny) {
+                boolean checked = false;
+                for (CompoundButton checkBox : checkBoxes) {
+                    if (checkBox.isChecked()) {
+                        checked = true;
+                        break;
+                    }
+                }
+                if (!checked) {
+                    setChecked(checkBoxAny, true);
                 }
             }
         }
-        mainActivity.clearAddedFilenames();
-        mainActivity.refreshExisting();
-        mainActivity.refreshPermutations();
-        mainActivity.refreshKeys();
+        for (View view : checkBoxes) {
+            mainActivity.fieldEdited(String.format(templateKey, view.getId()));
+        }
+        commit();
+    }
+
+    public void clear() {
+        for (CompoundButton checkBox : checkBoxes) {
+            setChecked(checkBox, false);
+        }
+        if (enableAny) {
+            setChecked(checkBoxAny, true);
+        }
+        commit();
     }
 
     public void setEnableMultiple(boolean enableMultiple) {
@@ -64,15 +92,38 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
             }
             if (checked.size() > 1) {
                 for (CompoundButton checkBox : checked) {
-                    setChecked(checkBox,false);
+                    setChecked(checkBox, false);
                 }
-                mainActivity.clearAddedFilenames();
-                mainActivity.refreshExisting();
-                mainActivity.refreshPermutations();
-                mainActivity.refreshKeys();
+                commit();
             }
         }
         this.enableMultiple = enableMultiple;
+    }
+
+    public void setEnableAny(boolean enableAny) {
+        if (!enableAny) {
+            setChecked(checkBoxAny, false);
+        } else {
+            boolean checked = false;
+            for (CompoundButton checkBox : checkBoxes) {
+                if (checkBox.isChecked()) {
+                    checked = true;
+                    break;
+                }
+            }
+            if (!checked) {
+                setChecked(checkBoxAny, true);
+            }
+        }
+        this.enableAny = enableAny;
+        commit();
+    }
+
+    private void commit() {
+        mainActivity.clearAddedFilenames();
+        mainActivity.refreshExisting();
+        mainActivity.refreshPermutations();
+        mainActivity.refreshKeys();
     }
 
     private void setChecked(CompoundButton checkBox, boolean value) {
