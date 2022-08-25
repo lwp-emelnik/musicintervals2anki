@@ -2,18 +2,13 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@drawable/bg_interval" />
     <item
-        android:height="4dp"
-        android:bottom="2dp"
         android:gravity="bottom|center_horizontal"
-        android:left="2dp"
-        android:right="2dp">
-        <shape>
-            <corners
-                android:bottomLeftRadius="4dp"
-                android:bottomRightRadius="4dp"
-                android:topLeftRadius="2dp"
-                android:topRightRadius="2dp" />
+        android:bottom="10dp">
+        <shape android:shape="oval">
             <solid android:color="?attr/colorControlActivated" />
+            <size
+                android:width="22dp"
+                android:height="22dp"/>
         </shape>
     </item>
 </layer-list>
