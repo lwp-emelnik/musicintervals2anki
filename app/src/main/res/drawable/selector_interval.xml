@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/bg_interval_checked" android:state_checked="true" />
-    <item android:drawable="@drawable/bg_interval" android:state_checked="false" />
+<selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:drawable="@drawable/bg_interval_checked" android:state_checked="true" app:state_highlighted="false" />
+    <item android:drawable="@drawable/bg_interval" android:state_checked="false" app:state_highlighted="false" />
+    <item android:drawable="@drawable/bg_interval_highlighted" android:state_checked="false"  app:state_highlighted="true" />
+    <item android:drawable="@drawable/bg_interval_checked_highlighted" android:state_checked="true"  app:state_highlighted="true" />
 </selector>

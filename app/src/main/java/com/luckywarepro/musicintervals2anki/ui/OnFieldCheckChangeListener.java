@@ -16,6 +16,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
     private final CompoundButton checkBoxAny;
     private boolean enableMultiple;
     private boolean enableAny;
+    protected int checkedCount;
 
     private final String templateKey;
 
@@ -26,44 +27,58 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
         this.templateKey = templateKey;
     }
 
+    protected void check(CompoundButton compoundButton) {
+        setChecked(checkBoxAny, false);
+        checkedCount++;
+        if (!enableMultiple) {
+            for (CompoundButton checkBox : checkBoxes) {
+                if (checkBox.getId() != compoundButton.getId()) {
+                    setChecked(checkBox, false);
+                }
+            }
+            checkedCount = 1;
+        }
+    }
+
+    protected void uncheckAll() {
+        for (CompoundButton checkBox : checkBoxes) {
+            setChecked(checkBox, false);
+        }
+        checkedCount = 0;
+    }
+
+    protected void checkAll() {
+        for (CompoundButton checkBox : checkBoxes) {
+            setChecked(checkBox, true);
+        }
+        checkedCount = checkBoxes.length;
+    }
+
+    protected void uncheck(CompoundButton compoundButton) {
+        checkedCount--;
+        if (enableAny) {
+            if (checkedCount == 0) {
+                setChecked(checkBoxAny, true);
+            }
+        }
+    }
+
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
         if (compoundButton.getId() == checkBoxAny.getId()) {
             if (b) {
-                for (CompoundButton checkBox : checkBoxes) {
-                    setChecked(checkBox, false);
-                }
+                uncheckAll();
             } else if (enableMultiple) {
-                for (CompoundButton checkBox : checkBoxes) {
-                    if (checkBox.isChecked()) {
-                        return;
-                    }
+                if (checkedCount > 0) {
+                    return;
                 }
-                for (CompoundButton checkBox : checkBoxes) {
-                    setChecked(checkBox, true);
-                }
+                checkAll();
             }
         } else {
             if (b) {
-                setChecked(checkBoxAny, false);
-                if (!enableMultiple) {
-                    for (CompoundButton checkBox : checkBoxes) {
-                        if (checkBox.getId() != compoundButton.getId()) {
-                            setChecked(checkBox, false);
-                        }
-                    }
-                }
-            } else if (enableAny) {
-                boolean checked = false;
-                for (CompoundButton checkBox : checkBoxes) {
-                    if (checkBox.isChecked()) {
-                        checked = true;
-                        break;
-                    }
-                }
-                if (!checked) {
-                    setChecked(checkBoxAny, true);
-                }
+                check(compoundButton);
+            } else {
+                uncheck(compoundButton);
             }
         }
         for (View view : checkBoxes) {
@@ -73,9 +88,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
     }
 
     public void clear() {
-        for (CompoundButton checkBox : checkBoxes) {
-            setChecked(checkBox, false);
-        }
+        uncheckAll();
         if (enableAny) {
             setChecked(checkBoxAny, true);
         }
@@ -84,16 +97,8 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
 
     public void setEnableMultiple(boolean enableMultiple) {
         if (!enableMultiple) {
-            ArrayList<CompoundButton> checked = new ArrayList<>();
-            for (CompoundButton checkBox : checkBoxes) {
-                if (checkBox.isChecked()) {
-                    checked.add(checkBox);
-                }
-            }
-            if (checked.size() > 1) {
-                for (CompoundButton checkBox : checked) {
-                    setChecked(checkBox, false);
-                }
+            if (checkedCount > 1) {
+                uncheckAll();
                 commit();
             }
         }
@@ -104,14 +109,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
         if (!enableAny) {
             setChecked(checkBoxAny, false);
         } else {
-            boolean checked = false;
-            for (CompoundButton checkBox : checkBoxes) {
-                if (checkBox.isChecked()) {
-                    checked = true;
-                    break;
-                }
-            }
-            if (!checked) {
+            if (checkedCount == 0) {
                 setChecked(checkBoxAny, true);
             }
         }

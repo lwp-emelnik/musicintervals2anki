@@ -9,6 +9,8 @@ import android.util.AttributeSet;
 import android.widget.ToggleButton;
 
 public class NoteToggleButton extends ToggleButton {
+    public static final String SELECTED_TEXT = "1";
+
     private static final int TEXT_SIZE = 32;
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -45,7 +47,7 @@ public class NoteToggleButton extends ToggleButton {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (isChecked()) {
-            canvas.drawText("1", getWidth() / 2f, getHeight() - NoteToggleButton.TEXT_SIZE, paint);
+            canvas.drawText(SELECTED_TEXT, getWidth() / 2f, getHeight() - NoteToggleButton.TEXT_SIZE, paint);
         }
     }
 }

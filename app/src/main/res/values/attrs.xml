@@ -6,4 +6,7 @@
     <declare-styleable name="recording_control">
         <attr name="state_recording" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="interval">
+        <attr name="state_highlighted" format="boolean" />
+    </declare-styleable>
 </resources>

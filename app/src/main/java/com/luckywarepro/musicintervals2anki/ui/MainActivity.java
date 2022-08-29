@@ -453,11 +453,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         };
         navigation = findViewById(R.id.navigationBottom);
 
-        OnFieldCheckChangeListener onNoteCheckChangeListener = new OnFieldCheckChangeListener(
+        OnFieldCheckChangeListener onNoteCheckChangeListener = new OnNoteCheckChangeListener(
                 this,
                 checkNotes,
                 checkNoteAny,
-                TEMPLATE_REF_DB_CHECK_NOTE
+                TEMPLATE_REF_DB_CHECK_NOTE,
+                (IntervalToggleButton) checkIntervals[0]
         );
         OnFieldCheckChangeListener onOctaveCheckChangeListener = new OnFieldCheckChangeListener(
                 this,
