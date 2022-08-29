@@ -144,7 +144,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteC"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -160,7 +160,7 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteD"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -176,7 +176,7 @@
                         app:layout_constraintStart_toEndOf="@+id/checkNoteC"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteE"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -192,7 +192,7 @@
                         app:layout_constraintStart_toEndOf="@+id/checkNoteD"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteF"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -208,7 +208,7 @@
                         app:layout_constraintStart_toEndOf="@+id/checkNoteE"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteG"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -224,7 +224,7 @@
                         app:layout_constraintStart_toEndOf="@+id/checkNoteF"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteA"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -240,7 +240,7 @@
                         app:layout_constraintStart_toEndOf="@+id/checkNoteG"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteB"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -278,7 +278,7 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteCSharp"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -304,7 +304,7 @@
                         app:layout_constraintStart_toEndOf="@+id/checkNoteCSharp"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteDSharp"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -330,7 +330,7 @@
                         app:layout_constraintStart_toEndOf="@+id/checkNoteDSharp"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteFSharp"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -356,7 +356,7 @@
                         app:layout_constraintStart_toEndOf="@+id/checkNoteFSharp"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteGSharp"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -382,7 +382,7 @@
                         app:layout_constraintStart_toEndOf="@+id/checkNoteGSharp"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ToggleButton
+                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
                         android:id="@+id/checkNoteASharp"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
