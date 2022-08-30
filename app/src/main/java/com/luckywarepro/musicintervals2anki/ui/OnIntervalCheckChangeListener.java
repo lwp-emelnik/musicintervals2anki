@@ -15,7 +15,8 @@ public class OnIntervalCheckChangeListener extends OnFieldCheckChangeListener {
         this.onNoteCheckChangeListener = onNoteCheckChangeListener;
     }
 
-    private void hint() {
+    public void hint() {
+        unhint();
         if (onNoteCheckChangeListener.checked.size() == 1 && checked.size() == 1 && ascending != null) {
             CompoundButton check = checked.get(0);
             CompoundButton[] noteChecks = onNoteCheckChangeListener.checkBoxes;
@@ -28,7 +29,7 @@ public class OnIntervalCheckChangeListener extends OnFieldCheckChangeListener {
         }
     }
 
-    private void unhint() {
+    public void unhint() {
         if (hintedNote != null) {
             hintedNote.setHintFor(null);
             hintedNote = null;
@@ -38,14 +39,12 @@ public class OnIntervalCheckChangeListener extends OnFieldCheckChangeListener {
     @Override
     protected void check(CompoundButton compoundButton) {
         super.check(compoundButton);
-        unhint();
         hint();
     }
 
     @Override
     protected void uncheck(CompoundButton compoundButton) {
         super.uncheck(compoundButton);
-        unhint();
         hint();
     }
 
@@ -57,7 +56,6 @@ public class OnIntervalCheckChangeListener extends OnFieldCheckChangeListener {
 
     public void setAscending(Boolean ascending) {
         this.ascending = ascending;
-        unhint();
         hint();
     }
 }

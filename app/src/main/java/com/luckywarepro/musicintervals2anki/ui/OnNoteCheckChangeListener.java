@@ -9,6 +9,8 @@ public class OnNoteCheckChangeListener extends OnFieldCheckChangeListener {
     private final IntervalToggleButton[] intervalToggleButtons;
     private boolean intervalsHinted;
     private Boolean ascending = null;
+    private Callback nonRadioModeCallback;
+    private Callback radioModeCallback;
 
     public OnNoteCheckChangeListener(MainActivity mainActivity, CompoundButton[] checkBoxes, CompoundButton checkBoxAny, String templateKey, IntervalToggleButton[] intervalToggleButtons) {
         super(mainActivity, checkBoxes, checkBoxAny, templateKey);
@@ -24,6 +26,9 @@ public class OnNoteCheckChangeListener extends OnFieldCheckChangeListener {
                         .setHintFor(checkBoxes[(index + i) % checkBoxes.length].getText().toString());
             }
             intervalsHinted = true;
+            if (radioModeCallback != null) {
+                radioModeCallback.run();
+            }
         }
     }
 
@@ -33,6 +38,9 @@ public class OnNoteCheckChangeListener extends OnFieldCheckChangeListener {
                 intervalToggleButton.setHintFor(null);
             }
             intervalsHinted = false;
+            if (nonRadioModeCallback != null) {
+                nonRadioModeCallback.run();
+            }
         }
     }
 
@@ -76,5 +84,17 @@ public class OnNoteCheckChangeListener extends OnFieldCheckChangeListener {
         } else {
             hintIntervals();
         }
+    }
+
+    public void setNonRadioModeCallback(Callback nonRadioModeCallback) {
+        this.nonRadioModeCallback = nonRadioModeCallback;
+    }
+
+    public void setRadioModeCallback(Callback radioModeCallback) {
+        this.radioModeCallback = radioModeCallback;
+    }
+
+    interface Callback {
+        void run();
     }
 }

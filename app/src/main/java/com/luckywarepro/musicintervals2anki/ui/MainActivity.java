@@ -473,6 +473,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 TEMPLATE_REF_DB_CHECK_INTERVAL,
                 onNoteCheckChangeListener
         );
+        onNoteCheckChangeListener.setNonRadioModeCallback(onIntervalCheckChangeListener::unhint);
+        onNoteCheckChangeListener.setRadioModeCallback(onIntervalCheckChangeListener::hint);
 
         onFieldCheckChangeListeners = new OnFieldCheckChangeListener[]{
                 onNoteCheckChangeListener,
