@@ -12,10 +12,11 @@ import java.util.ArrayList;
 public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChangeListener {
     private final MainActivity mainActivity;
 
-    private final CompoundButton[] checkBoxes;
+    protected final CompoundButton[] checkBoxes;
     private final CompoundButton checkBoxAny;
     private boolean enableMultiple;
     private boolean enableAny;
+    protected final ArrayList<CompoundButton> checked = new ArrayList<>();
 
     private final String templateKey;
 
@@ -26,44 +27,59 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
         this.templateKey = templateKey;
     }
 
+    protected void check(CompoundButton compoundButton) {
+        setChecked(checkBoxAny, false);
+        checked.add(compoundButton);
+        if (!enableMultiple) {
+            for (CompoundButton checkBox : checkBoxes) {
+                if (checkBox.getId() != compoundButton.getId()) {
+                    setChecked(checkBox, false);
+                    checked.remove(checkBox);
+                }
+            }
+        }
+    }
+
+    protected void uncheckAll() {
+        for (CompoundButton checkBox : checkBoxes) {
+            setChecked(checkBox, false);
+            checked.remove(checkBox);
+        }
+    }
+
+    protected void checkAll() {
+        checked.clear();
+        for (CompoundButton checkBox : checkBoxes) {
+            setChecked(checkBox, true);
+            checked.add(checkBox);
+        }
+    }
+
+    protected void uncheck(CompoundButton compoundButton) {
+        checked.remove(compoundButton);
+        if (enableAny) {
+            if (checked.size() == 0) {
+                setChecked(checkBoxAny, true);
+            }
+        }
+    }
+
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
         if (compoundButton.getId() == checkBoxAny.getId()) {
             if (b) {
-                for (CompoundButton checkBox : checkBoxes) {
-                    setChecked(checkBox, false);
-                }
+                uncheckAll();
             } else if (enableMultiple) {
-                for (CompoundButton checkBox : checkBoxes) {
-                    if (checkBox.isChecked()) {
-                        return;
-                    }
+                if (checked.size() > 0) {
+                    return;
                 }
-                for (CompoundButton checkBox : checkBoxes) {
-                    setChecked(checkBox, true);
-                }
+                checkAll();
             }
         } else {
             if (b) {
-                setChecked(checkBoxAny, false);
-                if (!enableMultiple) {
-                    for (CompoundButton checkBox : checkBoxes) {
-                        if (checkBox.getId() != compoundButton.getId()) {
-                            setChecked(checkBox, false);
-                        }
-                    }
-                }
-            } else if (enableAny) {
-                boolean checked = false;
-                for (CompoundButton checkBox : checkBoxes) {
-                    if (checkBox.isChecked()) {
-                        checked = true;
-                        break;
-                    }
-                }
-                if (!checked) {
-                    setChecked(checkBoxAny, true);
-                }
+                check(compoundButton);
+            } else {
+                uncheck(compoundButton);
             }
         }
         for (View view : checkBoxes) {
@@ -73,9 +89,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
     }
 
     public void clear() {
-        for (CompoundButton checkBox : checkBoxes) {
-            setChecked(checkBox, false);
-        }
+        uncheckAll();
         if (enableAny) {
             setChecked(checkBoxAny, true);
         }
@@ -84,16 +98,8 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
 
     public void setEnableMultiple(boolean enableMultiple) {
         if (!enableMultiple) {
-            ArrayList<CompoundButton> checked = new ArrayList<>();
-            for (CompoundButton checkBox : checkBoxes) {
-                if (checkBox.isChecked()) {
-                    checked.add(checkBox);
-                }
-            }
             if (checked.size() > 1) {
-                for (CompoundButton checkBox : checked) {
-                    setChecked(checkBox, false);
-                }
+                uncheckAll();
                 commit();
             }
         }
@@ -104,14 +110,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
         if (!enableAny) {
             setChecked(checkBoxAny, false);
         } else {
-            boolean checked = false;
-            for (CompoundButton checkBox : checkBoxes) {
-                if (checkBox.isChecked()) {
-                    checked = true;
-                    break;
-                }
-            }
-            if (!checked) {
+            if (checked.size() == 0) {
                 setChecked(checkBoxAny, true);
             }
         }

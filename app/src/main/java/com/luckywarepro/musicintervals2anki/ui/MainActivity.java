@@ -193,13 +193,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private PlaybackButton actionPlay;
     Button actionViewAll;
     private CompoundButton checkNoteAny;
-    private CompoundButton[] checkNotes;
+    private NoteToggleButton[] checkNotes;
     private CompoundButton checkOctaveAny;
     private CompoundButton[] checkOctaves;
     private RadioGroup radioGroupDirection;
     private RadioGroup radioGroupTiming;
     private CompoundButton checkIntervalAny;
-    private CompoundButton[] checkIntervals;
+    private IntervalToggleButton[] checkIntervals;
     private EditText inputTempo;
     private AutoCompleteTextView inputInstrument;
     private EditText inputFirstNoteDurationCoefficient;
@@ -424,7 +424,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         actionPlay = findViewById(R.id.actionPlay);
         actionViewAll = findViewById(R.id.actionViewAll);
         checkNoteAny = findViewById(R.id.checkNoteAny);
-        checkNotes = new CompoundButton[CHECK_NOTE_IDS.length];
+        checkNotes = new NoteToggleButton[CHECK_NOTE_IDS.length];
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
             checkNotes[i] = findViewById(CHECK_NOTE_IDS[i]);
         }
@@ -436,7 +436,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         radioGroupDirection = findViewById(R.id.radioGroupDirection);
         radioGroupTiming = findViewById(R.id.radioGroupTiming);
         checkIntervalAny = findViewById(R.id.checkIntervalAny);
-        checkIntervals = new CompoundButton[CHECK_INTERVAL_IDS.length];
+        checkIntervals = new IntervalToggleButton[CHECK_INTERVAL_IDS.length];
         for (int i = 0; i < CHECK_INTERVAL_IDS.length; i++) {
             checkIntervals[i] = findViewById(CHECK_INTERVAL_IDS[i]);
         }
@@ -453,11 +453,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         };
         navigation = findViewById(R.id.navigationBottom);
 
-        OnFieldCheckChangeListener onNoteCheckChangeListener = new OnFieldCheckChangeListener(
+        OnNoteCheckChangeListener onNoteCheckChangeListener = new OnNoteCheckChangeListener(
                 this,
                 checkNotes,
                 checkNoteAny,
-                TEMPLATE_REF_DB_CHECK_NOTE
+                TEMPLATE_REF_DB_CHECK_NOTE,
+                checkIntervals
         );
         OnFieldCheckChangeListener onOctaveCheckChangeListener = new OnFieldCheckChangeListener(
                 this,
@@ -465,12 +466,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 checkOctaveAny,
                 TEMPLATE_REF_DB_CHECK_OCTAVE
         );
-        OnFieldCheckChangeListener onIntervalCheckChangeListener = new OnFieldCheckChangeListener(
+        OnIntervalCheckChangeListener onIntervalCheckChangeListener = new OnIntervalCheckChangeListener(
                 this,
                 checkIntervals,
                 checkIntervalAny,
-                TEMPLATE_REF_DB_CHECK_INTERVAL
+                TEMPLATE_REF_DB_CHECK_INTERVAL,
+                onNoteCheckChangeListener
         );
+        onNoteCheckChangeListener.setNonRadioModeCallback(onIntervalCheckChangeListener::unhint);
+        onNoteCheckChangeListener.setRadioModeCallback(onIntervalCheckChangeListener::hint);
 
         onFieldCheckChangeListeners = new OnFieldCheckChangeListener[]{
                 onNoteCheckChangeListener,
@@ -512,13 +516,23 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         RadioGroup.OnCheckedChangeListener onDirectionChangedListener = (radioGroup, checkedId) -> {
             if (checkedId == R.id.radioDirectionAny) {
+                onNoteCheckChangeListener.setAscending(null);
+                onIntervalCheckChangeListener.setAscending(null);
                 return;
             }
             AutoTransition transition = new AutoTransition();
             transition.setDuration(TRANSITION_DURATION);
             transition.setInterpolator(new AccelerateDecelerateInterpolator());
             TransitionManager.beginDelayedTransition(layoutIntervals, transition);
-            (checkedId == R.id.radioDirectionDesc ? intervalConstraintsReverse : intervalConstraints).applyTo(layoutIntervals);
+            if (checkedId == R.id.radioDirectionDesc) {
+                onNoteCheckChangeListener.setAscending(false);
+                onIntervalCheckChangeListener.setAscending(false);
+                intervalConstraintsReverse.applyTo(layoutIntervals);
+            } else {
+                onNoteCheckChangeListener.setAscending(true);
+                onIntervalCheckChangeListener.setAscending(true);
+                intervalConstraints.applyTo(layoutIntervals);
+            }
         };
 
         checkNoteAny.setOnCheckedChangeListener(onNoteCheckChangeListener);

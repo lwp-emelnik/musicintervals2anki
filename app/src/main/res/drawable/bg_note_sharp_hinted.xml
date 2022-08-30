@@ -2,13 +2,13 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@drawable/bg_note_sharp" />
     <item
-        android:bottom="4dp"
-        android:gravity="bottom|center_horizontal">
+        android:gravity="bottom|center_horizontal"
+        android:bottom="48dp">
         <shape android:shape="oval">
-            <solid android:color="?attr/colorControlActivated" />
+            <solid android:color="#C6D64C" />
             <size
-                android:width="22dp"
-                android:height="22dp"/>
+                android:width="16dp"
+                android:height="16dp"/>
         </shape>
     </item>
 </layer-list>
