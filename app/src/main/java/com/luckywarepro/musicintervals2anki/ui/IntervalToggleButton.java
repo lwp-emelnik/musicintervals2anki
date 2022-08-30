@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.widget.ToggleButton;
 
 import com.luckywarepro.musicintervals2anki.R;
@@ -13,8 +14,6 @@ import com.luckywarepro.musicintervals2anki.R;
 import java.util.ArrayList;
 
 public class IntervalToggleButton extends ToggleButton {
-    private static final int TEXT_SIZE = 24;
-
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private boolean isHighlighted;
@@ -25,7 +24,7 @@ public class IntervalToggleButton extends ToggleButton {
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(Color.BLACK);
-        paint.setTextSize(TEXT_SIZE);
+        paint.setTextSize(24);
     }
 
     public IntervalToggleButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -66,10 +65,10 @@ public class IntervalToggleButton extends ToggleButton {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (isHighlighted) {
-            canvas.drawText(NoteToggleButton.SELECTED_TEXT, getWidth() / 2f, TEXT_SIZE + 24, paint);
+            canvas.drawText(NoteToggleButton.SELECTED_TEXT, getWidth() / 2f, dpToPx(17), paint);
         }
         if (hintFor != null) {
-            canvas.drawText(hintFor, getWidth() / 2f, TEXT_SIZE + 84, paint);
+            canvas.drawText(hintFor, getWidth() / 2f, dpToPx(39), paint);
         }
     }
 
@@ -82,5 +81,9 @@ public class IntervalToggleButton extends ToggleButton {
         this.hintFor = hintFor;
         refreshDrawableState();
         invalidate();
+    }
+
+    private int dpToPx(int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
 }
