@@ -513,6 +513,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         RadioGroup.OnCheckedChangeListener onDirectionChangedListener = (radioGroup, checkedId) -> {
             if (checkedId == R.id.radioDirectionAny) {
+                onNoteCheckChangeListener.setAscending(null);
                 return;
             }
             AutoTransition transition = new AutoTransition();
