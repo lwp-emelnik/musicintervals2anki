@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:drawable="@drawable/bg_interval_checked" android:state_checked="true" app:state_highlighted="false" />
-    <item android:drawable="@drawable/bg_interval" android:state_checked="false" app:state_highlighted="false" />
-    <item android:drawable="@drawable/bg_interval_highlighted" android:state_checked="false"  app:state_highlighted="true" />
-    <item android:drawable="@drawable/bg_interval_checked_highlighted" android:state_checked="true"  app:state_highlighted="true" />
+    <item android:drawable="@drawable/bg_interval_checked" android:state_checked="true" app:state_highlighted="false" app:state_hinted="false" />
+    <item android:drawable="@drawable/bg_interval_checked_hinted" android:state_checked="true" app:state_highlighted="false" app:state_hinted="true" />
+    <item android:drawable="@drawable/bg_interval" android:state_checked="false" app:state_highlighted="false" app:state_hinted="false" />
+    <item android:drawable="@drawable/bg_interval_hinted" android:state_checked="false" app:state_highlighted="false" app:state_hinted="true" />
+    <item android:drawable="@drawable/bg_interval_highlighted" android:state_checked="false"  app:state_highlighted="true" app:state_hinted="false" />
+    <item android:drawable="@drawable/bg_interval_highlighted_hinted" android:state_checked="false"  app:state_highlighted="true" app:state_hinted="true" />
+    <item android:drawable="@drawable/bg_interval_checked_highlighted" android:state_checked="true"  app:state_highlighted="true" app:state_hinted="false" />
+    <item android:drawable="@drawable/bg_interval_checked_highlighted_hinted" android:state_checked="true" app:state_highlighted="true" app:state_hinted="true" />
 </selector>

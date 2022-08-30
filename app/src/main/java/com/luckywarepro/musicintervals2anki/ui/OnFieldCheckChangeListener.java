@@ -12,11 +12,11 @@ import java.util.ArrayList;
 public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChangeListener {
     private final MainActivity mainActivity;
 
-    private final CompoundButton[] checkBoxes;
+    protected final CompoundButton[] checkBoxes;
     private final CompoundButton checkBoxAny;
     private boolean enableMultiple;
     private boolean enableAny;
-    protected int checkedCount;
+    protected final ArrayList<CompoundButton> checked = new ArrayList<>();
 
     private final String templateKey;
 
@@ -29,35 +29,36 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
 
     protected void check(CompoundButton compoundButton) {
         setChecked(checkBoxAny, false);
-        checkedCount++;
+        checked.add(compoundButton);
         if (!enableMultiple) {
             for (CompoundButton checkBox : checkBoxes) {
                 if (checkBox.getId() != compoundButton.getId()) {
                     setChecked(checkBox, false);
+                    checked.remove(checkBox);
                 }
             }
-            checkedCount = 1;
         }
     }
 
     protected void uncheckAll() {
         for (CompoundButton checkBox : checkBoxes) {
             setChecked(checkBox, false);
+            checked.remove(checkBox);
         }
-        checkedCount = 0;
     }
 
     protected void checkAll() {
+        checked.clear();
         for (CompoundButton checkBox : checkBoxes) {
             setChecked(checkBox, true);
+            checked.add(checkBox);
         }
-        checkedCount = checkBoxes.length;
     }
 
     protected void uncheck(CompoundButton compoundButton) {
-        checkedCount--;
+        checked.remove(compoundButton);
         if (enableAny) {
-            if (checkedCount == 0) {
+            if (checked.size() == 0) {
                 setChecked(checkBoxAny, true);
             }
         }
@@ -69,7 +70,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
             if (b) {
                 uncheckAll();
             } else if (enableMultiple) {
-                if (checkedCount > 0) {
+                if (checked.size() > 0) {
                     return;
                 }
                 checkAll();
@@ -97,7 +98,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
 
     public void setEnableMultiple(boolean enableMultiple) {
         if (!enableMultiple) {
-            if (checkedCount > 1) {
+            if (checked.size() > 1) {
                 uncheckAll();
                 commit();
             }
@@ -109,7 +110,7 @@ public class OnFieldCheckChangeListener implements CompoundButton.OnCheckedChang
         if (!enableAny) {
             setChecked(checkBoxAny, false);
         } else {
-            if (checkedCount == 0) {
+            if (checked.size() == 0) {
                 setChecked(checkBoxAny, true);
             }
         }

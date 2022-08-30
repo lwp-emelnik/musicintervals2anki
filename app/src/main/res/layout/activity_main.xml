@@ -619,7 +619,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalm2"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -636,7 +636,7 @@
                     app:layout_constraintStart_toEndOf="@+id/checkIntervalP1"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalM2"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -653,7 +653,7 @@
                     app:layout_constraintStart_toEndOf="@+id/checkIntervalm2"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalm3"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -670,7 +670,7 @@
                     app:layout_constraintStart_toEndOf="@+id/checkIntervalM2"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalM3"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -687,7 +687,7 @@
                     app:layout_constraintStart_toEndOf="@+id/checkIntervalm3"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalP4"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -704,7 +704,7 @@
                     app:layout_constraintStart_toEndOf="@+id/checkIntervalM3"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalTT"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -721,7 +721,7 @@
                     app:layout_constraintStart_toEndOf="@+id/checkIntervalP4"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalP5"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -738,7 +738,7 @@
                     app:layout_constraintStart_toEndOf="@+id/checkIntervalTT"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalm6"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -755,7 +755,7 @@
                     app:layout_constraintStart_toEndOf="@+id/checkIntervalP5"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalM6"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -772,7 +772,7 @@
                     app:layout_constraintStart_toEndOf="@+id/checkIntervalm6"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalm7"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -789,7 +789,7 @@
                     app:layout_constraintStart_toEndOf="@+id/checkIntervalM6"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalM7"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -806,7 +806,7 @@
                     app:layout_constraintStart_toEndOf="@+id/checkIntervalm7"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ToggleButton
+                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
                     android:id="@+id/checkIntervalP8"
                     android:layout_width="0dp"
                     android:layout_height="0dp"

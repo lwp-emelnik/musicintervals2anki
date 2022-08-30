@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private RadioGroup radioGroupDirection;
     private RadioGroup radioGroupTiming;
     private CompoundButton checkIntervalAny;
-    private CompoundButton[] checkIntervals;
+    private IntervalToggleButton[] checkIntervals;
     private EditText inputTempo;
     private AutoCompleteTextView inputInstrument;
     private EditText inputFirstNoteDurationCoefficient;
@@ -436,7 +436,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         radioGroupDirection = findViewById(R.id.radioGroupDirection);
         radioGroupTiming = findViewById(R.id.radioGroupTiming);
         checkIntervalAny = findViewById(R.id.checkIntervalAny);
-        checkIntervals = new CompoundButton[CHECK_INTERVAL_IDS.length];
+        checkIntervals = new IntervalToggleButton[CHECK_INTERVAL_IDS.length];
         for (int i = 0; i < CHECK_INTERVAL_IDS.length; i++) {
             checkIntervals[i] = findViewById(CHECK_INTERVAL_IDS[i]);
         }
@@ -458,7 +458,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 checkNotes,
                 checkNoteAny,
                 TEMPLATE_REF_DB_CHECK_NOTE,
-                (IntervalToggleButton) checkIntervals[0]
+                checkIntervals
         );
         OnFieldCheckChangeListener onOctaveCheckChangeListener = new OnFieldCheckChangeListener(
                 this,

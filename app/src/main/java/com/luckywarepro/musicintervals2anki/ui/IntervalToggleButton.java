@@ -10,14 +10,15 @@ import android.widget.ToggleButton;
 
 import com.luckywarepro.musicintervals2anki.R;
 
-public class IntervalToggleButton extends ToggleButton {
-    private static final int[] STATE_HIGHLIGHTED = {R.attr.state_highlighted};
+import java.util.ArrayList;
 
+public class IntervalToggleButton extends ToggleButton {
     private static final int TEXT_SIZE = 24;
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private boolean isHighlighted;
+    private String hintFor;
 
     private void init() {
         paint.setTextAlign(Paint.Align.CENTER);
@@ -49,10 +50,15 @@ public class IntervalToggleButton extends ToggleButton {
 
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
-        final int[] drawableState = super.onCreateDrawableState(extraSpace + 1);
+        ArrayList<Integer> drawableStates = new ArrayList<>();
         if (isHighlighted) {
-            mergeDrawableStates(drawableState, STATE_HIGHLIGHTED);
+            drawableStates.add(R.attr.state_highlighted);
         }
+        if (hintFor != null) {
+            drawableStates.add(R.attr.state_hinted);
+        }
+        final int[] drawableState = super.onCreateDrawableState(extraSpace + drawableStates.size());
+        mergeDrawableStates(drawableState, drawableStates.stream().mapToInt(i -> i).toArray());
         return drawableState;
     }
 
@@ -60,12 +66,21 @@ public class IntervalToggleButton extends ToggleButton {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (isHighlighted) {
-            canvas.drawText(NoteToggleButton.SELECTED_TEXT, getWidth() / 2f, TEXT_SIZE + 24 , paint);
+            canvas.drawText(NoteToggleButton.SELECTED_TEXT, getWidth() / 2f, TEXT_SIZE + 24, paint);
+        }
+        if (hintFor != null) {
+            canvas.drawText(hintFor, getWidth() / 2f, TEXT_SIZE + 84, paint);
         }
     }
 
     public void setHighlighted(boolean isHighlighted) {
         this.isHighlighted = isHighlighted;
         refreshDrawableState();
+    }
+
+    public void setHintFor(String hintFor) {
+        this.hintFor = hintFor;
+        refreshDrawableState();
+        invalidate();
     }
 }
