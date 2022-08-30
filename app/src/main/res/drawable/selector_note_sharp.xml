@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/bg_note_sharp_checked" android:state_checked="true" />
-    <item android:drawable="@drawable/bg_note_sharp" android:state_checked="false" />
+<selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:drawable="@drawable/bg_note_sharp_checked" android:state_checked="true" app:state_hinted="false" />
+    <item android:drawable="@drawable/bg_note_sharp_checked_hinted" android:state_checked="true" app:state_hinted="true" />
+    <item android:drawable="@drawable/bg_note_sharp" android:state_checked="false" app:state_hinted="false" />
+    <item android:drawable="@drawable/bg_note_sharp_hinted" android:state_checked="false" app:state_hinted="true" />
 </selector>

@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private PlaybackButton actionPlay;
     Button actionViewAll;
     private CompoundButton checkNoteAny;
-    private CompoundButton[] checkNotes;
+    private NoteToggleButton[] checkNotes;
     private CompoundButton checkOctaveAny;
     private CompoundButton[] checkOctaves;
     private RadioGroup radioGroupDirection;
@@ -424,7 +424,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         actionPlay = findViewById(R.id.actionPlay);
         actionViewAll = findViewById(R.id.actionViewAll);
         checkNoteAny = findViewById(R.id.checkNoteAny);
-        checkNotes = new CompoundButton[CHECK_NOTE_IDS.length];
+        checkNotes = new NoteToggleButton[CHECK_NOTE_IDS.length];
         for (int i = 0; i < CHECK_NOTE_IDS.length; i++) {
             checkNotes[i] = findViewById(CHECK_NOTE_IDS[i]);
         }
@@ -466,11 +466,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 checkOctaveAny,
                 TEMPLATE_REF_DB_CHECK_OCTAVE
         );
-        OnFieldCheckChangeListener onIntervalCheckChangeListener = new OnFieldCheckChangeListener(
+        OnIntervalCheckChangeListener onIntervalCheckChangeListener = new OnIntervalCheckChangeListener(
                 this,
                 checkIntervals,
                 checkIntervalAny,
-                TEMPLATE_REF_DB_CHECK_INTERVAL
+                TEMPLATE_REF_DB_CHECK_INTERVAL,
+                onNoteCheckChangeListener
         );
 
         onFieldCheckChangeListeners = new OnFieldCheckChangeListener[]{
@@ -514,6 +515,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         RadioGroup.OnCheckedChangeListener onDirectionChangedListener = (radioGroup, checkedId) -> {
             if (checkedId == R.id.radioDirectionAny) {
                 onNoteCheckChangeListener.setAscending(null);
+                onIntervalCheckChangeListener.setAscending(null);
                 return;
             }
             AutoTransition transition = new AutoTransition();
@@ -522,9 +524,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             TransitionManager.beginDelayedTransition(layoutIntervals, transition);
             if (checkedId == R.id.radioDirectionDesc) {
                 onNoteCheckChangeListener.setAscending(false);
+                onIntervalCheckChangeListener.setAscending(false);
                 intervalConstraintsReverse.applyTo(layoutIntervals);
             } else {
                 onNoteCheckChangeListener.setAscending(true);
+                onIntervalCheckChangeListener.setAscending(true);
                 intervalConstraints.applyTo(layoutIntervals);
             }
         };
