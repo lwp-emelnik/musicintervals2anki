@@ -8,6 +8,7 @@ public class OnNoteCheckChangeListener extends OnFieldCheckChangeListener {
     private final IntervalToggleButton unisonIntervalToggleButton;
     private final IntervalToggleButton[] intervalToggleButtons;
     private boolean intervalsHinted;
+    private boolean ascending = true;
 
     public OnNoteCheckChangeListener(MainActivity mainActivity, CompoundButton[] checkBoxes, CompoundButton checkBoxAny, String templateKey, IntervalToggleButton[] intervalToggleButtons) {
         super(mainActivity, checkBoxes, checkBoxAny, templateKey);
@@ -19,7 +20,8 @@ public class OnNoteCheckChangeListener extends OnFieldCheckChangeListener {
         if (checked.size() == 1) {
             int index = Arrays.asList(checkBoxes).indexOf(checked.get(0));
             for (int i = 0; i < intervalToggleButtons.length; i++) {
-                intervalToggleButtons[i].setHintFor(checkBoxes[(index + i) % checkBoxes.length].getText().toString());
+                intervalToggleButtons[ascending ? i : intervalToggleButtons.length - i - 1]
+                        .setHintFor(checkBoxes[(index + i) % checkBoxes.length].getText().toString());
             }
             intervalsHinted = true;
         }
@@ -65,5 +67,10 @@ public class OnNoteCheckChangeListener extends OnFieldCheckChangeListener {
             unisonIntervalToggleButton.setHighlighted(false);
             unhintIntervals();
         }
+    }
+
+    public void setAscending(boolean ascending) {
+        this.ascending = ascending;
+        hintIntervals();
     }
 }

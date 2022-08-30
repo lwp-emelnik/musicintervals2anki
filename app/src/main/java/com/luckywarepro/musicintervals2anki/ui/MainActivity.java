@@ -453,7 +453,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         };
         navigation = findViewById(R.id.navigationBottom);
 
-        OnFieldCheckChangeListener onNoteCheckChangeListener = new OnNoteCheckChangeListener(
+        OnNoteCheckChangeListener onNoteCheckChangeListener = new OnNoteCheckChangeListener(
                 this,
                 checkNotes,
                 checkNoteAny,
@@ -519,7 +519,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             transition.setDuration(TRANSITION_DURATION);
             transition.setInterpolator(new AccelerateDecelerateInterpolator());
             TransitionManager.beginDelayedTransition(layoutIntervals, transition);
-            (checkedId == R.id.radioDirectionDesc ? intervalConstraintsReverse : intervalConstraints).applyTo(layoutIntervals);
+            if (checkedId == R.id.radioDirectionDesc) {
+                onNoteCheckChangeListener.setAscending(false);
+                intervalConstraintsReverse.applyTo(layoutIntervals);
+            } else {
+                onNoteCheckChangeListener.setAscending(true);
+                intervalConstraints.applyTo(layoutIntervals);
+            }
         };
 
         checkNoteAny.setOnCheckedChangeListener(onNoteCheckChangeListener);
