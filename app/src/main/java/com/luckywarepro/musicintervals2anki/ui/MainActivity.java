@@ -38,6 +38,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -90,6 +91,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
@@ -524,6 +526,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             transition.setDuration(TRANSITION_DURATION);
             transition.setInterpolator(new AccelerateDecelerateInterpolator());
             TransitionManager.beginDelayedTransition(layoutIntervals, transition);
+            HorizontalScrollView horizontalScrollView = findViewById(R.id.scrollViewGroupInterval);
+            horizontalScrollView.scrollTo(
+                    horizontalScrollView.getChildAt(0).getMeasuredWidth()
+                            - horizontalScrollView.getMeasuredWidth()
+                            - horizontalScrollView.getScrollX(), 0);
             if (checkedId == R.id.radioDirectionDesc) {
                 onNoteCheckChangeListener.setAscending(false);
                 onIntervalCheckChangeListener.setAscending(false);
