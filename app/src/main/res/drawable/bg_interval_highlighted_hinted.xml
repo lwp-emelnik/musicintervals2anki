@@ -3,7 +3,7 @@
     <item android:drawable="@drawable/bg_interval" />
     <item
         android:gravity="bottom|center_horizontal"
-        android:bottom="36dp">
+        android:bottom="32dp">
         <shape android:shape="oval">
             <solid android:color="#C6D64C" />
             <size
@@ -13,7 +13,7 @@
     </item>
     <item
         android:gravity="bottom|center_horizontal"
-        android:bottom="58dp">
+        android:bottom="54dp">
         <shape android:shape="oval">
             <solid android:color="#C6D64C" />
             <size
