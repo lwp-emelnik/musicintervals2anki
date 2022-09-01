@@ -280,7 +280,7 @@
                             android:layout_height="0dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/checkNoteCSharp"
-                            app:layout_constraintHorizontal_weight="20"
+                            app:layout_constraintHorizontal_weight="15"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -296,7 +296,7 @@
                             android:textOn="@string/note_c_sharp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/space2"
-                            app:layout_constraintHorizontal_weight="30"
+                            app:layout_constraintHorizontal_weight="40"
                             app:layout_constraintStart_toEndOf="@+id/space1"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -306,7 +306,7 @@
                             android:layout_height="0dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/checkNoteDSharp"
-                            app:layout_constraintHorizontal_weight="20"
+                            app:layout_constraintHorizontal_weight="10"
                             app:layout_constraintStart_toEndOf="@+id/checkNoteCSharp"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -322,7 +322,7 @@
                             android:textOn="@string/note_d_sharp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/space3"
-                            app:layout_constraintHorizontal_weight="30"
+                            app:layout_constraintHorizontal_weight="40"
                             app:layout_constraintStart_toEndOf="@+id/space2"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -332,7 +332,7 @@
                             android:layout_height="0dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/checkNoteFSharp"
-                            app:layout_constraintHorizontal_weight="40"
+                            app:layout_constraintHorizontal_weight="30"
                             app:layout_constraintStart_toEndOf="@+id/checkNoteDSharp"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -348,7 +348,7 @@
                             android:textOn="@string/note_f_sharp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/space4"
-                            app:layout_constraintHorizontal_weight="30"
+                            app:layout_constraintHorizontal_weight="40"
                             app:layout_constraintStart_toEndOf="@+id/space3"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -358,7 +358,7 @@
                             android:layout_height="0dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/checkNoteGSharp"
-                            app:layout_constraintHorizontal_weight="15"
+                            app:layout_constraintHorizontal_weight="5"
                             app:layout_constraintStart_toEndOf="@+id/checkNoteFSharp"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -374,7 +374,7 @@
                             android:textOn="@string/note_g_sharp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/space5"
-                            app:layout_constraintHorizontal_weight="30"
+                            app:layout_constraintHorizontal_weight="40"
                             app:layout_constraintStart_toEndOf="@+id/space4"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -384,7 +384,7 @@
                             android:layout_height="0dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/checkNoteASharp"
-                            app:layout_constraintHorizontal_weight="15"
+                            app:layout_constraintHorizontal_weight="5"
                             app:layout_constraintStart_toEndOf="@+id/checkNoteGSharp"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -400,7 +400,7 @@
                             android:textOn="@string/note_a_sharp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/space6"
-                            app:layout_constraintHorizontal_weight="30"
+                            app:layout_constraintHorizontal_weight="40"
                             app:layout_constraintStart_toEndOf="@+id/space5"
                             app:layout_constraintTop_toTopOf="parent" />
 
@@ -410,7 +410,7 @@
                             android:layout_height="0dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintHorizontal_weight="20"
+                            app:layout_constraintHorizontal_weight="15"
                             app:layout_constraintStart_toEndOf="@+id/checkNoteASharp"
                             app:layout_constraintTop_toTopOf="parent" />
 
