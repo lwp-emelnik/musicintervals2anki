@@ -26,12 +26,12 @@ public class NoteToggleButton extends ToggleButton {
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(Color.BLACK);
-        paint.setTextSize(32);
+        paint.setTextSize(dpToPx(14));
         hintPaint.setTextAlign(Paint.Align.CENTER);
         hintPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         hintPaint.setStyle(Paint.Style.FILL);
         hintPaint.setColor(Color.BLACK);
-        hintPaint.setTextSize(24);
+        hintPaint.setTextSize(dpToPx(10));
     }
 
     public NoteToggleButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -59,10 +59,10 @@ public class NoteToggleButton extends ToggleButton {
         super.onDraw(canvas);
         boolean sharp = this.getText().toString().endsWith("#");
         if (isChecked()) {
-            canvas.drawText(SELECTED_TEXT, getWidth() / 2f, dpToPx(sharp ? 92 : 160), paint);
+            canvas.drawText(SELECTED_TEXT, getWidth() / 2f, dpToPx(sharp ? 91 : 158), paint);
         }
         if (hintFor != null) {
-            canvas.drawText(hintFor, getWidth() / 2f, dpToPx(sharp ? 50 : 119), hintPaint);
+            canvas.drawText(hintFor, getWidth() / 2f, dpToPx(sharp ? 48 : 116), hintPaint);
         }
     }
 
