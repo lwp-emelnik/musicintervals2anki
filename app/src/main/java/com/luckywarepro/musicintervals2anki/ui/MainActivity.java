@@ -312,6 +312,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     String[] octaveKeys = new String[]{};
     String[] intervalKeys = new String[]{};
 
+    private int activeDirectionLayout = R.id.radioDirectionAsc;
+
     private final Map<String, BroadcastReceiver> actionReceivers = new HashMap<String, BroadcastReceiver>() {{
         put(AudioCaptureService.ACTION_FILES_UPDATED, new BroadcastReceiver() {
             @Override
@@ -526,11 +528,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             transition.setDuration(TRANSITION_DURATION);
             transition.setInterpolator(new AccelerateDecelerateInterpolator());
             TransitionManager.beginDelayedTransition(layoutIntervals, transition);
-            HorizontalScrollView horizontalScrollView = findViewById(R.id.scrollViewGroupInterval);
-            horizontalScrollView.scrollTo(
-                    horizontalScrollView.getChildAt(0).getMeasuredWidth()
-                            - horizontalScrollView.getMeasuredWidth()
-                            - horizontalScrollView.getScrollX(), 0);
             if (checkedId == R.id.radioDirectionDesc) {
                 onNoteCheckChangeListener.setAscending(false);
                 onIntervalCheckChangeListener.setAscending(false);
@@ -539,6 +536,14 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 onNoteCheckChangeListener.setAscending(true);
                 onIntervalCheckChangeListener.setAscending(true);
                 intervalConstraints.applyTo(layoutIntervals);
+            }
+            if (checkedId != activeDirectionLayout) {
+                HorizontalScrollView horizontalScrollView = findViewById(R.id.scrollViewGroupInterval);
+                horizontalScrollView.scrollTo(
+                        horizontalScrollView.getChildAt(0).getMeasuredWidth()
+                                - horizontalScrollView.getMeasuredWidth()
+                                - horizontalScrollView.getScrollX(), 0);
+                activeDirectionLayout = checkedId;
             }
         };
 
