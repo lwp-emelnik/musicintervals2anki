@@ -435,7 +435,7 @@
             <CheckBox
                 android:id="@+id/checkNoteAny"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:text="@string/any"
                 app:layout_constraintTop_toBottomOf="@id/scrollViewGroupStartNote" />
 
@@ -522,7 +522,7 @@
             <CheckBox
                 android:id="@+id/checkOctaveAny"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:text="@string/any"
                 app:layout_constraintTop_toBottomOf="@id/viewGroupOctave" />
 
@@ -543,20 +543,20 @@
                 <RadioButton
                     android:id="@+id/radioDirectionAny"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:checked="true"
                     android:text="@string/any" />
 
                 <RadioButton
                     android:id="@+id/radioDirectionAsc"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:text="@string/direction_asc" />
 
                 <RadioButton
                     android:id="@+id/radioDirectionDesc"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:text="@string/direction_desc" />
 
             </RadioGroup>
@@ -578,20 +578,20 @@
                 <RadioButton
                     android:id="@+id/radioTimingAny"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:checked="true"
                     android:text="@string/any" />
 
                 <RadioButton
                     android:id="@+id/radioTimingMelodic"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:text="@string/timing_melodic" />
 
                 <RadioButton
                     android:id="@+id/radioTimingHarmonic"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:text="@string/timing_harmonic" />
 
             </RadioGroup>
@@ -868,7 +868,7 @@
             <CheckBox
                 android:id="@+id/checkIntervalAny"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:text="@string/any"
                 app:layout_constraintTop_toBottomOf="@id/scrollViewGroupInterval" />
 
@@ -883,7 +883,7 @@
             <EditText
                 android:id="@+id/inputTempo"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:autofillHints=""
                 android:ems="10"
                 android:inputType="number"
@@ -900,7 +900,7 @@
             <AutoCompleteTextView
                 android:id="@+id/inputInstrument"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 app:layout_constraintTop_toBottomOf="@id/labelInstrument" />
 
             <TextView
@@ -914,7 +914,7 @@
             <EditText
                 android:id="@+id/inputFirstNoteDurationCoefficient"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:autofillHints=""
                 android:ems="10"
                 android:inputType="numberDecimal"

@@ -19,6 +19,6 @@
     <CheckBox
         android:id="@+id/checkRemember"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:text="@string/do_not_show" />
 </LinearLayout>

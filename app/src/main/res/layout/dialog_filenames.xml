@@ -29,13 +29,13 @@
             <RadioButton
                 android:id="@+id/radioByName"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:text="@string/name" />
 
             <RadioButton
                 android:id="@+id/radioByDate"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:text="@string/modification_date" />
         </RadioGroup>
     </LinearLayout>
