@@ -76,6 +76,7 @@
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/actionAttach"
+                    android:contentDescription="@string/attach_audio"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
@@ -130,305 +131,313 @@
                 android:text="@string/start_note"
                 app:layout_constraintTop_toBottomOf="@id/viewGroupFilename" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/viewGroupStartNote"
+            <HorizontalScrollView
+                android:id="@+id/scrollViewGroupStartNote"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/note_keyboard_height"
+                android:layout_height="172dp"
+                android:scrollbarStyle="outsideInset"
                 app:layout_constraintTop_toBottomOf="@id/labelNote">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    android:id="@+id/viewGroupStartNote"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent">
 
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteC"
-                        android:layout_width="0dp"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="336dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/selector_note"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ff000000"
-                        android:textOff="@string/note_c"
-                        android:textOn="@string/note_c"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/checkNoteD"
-                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteD"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@drawable/selector_note"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ff000000"
-                        android:textOff="@string/note_d"
-                        android:textOn="@string/note_d"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/checkNoteE"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/checkNoteC"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteE"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@drawable/selector_note"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ff000000"
-                        android:textOff="@string/note_e"
-                        android:textOn="@string/note_e"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/checkNoteF"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/checkNoteD"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteC"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/note_c"
+                            android:textOn="@string/note_c"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkNoteD"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteF"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@drawable/selector_note"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ff000000"
-                        android:textOff="@string/note_f"
-                        android:textOn="@string/note_f"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/checkNoteG"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/checkNoteE"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteD"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/note_d"
+                            android:textOn="@string/note_d"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkNoteE"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkNoteC"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteG"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@drawable/selector_note"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ff000000"
-                        android:textOff="@string/note_g"
-                        android:textOn="@string/note_g"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/checkNoteA"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/checkNoteF"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteE"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/note_e"
+                            android:textOn="@string/note_e"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkNoteF"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkNoteD"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteA"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@drawable/selector_note"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ff000000"
-                        android:textOff="@string/note_a"
-                        android:textOn="@string/note_a"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/checkNoteB"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/checkNoteG"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteF"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/note_f"
+                            android:textOn="@string/note_f"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkNoteG"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkNoteE"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteB"
-                        android:layout_width="0dp"
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteG"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/note_g"
+                            android:textOn="@string/note_g"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkNoteA"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkNoteF"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteA"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/note_a"
+                            android:textOn="@string/note_a"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkNoteB"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkNoteG"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteB"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/note_b"
+                            android:textOn="@string/note_b"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkNoteA"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutKeysBlack"
+                        android:layout_width="336dp"
                         android:layout_height="0dp"
-                        android:background="@drawable/selector_note"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ff000000"
-                        android:textOff="@string/note_b"
-                        android:textOn="@string/note_b"
+                        app:layout_constraintBottom_toTopOf="@id/space0"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_weight="0.6">
+
+                        <Space
+                            android:id="@+id/space1"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkNoteCSharp"
+                            app:layout_constraintHorizontal_weight="15"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteCSharp"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note_sharp"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ffffffff"
+                            android:textOff="@string/note_c_sharp"
+                            android:textOn="@string/note_c_sharp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/space2"
+                            app:layout_constraintHorizontal_weight="40"
+                            app:layout_constraintStart_toEndOf="@+id/space1"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <Space
+                            android:id="@+id/space2"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkNoteDSharp"
+                            app:layout_constraintHorizontal_weight="10"
+                            app:layout_constraintStart_toEndOf="@+id/checkNoteCSharp"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteDSharp"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note_sharp"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ffffffff"
+                            android:textOff="@string/note_d_sharp"
+                            android:textOn="@string/note_d_sharp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/space3"
+                            app:layout_constraintHorizontal_weight="40"
+                            app:layout_constraintStart_toEndOf="@+id/space2"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <Space
+                            android:id="@+id/space3"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkNoteFSharp"
+                            app:layout_constraintHorizontal_weight="30"
+                            app:layout_constraintStart_toEndOf="@+id/checkNoteDSharp"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteFSharp"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note_sharp"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ffffffff"
+                            android:textOff="@string/note_f_sharp"
+                            android:textOn="@string/note_f_sharp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/space4"
+                            app:layout_constraintHorizontal_weight="40"
+                            app:layout_constraintStart_toEndOf="@+id/space3"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <Space
+                            android:id="@+id/space4"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkNoteGSharp"
+                            app:layout_constraintHorizontal_weight="5"
+                            app:layout_constraintStart_toEndOf="@+id/checkNoteFSharp"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteGSharp"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note_sharp"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ffffffff"
+                            android:textOff="@string/note_g_sharp"
+                            android:textOn="@string/note_g_sharp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/space5"
+                            app:layout_constraintHorizontal_weight="40"
+                            app:layout_constraintStart_toEndOf="@+id/space4"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <Space
+                            android:id="@+id/space5"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkNoteASharp"
+                            app:layout_constraintHorizontal_weight="5"
+                            app:layout_constraintStart_toEndOf="@+id/checkNoteGSharp"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
+                            android:id="@+id/checkNoteASharp"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_note_sharp"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="26dp"
+                            android:textColor="#ffffffff"
+                            android:textOff="@string/note_a_sharp"
+                            android:textOn="@string/note_a_sharp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/space6"
+                            app:layout_constraintHorizontal_weight="40"
+                            app:layout_constraintStart_toEndOf="@+id/space5"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <Space
+                            android:id="@+id/space6"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_weight="15"
+                            app:layout_constraintStart_toEndOf="@+id/checkNoteASharp"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <Space
+                        android:id="@+id/space0"
+                        android:layout_width="336dp"
+                        android:layout_height="0dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toEndOf="@+id/checkNoteA"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/layoutKeysBlack"
+                        app:layout_constraintVertical_weight="0.4" />
+
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutKeysBlack"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_constraintBottom_toTopOf="@id/space0"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_weight="0.6">
-
-                    <Space
-                        android:id="@+id/space1"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/checkNoteCSharp"
-                        app:layout_constraintHorizontal_weight="20"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteCSharp"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@drawable/selector_note_sharp"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ffffffff"
-                        android:textOff="@string/note_c_sharp"
-                        android:textOn="@string/note_c_sharp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/space2"
-                        app:layout_constraintHorizontal_weight="30"
-                        app:layout_constraintStart_toEndOf="@+id/space1"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <Space
-                        android:id="@+id/space2"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/checkNoteDSharp"
-                        app:layout_constraintHorizontal_weight="20"
-                        app:layout_constraintStart_toEndOf="@+id/checkNoteCSharp"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteDSharp"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@drawable/selector_note_sharp"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ffffffff"
-                        android:textOff="@string/note_d_sharp"
-                        android:textOn="@string/note_d_sharp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/space3"
-                        app:layout_constraintHorizontal_weight="30"
-                        app:layout_constraintStart_toEndOf="@+id/space2"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <Space
-                        android:id="@+id/space3"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/checkNoteFSharp"
-                        app:layout_constraintHorizontal_weight="40"
-                        app:layout_constraintStart_toEndOf="@+id/checkNoteDSharp"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteFSharp"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@drawable/selector_note_sharp"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ffffffff"
-                        android:textOff="@string/note_f_sharp"
-                        android:textOn="@string/note_f_sharp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/space4"
-                        app:layout_constraintHorizontal_weight="30"
-                        app:layout_constraintStart_toEndOf="@+id/space3"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <Space
-                        android:id="@+id/space4"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/checkNoteGSharp"
-                        app:layout_constraintHorizontal_weight="15"
-                        app:layout_constraintStart_toEndOf="@+id/checkNoteFSharp"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteGSharp"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@drawable/selector_note_sharp"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ffffffff"
-                        android:textOff="@string/note_g_sharp"
-                        android:textOn="@string/note_g_sharp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/space5"
-                        app:layout_constraintHorizontal_weight="30"
-                        app:layout_constraintStart_toEndOf="@+id/space4"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <Space
-                        android:id="@+id/space5"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/checkNoteASharp"
-                        app:layout_constraintHorizontal_weight="15"
-                        app:layout_constraintStart_toEndOf="@+id/checkNoteGSharp"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.luckywarepro.musicintervals2anki.ui.NoteToggleButton
-                        android:id="@+id/checkNoteASharp"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@drawable/selector_note_sharp"
-                        android:gravity="bottom|center_horizontal"
-                        android:paddingBottom="26dp"
-                        android:textColor="#ffffffff"
-                        android:textOff="@string/note_a_sharp"
-                        android:textOn="@string/note_a_sharp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/space6"
-                        app:layout_constraintHorizontal_weight="30"
-                        app:layout_constraintStart_toEndOf="@+id/space5"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <Space
-                        android:id="@+id/space6"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_weight="20"
-                        app:layout_constraintStart_toEndOf="@+id/checkNoteASharp"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <Space
-                    android:id="@+id/space0"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/layoutKeysBlack"
-                    app:layout_constraintVertical_weight="0.4" />
-
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            </HorizontalScrollView>
 
             <CheckBox
                 android:id="@+id/checkNoteAny"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:text="@string/any"
-                app:layout_constraintTop_toBottomOf="@id/viewGroupStartNote" />
+                app:layout_constraintTop_toBottomOf="@id/scrollViewGroupStartNote" />
 
             <TextView
                 android:id="@+id/labelOctave"
@@ -441,8 +450,7 @@
                 android:id="@+id/viewGroupOctave"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/labelOctave"
-                tools:layout_editor_absoluteX="16dp">
+                app:layout_constraintTop_toBottomOf="@id/labelOctave">
 
                 <ToggleButton
                     android:id="@+id/checkOctave1"
@@ -514,7 +522,7 @@
             <CheckBox
                 android:id="@+id/checkOctaveAny"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:text="@string/any"
                 app:layout_constraintTop_toBottomOf="@id/viewGroupOctave" />
 
@@ -535,20 +543,20 @@
                 <RadioButton
                     android:id="@+id/radioDirectionAny"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:checked="true"
                     android:text="@string/any" />
 
                 <RadioButton
                     android:id="@+id/radioDirectionAsc"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:text="@string/direction_asc" />
 
                 <RadioButton
                     android:id="@+id/radioDirectionDesc"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:text="@string/direction_desc" />
 
             </RadioGroup>
@@ -570,20 +578,20 @@
                 <RadioButton
                     android:id="@+id/radioTimingAny"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:checked="true"
                     android:text="@string/any" />
 
                 <RadioButton
                     android:id="@+id/radioTimingMelodic"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:text="@string/timing_melodic" />
 
                 <RadioButton
                     android:id="@+id/radioTimingHarmonic"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:text="@string/timing_harmonic" />
 
             </RadioGroup>
@@ -595,242 +603,274 @@
                 android:text="@string/interval"
                 app:layout_constraintTop_toBottomOf="@id/radioGroupTiming" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/viewGroupInterval"
+            <HorizontalScrollView
+                android:id="@+id/scrollViewGroupInterval"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 app:layout_constraintTop_toBottomOf="@id/labelInterval"
-                tools:layout_editor_absoluteX="16dp">
+                android:scrollbarStyle="outsideInset">
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalP1"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_P1"
-                    android:textOn="@string/interval_P1"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalm2"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent">
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalm2"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_m2"
-                    android:textOn="@string/interval_m2"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalM2"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalP1"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/viewGroupInterval"
+                        android:layout_width="628dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalM2"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_M2"
-                    android:textOn="@string/interval_M2"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalm3"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalm2"
-                    app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalP1"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_P1"
+                            android:textOn="@string/interval_P1"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalm2"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalm3"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_m3"
-                    android:textOn="@string/interval_m3"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalM3"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalM2"
-                    app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalm2"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_m2"
+                            android:textOn="@string/interval_m2"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalM2"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalP1"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalM3"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_M3"
-                    android:textOn="@string/interval_M3"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalP4"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalm3"
-                    app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalM2"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_M2"
+                            android:textOn="@string/interval_M2"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalm3"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalm2"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalP4"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_P4"
-                    android:textOn="@string/interval_P4"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalTT"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalM3"
-                    app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalm3"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_m3"
+                            android:textOn="@string/interval_m3"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalM3"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalM2"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalTT"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_TT"
-                    android:textOn="@string/interval_TT"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalP5"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalP4"
-                    app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalM3"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_M3"
+                            android:textOn="@string/interval_M3"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalP4"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalm3"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalP5"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_P5"
-                    android:textOn="@string/interval_P5"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalm6"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalTT"
-                    app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalP4"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_P4"
+                            android:textOn="@string/interval_P4"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalTT"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalM3"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalm6"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_m6"
-                    android:textOn="@string/interval_m6"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalM6"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalP5"
-                    app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalTT"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_TT"
+                            android:textOn="@string/interval_TT"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalP5"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalP4"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalM6"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_M6"
-                    android:textOn="@string/interval_M6"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalm7"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalm6"
-                    app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalP5"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_P5"
+                            android:textOn="@string/interval_P5"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalm6"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalTT"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalm7"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_m7"
-                    android:textOn="@string/interval_m7"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalM7"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalM6"
-                    app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalm6"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textSize="14dp"
+                            android:textOff="@string/interval_m6"
+                            android:textOn="@string/interval_m6"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalM6"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalP5"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalM7"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_M7"
-                    android:textOn="@string/interval_M7"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/checkIntervalP8"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalm7"
-                    app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalM6"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_M6"
+                            android:textOn="@string/interval_M6"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalm7"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalm6"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
-                    android:id="@+id/checkIntervalP8"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:background="@drawable/selector_interval"
-                    android:gravity="bottom|center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:textAllCaps="false"
-                    android:textColor="#ff000000"
-                    android:textOff="@string/interval_P8"
-                    android:textOn="@string/interval_P8"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/checkIntervalM7"
-                    app:layout_constraintTop_toTopOf="parent" />
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalm7"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_m7"
+                            android:textOn="@string/interval_m7"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalM7"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalM6"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalM7"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_M7"
+                            android:textOn="@string/interval_M7"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/checkIntervalP8"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalm7"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <com.luckywarepro.musicintervals2anki.ui.IntervalToggleButton
+                            android:id="@+id/checkIntervalP8"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@drawable/selector_interval"
+                            android:gravity="bottom|center_horizontal"
+                            android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            android:textColor="#ff000000"
+                            android:textOff="@string/interval_P8"
+                            android:textOn="@string/interval_P8"
+                            android:textSize="14dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/checkIntervalM7"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </HorizontalScrollView>
+
 
             <CheckBox
                 android:id="@+id/checkIntervalAny"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:text="@string/any"
-                app:layout_constraintTop_toBottomOf="@id/viewGroupInterval" />
+                app:layout_constraintTop_toBottomOf="@id/scrollViewGroupInterval" />
 
             <TextView
                 android:id="@+id/labelTempo"
@@ -843,7 +883,7 @@
             <EditText
                 android:id="@+id/inputTempo"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:autofillHints=""
                 android:ems="10"
                 android:inputType="number"
@@ -860,7 +900,7 @@
             <AutoCompleteTextView
                 android:id="@+id/inputInstrument"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 app:layout_constraintTop_toBottomOf="@id/labelInstrument" />
 
             <TextView
@@ -874,7 +914,7 @@
             <EditText
                 android:id="@+id/inputFirstNoteDurationCoefficient"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:autofillHints=""
                 android:ems="10"
                 android:inputType="numberDecimal"

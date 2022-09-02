@@ -38,6 +38,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -90,6 +91,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
@@ -309,6 +311,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     String[] noteKeys = new String[]{};
     String[] octaveKeys = new String[]{};
     String[] intervalKeys = new String[]{};
+
+    private int activeDirectionLayout = R.id.radioDirectionAsc;
 
     private final Map<String, BroadcastReceiver> actionReceivers = new HashMap<String, BroadcastReceiver>() {{
         put(AudioCaptureService.ACTION_FILES_UPDATED, new BroadcastReceiver() {
@@ -532,6 +536,14 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 onNoteCheckChangeListener.setAscending(true);
                 onIntervalCheckChangeListener.setAscending(true);
                 intervalConstraints.applyTo(layoutIntervals);
+            }
+            if (checkedId != activeDirectionLayout) {
+                HorizontalScrollView horizontalScrollView = findViewById(R.id.scrollViewGroupInterval);
+                horizontalScrollView.scrollTo(
+                        horizontalScrollView.getChildAt(0).getMeasuredWidth()
+                                - horizontalScrollView.getMeasuredWidth()
+                                - horizontalScrollView.getScrollX(), 0);
+                activeDirectionLayout = checkedId;
             }
         };
 

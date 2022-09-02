@@ -24,7 +24,7 @@ public class IntervalToggleButton extends ToggleButton {
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(Color.BLACK);
-        paint.setTextSize(24);
+        paint.setTextSize(dpToPx(10));
     }
 
     public IntervalToggleButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
