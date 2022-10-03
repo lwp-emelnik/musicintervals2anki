@@ -43,7 +43,6 @@ import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -91,7 +90,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
@@ -215,9 +213,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private final Map<String, StatefulField<?>> statefulData = new HashMap<>();
     private final Map<String, StatefulField<?>> tabStatefulData = new HashMap<>();
-
-    private Toast toast;
-    private String lastToastText;
 
     private ProgressDialog progressDialog;
 
@@ -1929,9 +1924,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         for (AlertDialog dialog : activeOnStartDialogs) {
             dialog.dismiss();
         }
-        if (toast != null) {
-            toast.cancel();
-        }
     }
 
     @Override
@@ -1966,20 +1958,18 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     void showMsg(int msgResId, Object... formatArgs) {
-        displayToast(getResources().getString(msgResId, formatArgs));
+        displayMessage(getResources().getString(msgResId, formatArgs));
     }
 
     void showQuantityMsg(int msgResId, int quantity, Object... formatArgs) {
-        displayToast(getResources().getQuantityString(msgResId, quantity, formatArgs));
+        displayMessage(getResources().getQuantityString(msgResId, quantity, formatArgs));
     }
 
-    private void displayToast(String text) {
-        if (toast != null && text.equals(lastToastText)) {
-            toast.cancel();
-        }
-        toast = Toast.makeText(this, text, Toast.LENGTH_LONG);
-        lastToastText = text;
-        toast.show();
+    private void displayMessage(String text) {
+        new AlertDialog.Builder(this)
+                .setMessage(text)
+                .setPositiveButton(R.string.ok, (dialogInterface, i) -> dialogInterface.dismiss())
+                .show();
     }
 
     private long touchDownAt;
