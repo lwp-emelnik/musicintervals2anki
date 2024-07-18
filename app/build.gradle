@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 def homePath = System.properties['user.home']
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     defaultConfig {
         applicationId "com.luckywarepro.musicintervals2anki"
         minSdkVersion 24
-        targetSdkVersion 33
-        versionCode 44
-        versionName "1.18.4"
+        targetSdkVersion 34
+        versionCode 45
+        versionName "1.18.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
