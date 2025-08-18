@@ -398,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 return;
             }
 
-            ViewGroup viewGroup = findViewById(R.id.content);
+            ViewGroup viewGroup = findViewById(R.id.container);
             View dialogView = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_notice, viewGroup, false);
             TextView textNotice = dialogView.findViewById(R.id.textNotice);
             final CheckBox checkRemember = dialogView.findViewById(R.id.checkRemember);

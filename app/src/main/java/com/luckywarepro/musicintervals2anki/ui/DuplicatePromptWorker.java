@@ -39,7 +39,7 @@ public class DuplicatePromptWorker implements Runnable {
 
     @Override
     public void run() {
-        ViewGroup viewGroup = mainActivity.findViewById(R.id.content);
+        ViewGroup viewGroup = mainActivity.findViewById(R.id.container);
         View dialogView = LayoutInflater.from(mainActivity).inflate(R.layout.dialog_adding_duplicate, viewGroup, false);
         final AlertDialog dialog = new AlertDialog.Builder(mainActivity)
                 .setView(dialogView)
