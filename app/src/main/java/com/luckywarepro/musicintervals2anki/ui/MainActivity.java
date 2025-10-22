@@ -360,9 +360,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         popup.setOnMenuItemClickListener(menuItem -> {
             int itemId = menuItem.getItemId();
             if (itemId == R.id.actionSelectFromFilesystem) {
-                if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                int permission = checkSelfPermission(Manifest.permission.READ_MEDIA_AUDIO);
+                if (permission != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{
-                                    Manifest.permission.READ_EXTERNAL_STORAGE},
+                                    Manifest.permission.READ_MEDIA_AUDIO},
                             PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_OPEN_CHOOSER
                     );
                     return true;
@@ -1178,9 +1179,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             );
             return;
         }
-        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{
-                            Manifest.permission.READ_EXTERNAL_STORAGE},
+                            Manifest.permission.READ_MEDIA_AUDIO},
                     PERMISSIONS_REQUEST_EXTERNAL_STORAGE_CALLBACK_CAPTURE
             );
             return;
