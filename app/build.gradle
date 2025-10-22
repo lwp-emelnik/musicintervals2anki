@@ -17,6 +17,18 @@ android {
         versionCode 46
         versionName "1.18.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags "-fexceptions -frtti -fvisibility=hidden -ffunction-sections -fdata-sections -Wl,--gc-sections"
+                cFlags "-fexceptions -frtti -fvisibility=hidden -ffunction-sections -fdata-sections -Wl,--gc-sections"
+                arguments '-DANDROID_STL=c++_static'
+            }
+        }
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64", "x86"
+            moduleName "app"
+            stl "stlport_static"
+        }
     }
     signingConfigs {
         release {
@@ -33,6 +45,12 @@ android {
             signingConfig signingConfigs.release
         }
     }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.10.2"
+        }
+    }
 
     useLibrary 'android.test.mock'
 
@@ -40,6 +58,8 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    ndkVersion '29.0.14206865'
 }
 
 configurations {
@@ -67,7 +87,6 @@ dependencies {
     androidTestImplementation 'org.mockito:mockito-core:3.10.0'
     androidTestImplementation 'org.mockito:mockito-android:3.10.0'
     driver 'org.xerial:sqlite-jdbc:3.34.0'
-    implementation 'com.github.lincollincol:PCM-Decoder:1.0'
     implementation 'io.github.medyo:android-about-page:2.0.0'
     testImplementation "org.powermock:powermock-module-junit4:2.0.9"
     testImplementation "org.powermock:powermock-module-junit4-rule:2.0.4"
