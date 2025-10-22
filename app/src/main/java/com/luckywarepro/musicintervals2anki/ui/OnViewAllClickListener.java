@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.luckywarepro.musicintervals2anki.R;
 
+import java.util.Arrays;
+
 /**
  * Copyright (c) 2021 LuckyWare Pro. (Apache-2.0 License)
  */
@@ -30,6 +32,7 @@ public class OnViewAllClickListener implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+        final boolean added = Arrays.stream(uriPathNames).anyMatch((uriPathName) -> uriPathName.getName().startsWith("[sound:"));
         for (int i = 0; i < uriPathNames.length; i++) {
             FilenameAdapter.UriPathName uriPathName = uriPathNames[i];
             uriPathName.setLabel(mainActivity.getFilenameLabel(uriPathName.getName(), i));
@@ -38,16 +41,19 @@ public class OnViewAllClickListener implements View.OnClickListener {
         ViewGroup viewGroup = mainActivity.findViewById(R.id.container);
         final View dialogView = LayoutInflater.from(mainActivity).inflate(R.layout.dialog_filenames, viewGroup, false);
 
-        final AlertDialog dialog = new AlertDialog.Builder(mainActivity)
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mainActivity)
                 .setView(dialogView)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
                     }
-                })
-                .setNeutralButton(R.string.play_all, null)
-                .create();
+                });
+        if (!added) {
+            dialogBuilder.setNeutralButton(R.string.play_all, null);
+        }
+
+        final AlertDialog dialog = dialogBuilder.create();
 
         final OnPlayAllClickListener playAllListener = new OnPlayAllClickListener(mainActivity, uriPathNames, null, null);
 
@@ -60,9 +66,11 @@ public class OnViewAllClickListener implements View.OnClickListener {
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                Button actionPlayAll = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
-                playAllListener.setActionPlayAll(actionPlayAll);
-                actionPlayAll.setOnClickListener(playAllListener);
+                if (!added) {
+                    Button actionPlayAll = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+                    playAllListener.setActionPlayAll(actionPlayAll);
+                    actionPlayAll.setOnClickListener(playAllListener);
+                }
             }
         });
 

@@ -74,6 +74,7 @@ public class FilenameAdapter extends RecyclerView.Adapter<FilenameAdapter.ViewHo
         textFilename.setText(label);
 
         Button actionPlay = holder.getActionPlay();
+        actionPlay.setVisibility(uriPathName.name.startsWith("[sound:") ? View.GONE : View.VISIBLE);
         actionPlay.setOnClickListener(groupListeners[position]);
     }
 

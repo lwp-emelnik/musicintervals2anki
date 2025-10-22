@@ -1064,12 +1064,14 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
             final ContentResolver resolver = getContentResolver();
             final FilenameAdapter.UriPathName[] uriPathNames = new FilenameAdapter.UriPathName[filenames.length];
+            boolean added = false;
             for (int i = 0; i < uriPathNames.length; i++) {
                 String filename = filenames[i];
+                added |= filename.startsWith("[sound:");
                 String name;
                 String path = null;
                 Uri uri;
-                if (filename.startsWith("[sound:")) {
+                if (added) {
                     name = filename;
                     path = ankiDir + AnkiDroidHelper.DIR_MEDIA
                             + filename.substring(7, filename.length() - 1);
@@ -1116,7 +1118,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 actionViewAll.setVisibility(View.VISIBLE);
                 actionViewAll.setOnClickListener(new OnViewAllClickListener(this, uriPathNames));
             } else {
-                actionPlay.setVisibility(View.VISIBLE);
+                actionPlay.setVisibility(added ? View.GONE : View.VISIBLE);
                 actionPlay.setOnClickListener(new OnPlayClickListener(this, uriFirst, actionPlay));
                 actionViewAll.setVisibility(View.GONE);
             }
