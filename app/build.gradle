@@ -14,8 +14,8 @@ android {
         applicationId "com.luckywarepro.musicintervals2anki"
         minSdkVersion 24
         targetSdkVersion 35
-        versionCode 46
-        versionName "1.18.6"
+        versionCode 48
+        versionName "1.18.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
